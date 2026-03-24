@@ -38,3 +38,9 @@ data/
 
 # Cursor
 .cursor/
+
+# Temp
+temp/
+
+# Astro
+.astro/
