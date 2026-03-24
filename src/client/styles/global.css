@@ -1,0 +1,9 @@
+@font-face {
+	font-family: 'HxkFont';
+	src: url('../assets/fonts/fonts.ttf') format('truetype');
+	font-display: swap;
+}
+
+* {
+	font-family: 'HxkFont', sans-serif;
+}
