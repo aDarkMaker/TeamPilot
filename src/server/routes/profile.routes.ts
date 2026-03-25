@@ -10,6 +10,8 @@ export function buildProfileRoutes(controller: ProfileController): Router {
 	router.post('/me/password', requireLogin, controller.changePassword);
 	router.post('/me/avatar', requireLogin, controller.uploadAvatar);
 	router.post('/me/profile-background', requireLogin, controller.uploadProfileBackground);
+	router.post('/me/avatar/reset', requireLogin, controller.resetAvatar);
+	router.post('/me/profile-background/reset', requireLogin, controller.resetProfileBackground);
 
 	return router;
 }

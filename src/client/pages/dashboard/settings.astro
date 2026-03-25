@@ -1,0 +1,9 @@
+---
+import DashboardLayout from "../../layouts/DashboardLayout.astro";
+import SettingsPage from '../../components/dashboard/SettingsPage';
+import '../../styles/settings.css';
+---
+
+<DashboardLayout title="个性设置">
+    <SettingsPage client:load />
+</DashboardLayout>

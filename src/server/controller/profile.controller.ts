@@ -24,7 +24,7 @@ export class ProfileController {
 	};
 
 	uploadAvatar = async (ctx: Context) => {
-		const file = takeSingleFile(ctx.request.file?.file);
+		const file = takeSingleFile(ctx.request.files?.file);
 		if (!file) throw new (await import('../types/api')).AppError(400, 'FILE_REQUIRED', '请上传文件');
 		const buf = await readUploadedBuffer(file);
 		const mime = file.mimetype || 'application/octet-stream';
@@ -40,9 +40,24 @@ export class ProfileController {
 		const data = await this.service.saveProfileBackground(getUserId(ctx), buf, mime);
 		ctx.body = { ok: true, data };
 	};
+
+	resetAvatar = async (ctx: Context) => {
+		const data = await this.service.clearAvatar(getUserId(ctx));
+		ctx.body = { ok: true, data };
+	};
+
+	resetProfileBackground = async (ctx: Context) => {
+		const data = await this.service.clearProfileBackground(getUserId(ctx));
+		ctx.body = { ok: true, data };
+	};
 }
 
-type KoaUploaded = { filepath?: string; mimetype?: string; newFilename?: string };
+type KoaUploaded = {
+	filepath?: string;
+	path?: string;
+	mimetype?: string;
+	newFilename?: string;
+};
 
 function takeSingleFile(raw: unknown): KoaUploaded | undefined {
 	if (!raw) return undefined;
@@ -52,8 +67,16 @@ function takeSingleFile(raw: unknown): KoaUploaded | undefined {
 
 async function readUploadedBuffer(file: KoaUploaded): Promise<Buffer> {
 	const { readFile, unlink } = await import('node:fs/promises');
-	if (!file.filepath) throw new Error('NO_FILE_PATH');
-	const buf = await readFile(file.filepath);
-	await unlink(file.filepath).catch(() => undefined);
-	return buf;
+	const filePath = file.filepath ?? file.path;
+	if (!filePath) {
+		throw new Error(`NO_FILE_PATH (keys=${Object.keys(file).join(',')})`);
+	}
+	try {
+		const buf = await readFile(filePath);
+		await unlink(filePath).catch(() => undefined);
+		return buf;
+	} catch (e) {
+		const msg = e instanceof Error ? e.message : 'UNKNOWN_READ_FILE_ERROR';
+		throw new Error(`READ_FILE_FAILED: ${msg}`);
+	}
 }

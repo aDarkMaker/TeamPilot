@@ -20,7 +20,12 @@ export const errorHandler: Middleware = async (ctx, next) => {
 			};
 			return;
 		}
+		console.error('[INTERNAL_ERROR]', err);
 		ctx.status = 500;
-		ctx.body = { ok: false, code: 'INTERNAL_ERROR', message: 'INTERNAL_SERVER_ERROR' };
+		ctx.body = {
+			ok: false,
+			code: 'INTERNAL_ERROR',
+			message: err instanceof Error ? err.message : 'INTERNAL_SERVER_ERROR',
+		};
 	}
 };

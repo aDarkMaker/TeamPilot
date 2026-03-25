@@ -43,7 +43,7 @@ export default function AuthTabs() {
 			{success && <div className="msg msg-success">{success}</div>}
 			<div className="card-content-wrap" style={{ height: contentHeight ? `${contentHeight}px` : undefined }}>
 				<div ref={loginRef} className={`card-panel ${view === 'login' ? 'active' : ''}`} aria-hidden={view !== 'login'}>
-					<LoginCard onError={setError} onSuccess={setSuccess} />
+					<LoginCard onError={setError} onSuccess={setSuccess} onLoggedIn={() => window.location.href = '/dashboard'} />
 				</div>
 				<div ref={applyRef} className={`card-panel ${view === 'apply' ? 'active' : ''}`} aria-hidden={view !== 'apply'}>
 					<ApplyCard onError={setError} onSuccess={setSuccess} />

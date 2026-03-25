@@ -1,0 +1,44 @@
+---
+import { ClientRouter, fade } from 'astro:transitions';
+import '../styles/dashboard.css';
+import '../styles/global.css';
+import { assetUrl } from '../lib/assetUrl';
+import favicon from '../assets/img/icon/icon-hxk.png';
+import DashboardSidebar from '../components/dashboard/DashboardSidebar';
+import DashboardTopBar from '../components/dashboard/DashboardTopBar';
+import DashboardBackground from '../components/dashboard/DashboardBackground';
+
+interface Props {
+    title?: string;
+    notifyVariant?: 'new' | 'mention' | 'read';
+}
+
+const { title = '工作主页', notifyVariant = 'read' }: Props = Astro.props;
+---
+
+<!doctype html>
+<html lang="zh-CN" class="dashboard-shell" transition:name="dash-html" transition:animate="none">
+    <head>
+        <ClientRouter />
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <link rel="icon" type="image/png" href={assetUrl(favicon)} />
+        <title>{title} · HXK</title>
+    </head>
+    <body>
+        <div class="dashboard-root">
+            <DashboardSidebar
+                client:load
+                transition:persist="dashboard-sidebar"
+                initialPath={Astro.url.pathname}
+            />
+            <DashboardBackground client:load transition:persist="dashboard-bg" />
+            <div class="dashboard-main">
+                <DashboardTopBar client:load transition:persist="dashboard-topbar" title={title} notifyVariant={notifyVariant} />
+                <main class="content-wrapper" transition:animate={fade({ duration: '0.22s' })}>
+                    <slot />
+                </main>
+            </div>
+        </div>
+    </body>
+</html>

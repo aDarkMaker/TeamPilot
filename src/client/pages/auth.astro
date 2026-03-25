@@ -1,6 +1,8 @@
 ---
 import '../styles/auth.css';
 import '../styles/global.css';
+import { assetUrl } from '../lib/assetUrl';
+import favicon from '../assets/img/icon/icon-hxk.png';
 import AuthTabs from '../components/auth/AuthTabs';
 ---
 
@@ -8,7 +10,7 @@ import AuthTabs from '../components/auth/AuthTabs';
     <head>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <link rel="icon" type="image/png" href="/assets/img/icon/icon-hxk.png" />
+        <link rel="icon" type="image/png" href={assetUrl(favicon)} />
     </head>
     <body class="auth-page">
         <main class="auth-container">

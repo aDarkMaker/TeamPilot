@@ -5,6 +5,15 @@ import { config } from '../config';
 
 let sqlite: Database | null = null;
 
+function ensureUserColumn(db: Database, column: string, type: string): void {
+	const cols = db
+		.query(`PRAGMA table_info(users)`)
+		.all()
+		.map((r: any) => String(r.name));
+	if (cols.includes(column)) return;
+	db.run(`ALTER TABLE users ADD COLUMN ${column} ${type}`);
+}
+
 function initSchema(db: Database): void {
 	db.run(`
     CREATE TABLE IF NOT EXISTS users (
@@ -22,6 +31,12 @@ function initSchema(db: Database): void {
       updated_at TEXT NOT NULL DEFAULT (datetime('now'))
     )
   `);
+
+	ensureUserColumn(db, 'avatar_path', 'TEXT');
+	ensureUserColumn(db, 'profile_bg_path', 'TEXT');
+	ensureUserColumn(db, 'nickname', 'TEXT');
+	ensureUserColumn(db, 'signature', 'TEXT');
+	ensureUserColumn(db, 'qq', 'TEXT');
 
 	db.run(`
     CREATE TABLE IF NOT EXISTS account_applications (

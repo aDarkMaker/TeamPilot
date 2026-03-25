@@ -1,9 +1,11 @@
 {
 	"words": [
+		"aboutyou",
 		"AUTOINCREMENT",
 		"DBFILENAME",
 		"hxktoolbox",
-		"setex"
+		"setex",
+		"topbar"
 	],
 	"ignorePaths": [
 		".gitignore",

@@ -114,4 +114,18 @@ export class ProfileService {
 		if (!user) throw new AppError(404, 'USER_NOT_FOUND', 'USER_NOT_FOUND');
 		return toPublicProfile(user);
 	}
+
+	async clearAvatar(userId: string): Promise<UserProfilePublic> {
+		await this.db.updateUserProfile(userId, { avatarPath: null });
+		const user = await this.db.findUserById(userId);
+		if (!user) throw new AppError(404, 'USER_NOT_FOUND', 'USER_NOT_FOUND');
+		return toPublicProfile(user);
+	}
+
+	async clearProfileBackground(userId: string): Promise<UserProfilePublic> {
+		await this.db.updateUserProfile(userId, { profileBgPath: null });
+		const user = await this.db.findUserById(userId);
+		if (!user) throw new AppError(404, 'USER_NOT_FOUND', 'USER_NOT_FOUND');
+		return toPublicProfile(user);
+	}
 }

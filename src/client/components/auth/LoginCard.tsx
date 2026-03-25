@@ -3,9 +3,10 @@ import { useState } from 'react';
 type Props = {
 	onError: (msg: string | null) => void;
 	onSuccess: (msg: string | null) => void;
+	onLoggedIn?: () => void;
 };
 
-export default function LoginCard({ onError, onSuccess }: Props) {
+export default function LoginCard({ onError, onSuccess, onLoggedIn }: Props) {
 	const [username, setUsername] = useState('');
 	const [password, setPassword] = useState('');
 	const [loading, setLoading] = useState(false);
@@ -37,6 +38,7 @@ export default function LoginCard({ onError, onSuccess }: Props) {
 			}
 
 			onSuccess('WELCOME BACK!');
+			onLoggedIn?.();
 		} catch (err) {
 			onError(err instanceof Error ? err.message : 'LOGIN FAILED');
 		} finally {

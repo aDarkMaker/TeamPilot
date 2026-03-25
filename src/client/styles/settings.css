@@ -1,0 +1,230 @@
+.settings-page {
+	width: 100%;
+	height: 100%;
+	max-width: none;
+	padding-bottom: 15px;
+}
+
+.settings-card {
+	height: 100%;
+	display: grid;
+	flex-direction: column;
+	gap: 12px;
+	padding: 0 6px 0 8px;
+	justify-content: flex-start;
+	margin-bottom: 15px;
+}
+
+.settings-top-msg {
+	padding: 0.85rem 1rem;
+	border-radius: 14px;
+	border: 1px solid rgba(255, 255, 255, 0.55);
+	background: rgba(255, 255, 255, 0.5);
+	backdrop-filter: blur(10px);
+	font-size: 0.9rem;
+	font-weight: 600;
+	animation: settings-toast-in 420ms cubic-bezier(0.25, 0.8, 0.25, 1) 220ms both;
+}
+
+.settings-top-msg.ok {
+	color: #276749;
+}
+
+.settings-top-msg.err {
+	color: #c53030;
+}
+
+.settings-section {
+	max-width: 400px;
+	padding: 1.05rem 1.15rem;
+	border-radius: 14px;
+	background: rgba(255, 255, 255, 0.5);
+	border: 1px solid rgba(255, 255, 255, 0.55);
+	backdrop-filter: blur(10px);
+}
+
+.settings-section h2 {
+	margin: 0 0 1.1rem;
+	font-size: 1rem;
+	font-weight: 600;
+	color: #2d3748;
+}
+
+.settings-field {
+	margin-bottom: 0.85rem;
+}
+
+.settings-field:last-child {
+	margin-bottom: 0;
+}
+
+.settings-field label {
+	display: block;
+	font-size: 0.8rem;
+	color: #718096;
+	margin-bottom: 0.35rem;
+}
+
+.settings-field input[type='text'],
+.settings-field input[type='password'],
+.settings-field textarea {
+	width: 100%;
+	box-sizing: border-box;
+	padding: 0.5rem 0.65rem;
+	border-radius: 10px;
+	border: 1px solid rgba(0, 0, 0, 0.08);
+	background: rgba(255, 255, 255, 0.85);
+	font-size: 0.95rem;
+}
+
+.settings-field textarea {
+	min-height: 72px;
+	resize: vertical;
+}
+
+.settings-actions {
+	margin-top: 0.75rem;
+}
+
+.settings-username {
+	margin-bottom: 0.85rem;
+	font-size: 0.85rem;
+	color: #718096;
+}
+
+.settings-avatar-row {
+	display: flex;
+	align-items: center;
+	gap: 1rem;
+	padding: 0.75rem 0.8rem;
+	border-radius: 14px;
+	border: 1px solid rgba(255, 255, 255, 0.55);
+	background: rgba(255, 255, 255, 0.35);
+}
+
+.settings-actions-inline {
+	display: flex;
+	flex-direction: column;
+	gap: 0.5rem;
+	min-width: 150px;
+}
+
+.settings-input,
+.settings-textarea {
+	width: 100%;
+	box-sizing: border-box;
+	padding: 0.5rem 0.65rem;
+	border-radius: 10px;
+	border: 1px solid rgba(0, 0, 0, 0.08);
+	background: rgba(255, 255, 255, 0.85);
+	font-size: 0.95rem;
+}
+
+.settings-textarea {
+	min-height: 72px;
+	resize: vertical;
+}
+
+.settings-btn {
+	padding: 0.45rem 1rem;
+	border-radius: 10px;
+	border: none;
+	background: #3182ce;
+	color: #fff;
+	font-size: 0.9rem;
+	cursor: pointer;
+	width: 100%;
+}
+
+.settings-btn:disabled {
+	opacity: 0.6;
+	cursor: not-allowed;
+}
+
+.settings-btn.secondary {
+	background: rgba(113, 128, 150, 0.25);
+	color: #2d3748;
+	width: 100%;
+}
+
+.settings-file {
+	display: inline-flex;
+}
+
+.settings-file-input {
+	display: none;
+}
+
+.settings-file-btn {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	padding: 0.45rem 1rem;
+	border-radius: 10px;
+	background: #3182ce;
+	color: #fff;
+	font-size: 0.9rem;
+	cursor: pointer;
+	user-select: none;
+	width: 100%;
+}
+
+.settings-file-btn.disabled {
+	opacity: 0.6;
+	cursor: not-allowed;
+}
+
+.settings-msg {
+	margin-top: 0.5rem;
+	font-size: 0.85rem;
+}
+
+.settings-msg.err {
+	color: #c53030;
+}
+
+.settings-msg.ok {
+	color: #276749;
+}
+
+.settings-preview-row {
+	display: flex;
+	align-items: flex-end;
+	gap: 1rem;
+	flex-wrap: wrap;
+}
+
+.settings-avatar-preview {
+	width: 72px;
+	height: 72px;
+	border-radius: 50%;
+	object-fit: cover;
+	border: 2px solid rgba(255, 255, 255, 0.8);
+	background: rgba(0, 0, 0, 0.06);
+}
+
+.settings-bg-preview {
+	width: 100%;
+	height: 150px;
+	border-radius: 12px;
+	border: 1px solid rgba(0, 0, 0, 0.08);
+	overflow: hidden;
+	background: rgba(0, 0, 0, 0.04);
+}
+
+.settings-bg-img {
+	width: 100%;
+	height: 100%;
+	display: block;
+}
+
+@keyframes settings-toast-in {
+	from {
+		opacity: 0;
+		transform: translateY(6px);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
