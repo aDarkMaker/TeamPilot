@@ -154,6 +154,31 @@ body.auth-page::before {
 	margin-top: 12px;
 }
 
+.card-content-wrap {
+	position: relative;
+	margin-top: 12px;
+	overflow: hidden;
+	will-change: height;
+	transition: height 640ms cubic-bezier(0.25, 0.8, 0.25, 1) 160ms;
+}
+
+.card-panel {
+	position: absolute;
+	inset: 0;
+	opacity: 0;
+	transform: translateY(4px);
+	pointer-events: none;
+	transition: opacity 280ms ease, transform 420ms cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+.card-panel.active {
+	position: relative;
+	opacity: 1;
+	transform: translateY(0);
+	pointer-events: auto;
+	transition-delay: 240ms;
+}
+
 .auth-form {
 	display: grid;
 	gap: 14px;
