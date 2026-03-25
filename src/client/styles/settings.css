@@ -82,7 +82,7 @@
 
 .settings-field textarea {
 	min-height: 72px;
-	resize: vertical;
+	resize: none;
 }
 
 .settings-actions {
@@ -125,7 +125,8 @@
 
 .settings-textarea {
 	min-height: 72px;
-	resize: vertical;
+	resize: none;
+	white-space: pre-wrap;
 }
 
 .settings-btn {
@@ -214,12 +215,68 @@
 	border: 1px solid rgba(0, 0, 0, 0.08);
 	overflow: hidden;
 	background: rgba(0, 0, 0, 0.04);
+	position: relative;
 }
 
 .settings-bg-img {
 	width: 100%;
 	height: 100%;
 	display: block;
+}
+
+.settings-bg-title {
+	font-size: 0.8rem;
+	color: #718096;
+	margin: 0 0 0.55rem;
+}
+
+.settings-avatar-title {
+	font-size: 0.8rem;
+	color: #718096;
+	margin: 0 0 0.55rem;
+}
+
+.settings-bg-overlay {
+	position: absolute;
+	inset: 0;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 0.6rem;
+	background: rgba(0, 0, 0, 0.45);
+	backdrop-filter: blur(2px);
+	opacity: 0;
+	transition: opacity 160ms ease;
+}
+
+.settings-bg-preview:hover .settings-bg-overlay,
+.settings-bg-preview:focus-within .settings-bg-overlay {
+	opacity: 1;
+}
+
+.settings-bg-overlay-btn {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	padding: 0.45rem 1rem;
+	border-radius: 10px;
+	border: 1px solid rgba(255, 255, 255, 0.25);
+	background: rgba(49, 130, 206, 0.95);
+	color: #fff;
+	font-size: 0.9rem;
+	cursor: pointer;
+	user-select: none;
+}
+
+.settings-bg-overlay-btn.secondary {
+	background: rgba(255, 255, 255, 0.18);
+	color: #fff;
+}
+
+.settings-bg-overlay-btn:disabled,
+.settings-bg-overlay-btn.disabled {
+	opacity: 0.65;
+	cursor: not-allowed;
 }
 
 @keyframes settings-toast-in {

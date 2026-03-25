@@ -1,5 +1,7 @@
 import { useState } from 'react';
 
+import { broadcastApplicationsUpdated } from '../../lib/pendingApplicationsStore';
+
 type Props = {
 	onError: (msg: string | null) => void;
 	onSuccess: (msg: string | null) => void;
@@ -44,6 +46,7 @@ export default function ApplyCard({ onError, onSuccess }: Props) {
 				throw new Error(message);
 			}
 
+			broadcastApplicationsUpdated();
 			onSuccess('已上报组织');
 			setUsername('');
 			setPassword('');

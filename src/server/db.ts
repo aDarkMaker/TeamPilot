@@ -9,6 +9,8 @@ export interface DB {
 	findUserById(id: string): Promise<User | null>;
 	createUser(input: { username: string; passwordHash: string; role: Role; status: UserStatus }): Promise<User>;
 	updateUserRole(userId: string, role: Role): Promise<void>;
+	listUsers(): Promise<User[]>;
+	updateUserStatus(userId: string, status: UserStatus): Promise<void>;
 
 	createAccountApplication(input: { username: string; passwordHash: string; reason: string }): Promise<AccountApplication>;
 	findApplicationById(id: string): Promise<AccountApplication | null>;
@@ -88,6 +90,13 @@ export function createDb(sqlite: Database): DB {
 		},
 		async updateUserRole(userId, role) {
 			sqlite.query("UPDATE users SET role = ?, updated_at = datetime('now') WHERE id = ?").run(role, userId);
+		},
+		async listUsers() {
+			const rows = sqlite.query('SELECT * FROM users ORDER BY created_at DESC').all();
+			return rows.map(mapUser);
+		},
+		async updateUserStatus(userId, status) {
+			sqlite.query("UPDATE users SET status = ?, updated_at = datetime('now') WHERE id = ?").run(status, userId);
 		},
 		async createAccountApplication(input) {
 			const result = sqlite

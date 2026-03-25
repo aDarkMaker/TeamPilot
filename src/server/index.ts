@@ -17,6 +17,17 @@ import mount from 'koa-mount';
 import { join } from 'node:path';
 import { ProfileService } from './services/profile.service';
 import { ProfileController } from './controller/profile.controller';
+import type { Socket } from 'node:net';
+
+function isBenignClientError(err: unknown): boolean {
+	if (!err || typeof err !== 'object') return false;
+	const anyErr = err as any;
+	const code = typeof anyErr.code === 'string' ? anyErr.code : '';
+	const message = typeof anyErr.message === 'string' ? anyErr.message : '';
+	if (code === 'ECONNRESET' || code === 'EPIPE' || code === 'ERR_STREAM_PREMATURE_CLOSE') return true;
+	if (message.includes('Premature close')) return true;
+	return false;
+}
 
 async function main() {
 	const sqlite = await startSQLite();
@@ -50,6 +61,16 @@ async function main() {
 
 	const server = app.listen(config.port, () => {
 		console.log(`Server running at http://localhost:${config.port}`);
+	});
+
+	server.on('clientError', (err: Error, socket: Socket) => {
+		if (isBenignClientError(err)) {
+			// Avoid noisy logs when clients disconnect during reload/restart.
+			socket.destroy();
+			return;
+		}
+		console.error('[CLIENT_ERROR]', err);
+		socket.destroy();
 	});
 
 	const shutdown = async () => {

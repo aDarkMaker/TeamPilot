@@ -4,6 +4,7 @@
 		"AUTOINCREMENT",
 		"DBFILENAME",
 		"hxktoolbox",
+		"procs",
 		"setex",
 		"topbar"
 	],

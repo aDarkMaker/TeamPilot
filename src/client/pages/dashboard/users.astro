@@ -1,7 +1,8 @@
 ---
 import DashboardLayout from '../../layouts/DashboardLayout.astro';
+import UsersAdminPage from '../../components/dashboard/UsersAdminPage.tsx';
 ---
 
 <DashboardLayout title="成员管理">
-	<p style="color: #4a5568;">用户管理稍后补充。</p>
+	<UsersAdminPage client:load />
 </DashboardLayout>

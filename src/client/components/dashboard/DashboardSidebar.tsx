@@ -91,6 +91,10 @@ export default function DashboardSidebar({ initialPath }: Props) {
             : '';
     
     const onLogout = async () => {
+		localStorage.removeItem('hxk_profile_background_url');
+
+		document.documentElement.style.removeProperty('--dash-bg-image');
+
         try {
 			await fetch('/api/auth/logout', { method: 'POST', credentials: 'include' });
 		} finally {

@@ -100,6 +100,7 @@ export default function SettingsPage() {
     const [oldPw, setOldPw] = useState('');
 	const [newPw, setNewPw] = useState('');
 	const [newPw2, setNewPw2] = useState('');
+	const bgPickId = useId();
 
 	const dispatchProfileUpdated = (detail: Partial<Me>) => {
 		window.dispatchEvent(new CustomEvent('hxk:profile-updated', { detail }));
@@ -373,8 +374,9 @@ export default function SettingsPage() {
 					</section>
 
 					<section className="settings-section">
-						<h2>头像</h2>
-						<div className="settings-avatar-row">
+						<h2>个性化设置</h2>
+						<div className="settings-avatar-title">头像</div>
+						<div className="settings-avatar-row" style={{ marginBottom: '0.95rem' }}>
 							<UserAvatar username={username} avatarUrl={avatarUrl} size={72} />
 							<div className="settings-actions-inline">
 								<SettingsFileInput
@@ -388,10 +390,8 @@ export default function SettingsPage() {
 								</SettingsButton>
 							</div>
 						</div>
-					</section>
 
-					<section className="settings-section">
-						<h2>自定义背景</h2>
+						<div className="settings-bg-title">背景</div>
 						<div className="settings-bg-preview">
 							<img
 								className="settings-bg-img"
@@ -399,17 +399,30 @@ export default function SettingsPage() {
 								alt=""
 								loading="lazy"
 							/>
-						</div>
-						<div className="settings-actions-inline" style={{ marginTop: '0.85rem' }}>
-							<SettingsFileInput
-								accept="image/jpeg,image/png,image/webp"
-								disabled={saving}
-								label="上传背景"
-								onPick={(f) => void uploadBg(f)}
-							/>
-							<SettingsButton variant="secondary" disabled={saving} onClick={() => void resetBg()}>
-								恢复默认
-							</SettingsButton>
+							<div className="settings-bg-overlay">
+								<input
+									id={bgPickId}
+									type="file"
+									accept="image/jpeg,image/png,image/webp"
+									disabled={saving}
+									onChange={(e) => void uploadBg(e.target.files?.[0] ?? null)}
+									className="settings-file-input"
+								/>
+								<label
+									htmlFor={bgPickId}
+									className={`settings-bg-overlay-btn ${saving ? 'disabled' : ''}`}
+								>
+									修改
+								</label>
+								<button
+									type="button"
+									className="settings-bg-overlay-btn secondary"
+									disabled={saving}
+									onClick={() => void resetBg()}
+								>
+									恢复默认
+								</button>
+							</div>
 						</div>
 					</section>
 

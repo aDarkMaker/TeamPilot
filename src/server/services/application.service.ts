@@ -4,7 +4,7 @@ import { AppError } from '../types/api';
 import { hashPassword } from '../auth/password';
 
 const submitSchema = z.object({
-	username: z.string().min(3).max(50),
+	username: z.string().min(2).max(4),
 	password: z.string().min(8).max(128),
 	reason: z.string().min(2).max(500),
 });
