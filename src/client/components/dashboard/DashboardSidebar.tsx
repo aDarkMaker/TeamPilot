@@ -90,9 +90,12 @@ export default function DashboardSidebar({ initialPath }: Props) {
             ? 'active'
             : '';
     
-    const onLogout = () => {
-        // TODO: logout
-        window.location.href = '/auth';
+    const onLogout = async () => {
+        try {
+			await fetch('/api/auth/logout', { method: 'POST', credentials: 'include' });
+		} finally {
+			window.location.href = '/auth';
+		}
     };
 
     const displayName = me?.nickname?.trim() || me?.username || '…';

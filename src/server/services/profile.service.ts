@@ -73,6 +73,9 @@ export class ProfileService {
 
     async changePassword(userId: string, body: unknown): Promise<void> {
         const { oldPassword,newPassword } = passwordSchema.parse(body);
+        if (oldPassword === newPassword) {
+            throw new AppError(400, 'INVALID_PASSWORD', 'SAME_PASSWORD');
+        }
         const user = await this.db.findUserById(userId);
         if (!user) throw new AppError(404, 'USER_NOT_FOUND', 'USER_NOT_FOUND');
         const ok = await verifyPassword(oldPassword, user.passwordHash);

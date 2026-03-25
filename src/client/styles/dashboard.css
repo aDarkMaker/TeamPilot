@@ -74,10 +74,7 @@ html.dashboard-shell body {
 	flex-direction: column;
 	padding: 16px 12px;
 	min-height: 0;
-	overflow-y: auto;
-	overflow-x: hidden;
-	overscroll-behavior-y: contain;
-	-webkit-overflow-scrolling: touch;
+	overflow: hidden;
 	border-right: 1px solid var(--dash-glass-border);
 	background: var(--dash-glass);
 	backdrop-filter: blur(16px);

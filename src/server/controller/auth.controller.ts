@@ -25,4 +25,15 @@ export class AuthController {
 			},
 		};
 	};
+
+	logout = async (ctx: Context) => {
+		ctx.cookies.set(COOKIE_NAME, '', {
+			httpOnly: true,
+			sameSite: 'lax',
+			secure: process.env.NODE_ENV === 'production',
+			maxAge: 0,
+			path: '/',
+		});
+		ctx.body = { ok: true, data: { status: 'ok' } }; 
+	}
 }

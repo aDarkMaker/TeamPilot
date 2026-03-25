@@ -13,6 +13,8 @@
 	padding: 0 6px 0 8px;
 	justify-content: flex-start;
 	margin-bottom: 15px;
+	grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+	align-content: start;
 }
 
 .settings-top-msg {
@@ -24,6 +26,7 @@
 	font-size: 0.9rem;
 	font-weight: 600;
 	animation: settings-toast-in 420ms cubic-bezier(0.25, 0.8, 0.25, 1) 220ms both;
+	grid-column: 1 / -1;
 }
 
 .settings-top-msg.ok {
@@ -145,6 +148,7 @@
 	background: rgba(113, 128, 150, 0.25);
 	color: #2d3748;
 	width: 100%;
+	margin-top: 4px;
 }
 
 .settings-file {

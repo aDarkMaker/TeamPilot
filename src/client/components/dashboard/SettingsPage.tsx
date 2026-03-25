@@ -111,7 +111,7 @@ export default function SettingsPage() {
             const res = await fetch('/api/users/me', { credentials: 'include' });
             const json = (await res.json()) as MeApi;
             if (!res.ok || !json?.ok || !json.data) {
-                setMsg({ type: 'err', text: errText(json, 'Load Failed') });
+                setMsg({ type: 'err', text: errText(json, '加载失败了！') });
                 return;
             }
             const u = json.data;
@@ -122,7 +122,7 @@ export default function SettingsPage() {
             setAvatarUrl(u.avatarUrl);
             setBgUrl(u.profileBackgroundUrl);
         } catch (err) {
-            setMsg({ type: 'err', text: 'Network Error' });
+            setMsg({ type: 'err', text: '等会再试试吧！' });
         } finally {
             setLoading(false);
         }
@@ -149,10 +149,10 @@ export default function SettingsPage() {
             });
             const json = await res.json();
             if (!res.ok || !json?.ok) {
-                setMsg({ type: 'err', text: errText(json, 'Save Failed') });
+                setMsg({ type: 'err', text: errText(json, '保存失败了！') });
                 return;
             }
-            setMsg({ type: 'ok', text: 'Save Success' });
+            setMsg({ type: 'ok', text: '保存好哩！' });
             if (json.data) {
                 setAvatarUrl(json.data.avatarUrl ?? null);
                 setBgUrl(json.data.profileBackgroundUrl ?? null);
@@ -181,10 +181,10 @@ export default function SettingsPage() {
             const res = await fetch('/api/users/me/avatar', { method: 'POST', credentials: 'include', body: fd });
             const json = await res.json();
             if (!res.ok || !json?.ok) {
-                setMsg({ type: 'err', text: errText(json, 'Avatar Upload Failed') });
+                setMsg({ type: 'err', text: errText(json, '头像上传失败了！') });
                 return;
             }
-            setMsg({ type: 'ok', text: 'Avatar Changed' });
+            setMsg({ type: 'ok', text: '头像修改好哩！' });
             if (json.data) {
 				setAvatarUrl(json.data.avatarUrl ?? null);
 				setBgUrl(json.data.profileBackgroundUrl ?? null);
@@ -197,7 +197,7 @@ export default function SettingsPage() {
 				});
 			}
         } catch {
-            setMsg({ type: 'err', text: 'Network Error' });
+            setMsg({ type: 'err', text: '等会再试试吧！' });
         } finally {
             setSaving(false);
         }
@@ -217,10 +217,10 @@ export default function SettingsPage() {
             });
             const json = await res.json();
             if (!res.ok || !json?.ok) {
-                setMsg({ type: 'err', text: errText(json, 'Background Upload Failed') });
+                setMsg({ type: 'err', text: errText(json, '背景图片上传失败了！') });
                 return;
             }
-            setMsg({ type: 'ok', text: 'Background Changed' });
+            setMsg({ type: 'ok', text: '背景图片上传好啦！' });
 			if (json.data) {
 				setBgUrl(json.data.profileBackgroundUrl ?? null);
 				setAvatarUrl(json.data.avatarUrl ?? null);
@@ -233,7 +233,7 @@ export default function SettingsPage() {
 				});
 			}
         } catch {
-            setMsg({ type: 'err', text: 'Network Error' });
+            setMsg({ type: 'err', text: '等会再试试吧！' });
         } finally {
             setSaving(false);
         }
@@ -249,10 +249,10 @@ export default function SettingsPage() {
 			});
 			const json = await res.json();
 			if (!res.ok || !json?.ok) {
-				setMsg({ type: 'err', text: errText(json, 'Avatar Reset Failed') });
+				setMsg({ type: 'err', text: errText(json, '头像恢复默认失败了！') });
 				return;
 			}
-			setMsg({ type: 'ok', text: '头像已恢复默认' });
+			setMsg({ type: 'ok', text: '头像恢复默认好哩！' });
 			if (json.data) {
 				setAvatarUrl(json.data.avatarUrl ?? null);
 				setBgUrl(json.data.profileBackgroundUrl ?? null);
@@ -265,7 +265,7 @@ export default function SettingsPage() {
 				});
 			}
 		} catch {
-			setMsg({ type: 'err', text: 'Network Error' });
+			setMsg({ type: 'err', text: '等会再试试吧！' });
 		} finally {
 			setSaving(false);
 		}
@@ -281,10 +281,10 @@ export default function SettingsPage() {
 			});
 			const json = await res.json();
 			if (!res.ok || !json?.ok) {
-				setMsg({ type: 'err', text: errText(json, 'Background Reset Failed') });
+				setMsg({ type: 'err', text: errText(json, '背景恢复默认失败了！') });
 				return;
 			}
-			setMsg({ type: 'ok', text: '背景已恢复默认' });
+			setMsg({ type: 'ok', text: '背景恢复默认好哩！' });
 			if (json.data) {
 				setBgUrl(json.data.profileBackgroundUrl ?? null);
 				setAvatarUrl(json.data.avatarUrl ?? null);
@@ -297,7 +297,7 @@ export default function SettingsPage() {
 				});
 			}
 		} catch {
-			setMsg({ type: 'err', text: 'Network Error' });
+			setMsg({ type: 'err', text: '等会再试试吧！' });
 		} finally {
 			setSaving(false);
 		}
@@ -305,7 +305,11 @@ export default function SettingsPage() {
 
     const changePassword = async () => {
         if (newPw !== newPw2) {
-            setMsg({ type: 'err', text: 'Passwords Do Not Match' });
+            setMsg({ type: 'err', text: '两次输入的密码不一致！' });
+            return;
+        }
+        if (oldPw && newPw && newPw === oldPw) {
+            setMsg({ type: 'err', text: '一样的密码还要改吗？'});
             return;
         }
         setSaving(true);
@@ -319,15 +323,15 @@ export default function SettingsPage() {
             });
             const json = await res.json();
             if (!res.ok || !json?.ok) {
-				setMsg({ type: 'err', text: errText(json, '修改密码失败') });
+				setMsg({ type: 'err', text: errText(json, '修改密码失败了！') });
 				return;
 			}
-            setMsg({ type: 'ok', text: '密码已修改' });
+            setMsg({ type: 'ok', text: '密码修改好哩！' });
 			setOldPw('');
 			setNewPw('');
 			setNewPw2('');
         } catch {
-            setMsg({ type: 'err', text: 'Network Error' });
+            setMsg({ type: 'err', text: '等会再试试吧！' });
         } finally {
             setSaving(false);
         }
@@ -411,6 +415,11 @@ export default function SettingsPage() {
 
 					<section className="settings-section">
 						<h2>修改密码</h2>
+
+                        <div className="settings-field">
+							<label htmlFor="old-pw">当前密码</label>
+							<SettingsInput id="old-pw" type="password" value={oldPw} onChange={(e) => setOldPw(e.target.value)} autoComplete="current-password" />
+						</div>
 
 						<div className="settings-field">
 							<label htmlFor="new-pw">新密码</label>
