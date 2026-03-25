@@ -1,4 +1,4 @@
-import type { Database } from 'bun:sqlite';
+import type { Database, SQLQueryBindings } from 'bun:sqlite';
 import type Redis from 'ioredis';
 import type { Role, UserStatus } from './types/auth';
 import type { User } from './types/user';
@@ -14,6 +14,17 @@ export interface DB {
 	findApplicationById(id: string): Promise<AccountApplication | null>;
 	findPendingApplications(): Promise<AccountApplication[]>;
 	setApplicationReview(input: { id: string; status: 'approved' | 'rejected'; reviewedBy: string }): Promise<void>;
+	updateUserProfile(
+		userId: string,
+		patch: {
+			nickname?: string | null;
+			signature?: string | null;
+			qq?: string | null;
+			avatarPath?: string | null;
+			profileBgPath?: string | null;
+		}
+	): Promise<void>;
+	updateUserPasswordHash(userId: string, passwordHash: string): Promise<void>;
 }
 
 export interface Cache {
@@ -31,8 +42,13 @@ function mapUser(row: any): User {
 		passwordHash: row.password_hash,
 		role: row.role,
 		status: row.status,
-        createdAt: String(row.created_at),
-        updatedAt: String(row.updated_at),
+		nickname: row.nickname ?? null,
+		signature: row.signature ?? null,
+		qq: row.qq ?? null,
+		avatarPath: row.avatar_path ?? null,
+		profileBgPath: row.profile_bg_path ?? null,
+		createdAt: String(row.created_at),
+		updatedAt: String(row.updated_at),
 	};
 }
 
@@ -61,14 +77,17 @@ export function createDb(sqlite: Database): DB {
 		},
 		async createUser(input) {
 			const result = sqlite
-				.query('INSERT INTO users (username, password_hash, role, status) VALUES (?, ?, ?, ?)')
+				.query(
+					`INSERT INTO users (username, password_hash, role, status, nickname, signature, qq, avatar_path, profile_bg_path)
+			 VALUES (?, ?, ?, ?, NULL, NULL, NULL, NULL, NULL)`
+				)
 				.run(input.username, input.passwordHash, input.role, input.status);
-			sqlite.query('UPDATE users SET updated_at = datetime(\'now\') WHERE id = ?').run(result.lastInsertRowid);
+			sqlite.query("UPDATE users SET updated_at = datetime('now') WHERE id = ?").run(result.lastInsertRowid);
 			const row = sqlite.query('SELECT * FROM users WHERE id = ? LIMIT 1').get(result.lastInsertRowid);
 			return mapUser(row);
 		},
 		async updateUserRole(userId, role) {
-			sqlite.query('UPDATE users SET role = ?, updated_at = datetime(\'now\') WHERE id = ?').run(role, userId);
+			sqlite.query("UPDATE users SET role = ?, updated_at = datetime('now') WHERE id = ?").run(role, userId);
 		},
 		async createAccountApplication(input) {
 			const result = sqlite
@@ -87,8 +106,41 @@ export function createDb(sqlite: Database): DB {
 		},
 		async setApplicationReview(input) {
 			sqlite
-				.query('UPDATE account_applications SET status = ?, reviewed_by = ?, reviewed_at = datetime(\'now\') WHERE id = ?')
+				.query("UPDATE account_applications SET status = ?, reviewed_by = ?, reviewed_at = datetime('now') WHERE id = ?")
 				.run(input.status, input.reviewedBy, input.id);
+		},
+		async updateUserProfile(userId, patch) {
+			const set: string[] = [];
+			const vals: SQLQueryBindings[] = [];
+			if (patch.nickname !== undefined) {
+				set.push('nickname = ?');
+				vals.push(patch.nickname);
+			}
+			if (patch.signature !== undefined) {
+				set.push('signature = ?');
+				vals.push(patch.signature);
+			}
+			if (patch.qq !== undefined) {
+				set.push('qq = ?');
+				vals.push(patch.qq);
+			}
+			if (patch.avatarPath !== undefined) {
+				set.push('avatar_path = ?');
+				vals.push(patch.avatarPath);
+			}
+			if (patch.profileBgPath !== undefined) {
+				set.push('profile_bg_path = ?');
+				vals.push(patch.profileBgPath);
+			}
+			if (set.length === 0) {
+				return;
+			}
+			set.push("updated_at = datetime('now')");
+			vals.push(userId);
+			sqlite.query(`UPDATE users SET ${set.join(', ')} WHERE id = ?`).run(...vals);
+		},
+		async updateUserPasswordHash(userId, passwordHash) {
+			sqlite.query("UPDATE users SET password_hash = ?, updated_at = datetime('now') WHERE id = ?").run(passwordHash, userId);
 		},
 	};
 }

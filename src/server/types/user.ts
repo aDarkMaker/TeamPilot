@@ -6,6 +6,24 @@ export interface User {
 	passwordHash: string;
 	role: Role;
 	status: UserStatus;
+	nickname: string | null;
+	signature: string | null;
+	qq: string | null;
+	avatarPath: string | null;
+	profileBgPath: string | null;
+	createdAt: string;
+	updatedAt: string;
+}
+
+export interface UserProfilePublic {
+	id: string;
+	username: string;
+	nickname: string | null;
+	signature: string | null;
+	qq: string | null;
+	avatarUrl: string | null;
+	profileBackgroundUrl: string | null;
+	role: Role;
 	createdAt: string;
 	updatedAt: string;
 }

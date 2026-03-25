@@ -13,6 +13,11 @@ function initSchema(db: Database): void {
       password_hash TEXT NOT NULL,
       role TEXT NOT NULL CHECK (role IN ('user', 'admin', 'super_admin')),
       status TEXT NOT NULL CHECK (status IN ('active', 'disabled')),
+      nickname TEXT,
+      signature TEXT,
+      qq TEXT,
+      avatar_path TEXT,
+      profile_bg_path TEXT,
       created_at TEXT NOT NULL DEFAULT (datetime('now')),
       updated_at TEXT NOT NULL DEFAULT (datetime('now'))
     )

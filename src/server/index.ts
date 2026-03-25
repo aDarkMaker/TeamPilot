@@ -12,6 +12,11 @@ import { startSQLite, stopSQLite } from './lifecycle/sqlite.lifecycle';
 import { startRedis, stopRedis } from './lifecycle/redis.lifecycle';
 import { AuthService } from './services/auth.service';
 import { AuthController } from './controller/auth.controller';
+import serve from 'koa-static';
+import mount from 'koa-mount';
+import { join } from 'node:path';
+import { ProfileService } from './services/profile.service';
+import { ProfileController } from './controller/profile.controller';
 
 async function main() {
 	const sqlite = await startSQLite();
@@ -25,6 +30,9 @@ async function main() {
 	const applicationService = new ApplicationService(db);
 	const adminService = new AdminService(db);
 
+	const profileService = new ProfileService(db);
+	const profileController = new ProfileController(profileService);
+
 	const applicationController = new ApplicationController(applicationService);
 	const adminController = new AdminController(adminService);
 	const authService = new AuthService(db);
@@ -33,9 +41,12 @@ async function main() {
 	const app = new Koa();
 	applyGlobalMiddleware(app);
 
-	const apiRouter = composeApiRouter({ applicationController, adminController, authController });
+	const apiRouter = composeApiRouter({ applicationController, adminController, authController, profileController });
 	app.use(apiRouter.routes());
 	app.use(apiRouter.allowedMethods());
+
+	const uploadRoot = join(process.cwd(), 'data', 'uploads');
+	app.use(mount('/uploads', serve(uploadRoot)));
 
 	const server = app.listen(config.port, () => {
 		console.log(`Server running at http://localhost:${config.port}`);
