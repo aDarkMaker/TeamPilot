@@ -12,6 +12,8 @@ import { AdminController } from './controller/admin.controller';
 import { buildRoutes } from './routes';
 import { startSQLite, stopSQLite } from './lifecycle/sqlite.lifecycle';
 import { startRedis, stopRedis } from './lifecycle/redis.lifecycle';
+import { AuthService } from './services/auth.service';
+import { AuthController } from './controller/auth.controller';
 
 async function main() {
 	const sqlite = await startSQLite();
@@ -27,13 +29,15 @@ async function main() {
 
 	const applicationController = new ApplicationController(applicationService);
 	const adminController = new AdminController(adminService);
+	const authService = new AuthService(db);
+	const authController = new AuthController(authService);
 
 	const app = new Koa();
 	app.use(errorHandler);
 	app.use(bodyParser());
 	app.use(authMiddleware);
 
-	const routes = buildRoutes({ applicationController, adminController });
+	const routes = buildRoutes({ applicationController, adminController, authController });
 	app.use(routes.routes());
 	app.use(routes.allowedMethods());
 
