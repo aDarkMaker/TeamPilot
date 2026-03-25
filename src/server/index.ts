@@ -1,15 +1,13 @@
 import Koa from 'koa';
-import bodyParser from 'koa-bodyparser';
 import { config } from './config';
 import { createDb, createCache } from './db';
 import { bootstrapSuperAdmin } from './auth/bootstrapSuperAdmin';
-import { errorHandler } from './middleware/errorHandler';
-import { authMiddleware } from './middleware/auth';
+import { applyGlobalMiddleware } from './middleware/applyGlobalMiddleware';
 import { ApplicationService } from './services/application.service';
 import { AdminService } from './services/admin.service';
 import { ApplicationController } from './controller/application.controller';
 import { AdminController } from './controller/admin.controller';
-import { buildRoutes } from './routes';
+import { composeApiRouter } from './routes';
 import { startSQLite, stopSQLite } from './lifecycle/sqlite.lifecycle';
 import { startRedis, stopRedis } from './lifecycle/redis.lifecycle';
 import { AuthService } from './services/auth.service';
@@ -33,13 +31,11 @@ async function main() {
 	const authController = new AuthController(authService);
 
 	const app = new Koa();
-	app.use(errorHandler);
-	app.use(bodyParser());
-	app.use(authMiddleware);
+	applyGlobalMiddleware(app);
 
-	const routes = buildRoutes({ applicationController, adminController, authController });
-	app.use(routes.routes());
-	app.use(routes.allowedMethods());
+	const apiRouter = composeApiRouter({ applicationController, adminController, authController });
+	app.use(apiRouter.routes());
+	app.use(apiRouter.allowedMethods());
 
 	const server = app.listen(config.port, () => {
 		console.log(`Server running at http://localhost:${config.port}`);
