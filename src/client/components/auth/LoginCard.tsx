@@ -22,11 +22,23 @@ export default function LoginCard({ onError, onSuccess }: Props) {
 
 		setLoading(true);
 		try {
-			// TODO: 后端登陆
-			await new Promise((r) => setTimeout(r, 600));
-			onSuccess('LOGIN SUCCESS');
-		} catch {
-			onError('LOGIN FAILED');
+			const resp = await fetch('/api/auth/login', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				credentials: 'include',
+				body: JSON.stringify({ username: username.trim(), password }),
+			});
+
+			const data = await resp.json().catch(() => null);
+
+			if (!resp.ok || !data?.ok) {
+				const message = data?.message || data?.code || 'LOGIN FAILED';
+				throw new Error(message);
+			}
+
+			onSuccess('WELCOME BACK!');
+		} catch (err) {
+			onError(err instanceof Error ? err.message : 'LOGIN FAILED');
 		} finally {
 			setLoading(false);
 		}
