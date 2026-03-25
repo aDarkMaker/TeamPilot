@@ -1,4 +1,4 @@
-import { useLayoutEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import LoginCard from './LoginCard';
 import ApplyCard from './ApplyCard';
 type ViewMode = 'login' | 'apply';
@@ -12,7 +12,7 @@ export default function AuthTabs() {
 	const loginRef = useRef<HTMLDivElement>(null);
 	const applyRef = useRef<HTMLDivElement>(null);
 
-	useLayoutEffect(() => {
+	useEffect(() => {
 		const activeRef = view === 'login' ? loginRef.current : applyRef.current;
 		if (!activeRef) return;
 		setContentHeight(activeRef.offsetHeight);
