@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useLayoutEffect, useRef, useState } from 'react';
 import LoginCard from './LoginCard';
 import ApplyCard from './ApplyCard';
 type ViewMode = 'login' | 'apply';
@@ -7,6 +7,16 @@ export default function AuthTabs() {
 	const [view, setView] = useState<ViewMode>('login');
 	const [error, setError] = useState<string | null>(null);
 	const [success, setSuccess] = useState<string | null>(null);
+	const [contentHeight, setContentHeight] = useState<number>(0);
+
+	const loginRef = useRef<HTMLDivElement>(null);
+	const applyRef = useRef<HTMLDivElement>(null);
+
+	useLayoutEffect(() => {
+		const activeRef = view === 'login' ? loginRef.current : applyRef.current;
+		if (!activeRef) return;
+		setContentHeight(activeRef.offsetHeight);
+	}, [view]);
 
 	function switchView(next: ViewMode) {
 		setView(next);
@@ -31,8 +41,13 @@ export default function AuthTabs() {
 			</div>
 			{error && <div className="msg msg-error">{error}</div>}
 			{success && <div className="msg msg-success">{success}</div>}
-			<div className="card-content">
-				{view === 'login' ? <LoginCard onError={setError} onSuccess={setSuccess} /> : <ApplyCard onError={setError} onSuccess={setSuccess} />}
+			<div className="card-content-wrap" style={{ height: contentHeight ? `${contentHeight}px` : undefined }}>
+				<div ref={loginRef} className={`card-panel ${view === 'login' ? 'active' : ''}`} aria-hidden={view !== 'login'}>
+					<LoginCard onError={setError} onSuccess={setSuccess} />
+				</div>
+				<div ref={applyRef} className={`card-panel ${view === 'apply' ? 'active' : ''}`} aria-hidden={view !== 'apply'}>
+					<ApplyCard onError={setError} onSuccess={setSuccess} />
+				</div>
 			</div>
 		</section>
 	);
