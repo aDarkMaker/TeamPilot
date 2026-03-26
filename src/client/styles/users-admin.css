@@ -173,7 +173,6 @@
 }
 
 .users-admin-btn:hover {
-	transform: translateY(-1px);
 	background: rgba(255, 255, 255, 0.85);
 	border-color: rgba(0, 0, 0, 0.12);
 }
