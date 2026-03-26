@@ -2,7 +2,13 @@ import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'reac
 
 import { dayKey, scheduleStore, broadcastScheduleUpdated, type Role, type ScheduleDayItem } from '../../lib/scheduleStore';
 
-type MentionUser = { id: string; username: string; avatarUrl?: string | null };
+type MentionUser = {
+	id: string;
+	username: string;
+	nickname?: string | null;
+	role?: 'user' | 'admin' | 'super_admin';
+	avatarUrl?: string | null;
+};
 type Me = { id: string; username: string; role: Role };
 
 const now = new Date();
@@ -330,8 +336,14 @@ export default function Calendar() {
 
 	async function searchMention(keyword: string) {
 		if (!keyword) {
-			setMentionOpen(false);
-			setMentionUsers([]);
+			// still show list when only '@'
+			try {
+				const users = await api<MentionUser[]>(`/api/schedule/users/search?q=`);
+				setMentionUsers(users);
+				setMentionOpen(true);
+			} catch {
+				setMentionOpen(false);
+			}
 			return;
 		}
 		try {
@@ -590,14 +602,14 @@ export default function Calendar() {
 																) : null}
 																<span className="avatar-fallback">{u.username.slice(0, 1)}</span>
 															</span>
-															<span className="name">{u.username}</span>
+															<span className="name">{(u.nickname && u.nickname.trim()) || u.username}</span>
+															<span className={`role ${u.role ?? 'user'}`}>{u.role === 'super_admin' ? '超管' : u.role === 'admin' ? '管理员' : '成员'}</span>
 														</button>
 													);
 												})}
 											</div>
 										)}
 									</div>
-									<div className="calendar-muted">已选：{participants.length}</div>
 								</div>
 							)}
 

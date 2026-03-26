@@ -484,6 +484,21 @@
 	white-space: nowrap;
 }
 
+.calendar-mention-row .role {
+	font-size: 12px;
+	font-weight: 850;
+	color: var(--dash-muted);
+	flex-shrink: 0;
+}
+
+.calendar-mention-row .role.admin {
+	color: #c05621;
+}
+
+.calendar-mention-row .role.super_admin {
+	color: #553c9a;
+}
+
 .calendar-modal.open,
 .time-picker.open {
 	animation: modal-fade-in 180ms ease both;

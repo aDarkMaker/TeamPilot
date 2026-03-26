@@ -3,6 +3,7 @@ import type { DB } from '../db';
 import { canReviewApplication } from '../auth/rbac';
 import { AppError } from '../types/api';
 import type { Role } from '../types/auth';
+import { pinyin } from 'pinyin-pro';
 
 const createSchema = z.object({
     title: z.string().min(1).max(100),
@@ -33,6 +34,33 @@ export class ScheduleService {
 
 	private toPublicUrl(storedPath: string | null | undefined) {
 		return storedPath ? `/uploads/${String(storedPath).replace(/^\/+/, '')}` : null;
+	}
+
+	private normalizeKey(s: string) {
+		return s.trim().toLowerCase().replace(/\s+/g, '');
+	}
+
+	private pinyinTokens(raw: string) {
+		const normalized = this.normalizeKey(raw);
+		if (!normalized) return { full: '', initials: '' };
+		const full = this.normalizeKey(
+			pinyin(normalized, {
+				toneType: 'none',
+				type: 'string',
+				separator: '',
+				nonZh: 'removed',
+			})
+		);
+		const initials = this.normalizeKey(
+			pinyin(normalized, {
+				toneType: 'none',
+				pattern: 'first',
+				type: 'string',
+				separator: '',
+				nonZh: 'removed',
+			})
+		);
+		return { full, initials };
 	}
 
 	async create(actor: { id: string; role: Role }, body: unknown) {
@@ -185,13 +213,47 @@ export class ScheduleService {
 	}
 
     async searchUsers(query: unknown) {
-        const q = z
-            .object({ q: z.string().trim().max(20).optional().default('') })
-            .parse(query).q;
-		const rows = await this.db.searchUsersByUsername(q, 8);
-		return rows.map((u) => ({
+		const qRaw = z.object({ q: z.string().trim().max(20).optional().default('') }).parse(query).q;
+		const q = this.normalizeKey(qRaw);
+
+		const all = await this.db.listUsers();
+		const active = all.filter((u) => u.status === 'active');
+
+		// Feishu-like: when only '@' (q empty), still show a list.
+		const pool = q
+			? active.filter((u) => {
+					const display = (u.nickname?.trim() || u.username || '').trim();
+					const k1 = this.normalizeKey(u.username ?? '');
+					const k2 = this.normalizeKey(u.nickname ?? '');
+					const k3 = this.normalizeKey(display);
+
+					const { full, initials } = this.pinyinTokens(display);
+					const { full: full2, initials: initials2 } = this.pinyinTokens(u.username ?? '');
+					const { full: full3, initials: initials3 } = this.pinyinTokens(u.nickname ?? '');
+
+					return (
+						k1.includes(q) ||
+						k2.includes(q) ||
+						k3.includes(q) ||
+						(full && full.includes(q)) ||
+						(initials && initials.includes(q)) ||
+						(full2 && full2.includes(q)) ||
+						(initials2 && initials2.includes(q)) ||
+						(full3 && full3.includes(q)) ||
+						(initials3 && initials3.includes(q))
+					);
+				})
+			: active;
+
+		// Prefer higher roles first when showing default list.
+		const roleRank: Record<Role, number> = { super_admin: 3, admin: 2, user: 1 };
+		const sorted = pool.sort((a, b) => (roleRank[b.role] ?? 0) - (roleRank[a.role] ?? 0) || a.username.localeCompare(b.username));
+
+		return sorted.slice(0, 20).map((u) => ({
 			id: u.id,
 			username: u.username,
+			nickname: u.nickname ?? null,
+			role: u.role,
 			avatarUrl: this.toPublicUrl(u.avatarPath),
 		}));
     }
