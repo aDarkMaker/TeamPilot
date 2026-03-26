@@ -12,6 +12,8 @@ import { startSQLite, stopSQLite } from './lifecycle/sqlite.lifecycle';
 import { startRedis, stopRedis } from './lifecycle/redis.lifecycle';
 import { AuthService } from './services/auth.service';
 import { AuthController } from './controller/auth.controller';
+import { ScheduleService } from './services/schedule.service';
+import { ScheduleController } from './controller/schedule.controller';
 import serve from 'koa-static';
 import mount from 'koa-mount';
 import { join } from 'node:path';
@@ -49,10 +51,13 @@ async function main() {
 	const authService = new AuthService(db);
 	const authController = new AuthController(authService);
 
+	const scheduleService = new ScheduleService(db);
+	const scheduleController = new ScheduleController(scheduleService);
+
 	const app = new Koa();
 	applyGlobalMiddleware(app);
 
-	const apiRouter = composeApiRouter({ applicationController, adminController, authController, profileController });
+	const apiRouter = composeApiRouter({ applicationController, adminController, authController, profileController, scheduleController });
 	app.use(apiRouter.routes());
 	app.use(apiRouter.allowedMethods());
 

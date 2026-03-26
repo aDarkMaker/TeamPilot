@@ -17,20 +17,20 @@ function ensureUserColumn(db: Database, column: string, type: string): void {
 function initSchema(db: Database): void {
 	db.run(`
     CREATE TABLE IF NOT EXISTS users (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      username TEXT NOT NULL UNIQUE,
-      password_hash TEXT NOT NULL,
-      role TEXT NOT NULL CHECK (role IN ('user', 'admin', 'super_admin')),
-      status TEXT NOT NULL CHECK (status IN ('active', 'disabled')),
-      nickname TEXT,
-      signature TEXT,
-      qq TEXT,
-      avatar_path TEXT,
-      profile_bg_path TEXT,
-      created_at TEXT NOT NULL DEFAULT (datetime('now')),
-      updated_at TEXT NOT NULL DEFAULT (datetime('now'))
-    )
-  `);
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        username TEXT NOT NULL UNIQUE,
+        password_hash TEXT NOT NULL,
+        role TEXT NOT NULL CHECK (role IN ('user', 'admin', 'super_admin')),
+        status TEXT NOT NULL CHECK (status IN ('active', 'disabled')),
+        nickname TEXT,
+        signature TEXT,
+        qq TEXT,
+        avatar_path TEXT,
+        profile_bg_path TEXT,
+        created_at TEXT NOT NULL DEFAULT (datetime('now')),
+        updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+    );
+    `);
 
 	ensureUserColumn(db, 'avatar_path', 'TEXT');
 	ensureUserColumn(db, 'profile_bg_path', 'TEXT');
@@ -40,19 +40,51 @@ function initSchema(db: Database): void {
 
 	db.run(`
     CREATE TABLE IF NOT EXISTS account_applications (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      username TEXT NOT NULL UNIQUE,
-      password_hash TEXT NOT NULL,
-      reason TEXT NOT NULL,
-      status TEXT NOT NULL CHECK (status IN ('pending', 'approved', 'rejected')),
-      reviewed_by TEXT NULL,
-      reviewed_at TEXT NULL,
-      created_at TEXT NOT NULL DEFAULT (datetime('now'))
-    )
-  `);
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        username TEXT NOT NULL UNIQUE,
+        password_hash TEXT NOT NULL,
+        reason TEXT NOT NULL,
+        status TEXT NOT NULL CHECK (status IN ('pending', 'approved', 'rejected')),
+        reviewed_by TEXT NULL,
+        reviewed_at TEXT NULL,
+        created_at TEXT NOT NULL DEFAULT (datetime('now'))
+    );
+    `);
+
+	db.run(`
+	CREATE TABLE IF NOT EXISTS schedules (
+		id INTEGER PRIMARY KEY AUTOINCREMENT,
+		title TEXT NOT NULL,
+		description TEXT,
+		location TEXT,
+		year INTEGER NOT NULL,
+		month INTEGER NOT NULL,
+		day INTEGER NOT NULL,
+		start_at TEXT NOT NULL,
+		end_at TEXT NOT NULL,
+		duration_minutes INTEGER NOT NULL,
+		created_by INTEGER NOT NULL,
+		created_at TEXT NOT NULL DEFAULT (datetime('now')),
+		updated_at TEXT NOT NULL DEFAULT (datetime('now')),
+		FOREIGN KEY(created_by) REFERENCES users(id)
+	);
+		`);
+
+	db.run(`
+	CREATE TABLE IF NOT EXISTS schedule_participants (
+		schedule_id INTEGER NOT NULL,
+		user_id INTEGER NOT NULL,
+		PRIMARY KEY (schedule_id, user_id),
+		FOREIGN KEY(schedule_id) REFERENCES schedules(id) ON DELETE CASCADE,
+		FOREIGN KEY(user_id) REFERENCES users(id)
+	);
+		`);
 
 	db.run(`CREATE INDEX IF NOT EXISTS idx_users_role_status ON users(role, status)`);
 	db.run(`CREATE INDEX IF NOT EXISTS idx_applications_status ON account_applications(status)`);
+
+	db.run(`CREATE INDEX IF NOT EXISTS idx_schedules_date ON schedules(year, month, day)`);
+	db.run(`CREATE INDEX IF NOT EXISTS idx_schedule_participants_user ON schedule_participants(user_id)`);
 }
 
 export async function startSQLite(): Promise<Database> {

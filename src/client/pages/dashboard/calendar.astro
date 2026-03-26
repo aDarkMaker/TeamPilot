@@ -1,7 +1,8 @@
 ---
 import DashboardLayout from '../../layouts/DashboardLayout.astro';
+import CalendarView from '../../components/dashboard/Calendar';
 ---
 
 <DashboardLayout title="日程安排">
-	<p style="color: #4a5568;">日历稍后补充。</p>
+    <CalendarView client:load />
 </DashboardLayout>
