@@ -72,6 +72,14 @@ type BlockLayout = {
 	widthPct: number;
 };
 
+type DraftRange = {
+	dayKey: string;
+	day: { year: number; month: number; day: number };
+	startMin: number;
+	endMin: number;
+	active: boolean;
+};
+
 function layoutDayBlocks(items: ScheduleDayItem[]): BlockLayout[] {
 	const dayStart = START_HOUR * 60;
 	const dayEnd = END_HOUR * 60;
@@ -150,6 +158,7 @@ export default function Calendar() {
 	const [detail, setDetail] = useState<ScheduleDayItem | null>(null);
 	const [editId, setEditId] = useState<string | null>(null);
 	const [closing, setClosing] = useState<{ create: boolean; time: boolean; detail: boolean }>({ create: false, time: false, detail: false });
+	const [draftRange, setDraftRange] = useState<DraftRange | null>(null);
 
 	useEffect(() => {
 		if (!timePicker.open) return;
@@ -187,7 +196,15 @@ export default function Calendar() {
 		return out;
 	}, [storeState.byDay, dayKeys]);
 
-	const dateLabel = useMemo(() => weekLabel, [weekLabel]);
+	const dateLabel = useMemo(() => {
+		const d = new Date(selectedYmd.year, selectedYmd.month - 1, selectedYmd.day);
+		const week = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'][d.getDay()] ?? '';
+		return `${selectedYmd.year}年${selectedYmd.month}月${selectedYmd.day}日 ${week}`;
+	}, [selectedYmd]);
+	const showBackToday = useMemo(() => {
+		const t = toYmd(new Date());
+		return selectedYmd.year !== t.year || selectedYmd.month !== t.month || selectedYmd.day !== t.day;
+	}, [selectedYmd]);
 	const layoutsByDay = useMemo(() => {
 		const out: Record<string, BlockLayout[]> = {};
 		for (const d of dayKeys) out[d.key] = layoutDayBlocks(rowsByDay[d.key] ?? []);
@@ -207,6 +224,29 @@ export default function Calendar() {
 		for (let m = start; m <= end; m += STEP_MINUTES) out.push(fmtHHmm(m));
 		return out;
 	}, []);
+
+	function minuteFromClientY(sheetEl: HTMLElement, clientY: number) {
+		const rect = sheetEl.getBoundingClientRect();
+		const ratio = clamp((clientY - rect.top) / rect.height, 0, 1);
+		const dayStart = START_HOUR * 60;
+		const dayEnd = END_HOUR * 60;
+		const raw = dayStart + ratio * (dayEnd - dayStart);
+		const snapped = Math.round(raw / STEP_MINUTES) * STEP_MINUTES;
+		return clamp(snapped, dayStart, dayEnd);
+	}
+
+	function openCreateAt(day: { year: number; month: number; day: number }, startMin: number, endMin: number) {
+		const dayStart = START_HOUR * 60;
+		const dayEnd = END_HOUR * 60;
+		const safeStart = clamp(startMin, dayStart, dayEnd - 30);
+		const safeEnd = clamp(Math.max(endMin, safeStart + 30), safeStart + 30, dayEnd);
+		setSelectedYmd(day);
+		setStartAt(fmtHHmm(safeStart));
+		setEndAt(fmtHHmm(safeEnd));
+		setEditId(null);
+		setCreateErr(null);
+		setModalOpen(true);
+	}
 
 	async function api<T>(url: string, init?: RequestInit): Promise<T> {
 		const resp = await fetch(url, { credentials: 'include', ...init });
@@ -417,9 +457,20 @@ export default function Calendar() {
 		if (e <= s) setEndAt(addMinutes(startAt, 60));
 	}, [startAt]);
 
+	useEffect(() => {
+		if (!draftRange?.active) return;
+		const onUp = () => setDraftRange((prev) => (prev?.active ? { ...prev, active: false } : prev));
+		window.addEventListener('pointerup', onUp);
+		window.addEventListener('pointercancel', onUp);
+		return () => {
+			window.removeEventListener('pointerup', onUp);
+			window.removeEventListener('pointercancel', onUp);
+		};
+	}, [draftRange?.active]);
+
 	return (
 		<div className="calendar-page">
-			<div className="calendar-head">
+				<div className="calendar-head">
 				<div className="calendar-head-title">
 					<button type="button" className="calendar-date-btn" onClick={() => setAnchorDate((d) => addDays(d, -7))}>
 						‹
@@ -430,6 +481,19 @@ export default function Calendar() {
 					</button>
 				</div>
 				<div className="calendar-head-actions">
+					{showBackToday && (
+						<button
+							type="button"
+							className="calendar-btn"
+							onClick={() => {
+								const t = new Date();
+								setAnchorDate(t);
+								setSelectedYmd(toYmd(t));
+							}}
+						>
+							返回今日
+						</button>
+					)}
 					<button type="button" className="calendar-btn primary" onClick={() => setModalOpen(true)}>
 						添加
 					</button>
@@ -474,7 +538,50 @@ export default function Calendar() {
 						</div>
 						<div className="calendar-week-grid">
 							{dayKeys.map((d) => (
-								<div key={d.key} className="calendar-sheet">
+								<div
+									key={d.key}
+									className="calendar-sheet"
+									onPointerDown={(e) => {
+										const target = e.target as HTMLElement;
+										if (target.closest('.calendar-block')) return;
+										const el = e.currentTarget as HTMLElement;
+										const start = minuteFromClientY(el, e.clientY);
+										setDraftRange({
+											dayKey: d.key,
+											day: d.ymd,
+											startMin: start,
+											endMin: clamp(start + STEP_MINUTES, START_HOUR * 60, END_HOUR * 60),
+											active: true,
+										});
+									}}
+									onPointerMove={(e) => {
+										if (!draftRange?.active || draftRange.dayKey !== d.key) return;
+										const el = e.currentTarget as HTMLElement;
+										const cur = minuteFromClientY(el, e.clientY);
+										setDraftRange((prev) =>
+											prev && prev.dayKey === d.key ? { ...prev, endMin: cur } : prev
+										);
+									}}
+									onPointerUp={() => {
+										if (!draftRange?.active || draftRange.dayKey !== d.key) return;
+										const start = Math.min(draftRange.startMin, draftRange.endMin);
+										const end = Math.max(draftRange.startMin, draftRange.endMin);
+										openCreateAt(d.ymd, start, end);
+										setDraftRange(null);
+									}}
+									onPointerLeave={() => {
+										// Keep draft when dragging across the same column edge.
+									}}
+								>
+									{draftRange?.active && draftRange.dayKey === d.key ? (
+										<div
+											className="calendar-draft-block"
+											style={{
+												top: `${((Math.min(draftRange.startMin, draftRange.endMin) - START_HOUR * 60) / ((END_HOUR - START_HOUR) * 60)) * 100}%`,
+												height: `${(Math.max(Math.abs(draftRange.endMin - draftRange.startMin), 30) / ((END_HOUR - START_HOUR) * 60)) * 100}%`,
+											}}
+										/>
+									) : null}
 									{(layoutsByDay[d.key] ?? []).map((b) => (
 										<div
 											key={b.item.id}
@@ -551,7 +658,7 @@ export default function Calendar() {
 										<div className="calendar-members-chips">
 											{participants.map((p) => (
 												<button key={p.id} type="button" className="calendar-chip" onClick={() => removeParticipant(p.id)} title="移除">
-													{p.username}
+													{(p.nickname && p.nickname.trim()) || p.username}
 												</button>
 											))}
 											<input
@@ -657,7 +764,7 @@ export default function Calendar() {
 								</div>
 							</div>
 
-							<button type="submit" className="calendar-btn primary" disabled={loading}>
+							<button type="submit" className="calendar-btn primary calendar-form-submit" disabled={loading}>
 								{loading ? '提交中…' : '创建'}
 							</button>
 						</form>
@@ -725,7 +832,13 @@ export default function Calendar() {
 											setDescription(detail.description ?? '');
 											setLocation(detail.location ?? '');
 											setSelectedYmd({ year: detail.year, month: detail.month, day: detail.day });
-											setParticipants((detail.participants ?? []).map((p) => ({ id: p.userId, username: p.username })));
+											setParticipants(
+												(detail.participants ?? []).map((p) => ({
+													id: p.userId,
+													username: p.username,
+													avatarUrl: p.avatarUrl ?? null,
+												}))
+											);
 											setTimePicker({ open: false, field: null });
 											setModalOpen(true);
 											closeDetail();
