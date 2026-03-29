@@ -1,0 +1,9 @@
+---
+import DashboardLayout from '../../layouts/DashboardLayout.astro';
+import NewcomersPage from '../../components/dashboard/newcomers/NewcomersPage';
+import '../../styles/newcomers.css';
+---
+
+<DashboardLayout title="新人详情">
+	<NewcomersPage client:load />
+</DashboardLayout>

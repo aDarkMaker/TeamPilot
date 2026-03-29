@@ -13,3 +13,11 @@ export function canReviewApplication(role: Role): boolean {
 export function canAppointAdmin(role: Role): boolean {
 	return role === 'super_admin';
 }
+
+export function roleRank(role: Role): number {
+	return rank[role];
+}
+
+export function canDeleteOthersComment(actorRole: Role, targetAuthorRole: Role): boolean {
+	return rank[actorRole] > rank[targetAuthorRole];
+}

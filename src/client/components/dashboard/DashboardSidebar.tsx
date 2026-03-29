@@ -7,6 +7,7 @@ import iconDashboard from '../../assets/img/icon/navbar/dashboard.png';
 import iconList from '../../assets/img/icon/navbar/list.png';
 import iconUser from '../../assets/img/icon/navbar/user.png';
 import iconCalendar from '../../assets/img/icon/navbar/calendar.png';
+import iconUserPlus from '../../assets/img/icon/navbar/user-plus.png';
 import iconLogout from '../../assets/img/icon/navbar/logout.png';
 import iconSettings from '../../assets/img/icon/navbar/settings.png';
 
@@ -136,6 +137,12 @@ export default function DashboardSidebar({ initialPath }: Props) {
 					<a className={linkClass('/dashboard/calendar')} href="/dashboard/calendar">
 						<img src={assetUrl(iconCalendar)} alt="" />
 						<span>日程安排</span>
+					</a>
+				</li>
+				<li>
+					<a className={linkClass('/dashboard/newcomers')} href="/dashboard/newcomers">
+						<img src={assetUrl(iconUserPlus)} alt="" />
+						<span>新人详情</span>
 					</a>
 				</li>
 				<li>

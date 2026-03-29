@@ -85,6 +85,72 @@ function initSchema(db: Database): void {
 
 	db.run(`CREATE INDEX IF NOT EXISTS idx_schedules_date ON schedules(year, month, day)`);
 	db.run(`CREATE INDEX IF NOT EXISTS idx_schedule_participants_user ON schedule_participants(user_id)`);
+
+	db.run(`
+	CREATE TABLE IF NOT EXISTS recruitment_applications (
+		id INTEGER PRIMARY KEY AUTOINCREMENT,
+		submitter_user_id INTEGER NOT NULL,
+		full_name TEXT NOT NULL,
+		contact TEXT NOT NULL,
+		qq TEXT NOT NULL,
+		department TEXT NOT NULL,
+		department_sort_order INTEGER NOT NULL,
+		is_student INTEGER NOT NULL CHECK (is_student IN (0, 1)),
+		school_college TEXT,
+		grade TEXT,
+		wants_offline_interview INTEGER NOT NULL CHECK (wants_offline_interview IN (0, 1)),
+		offline_interview_slot TEXT,
+		wants_online_interview INTEGER NOT NULL CHECK (wants_online_interview IN (0, 1)),
+		online_interview_slot TEXT,
+		intro_markdown TEXT NOT NULL,
+		works_markdown TEXT NOT NULL,
+		attachment_path TEXT,
+		created_at TEXT NOT NULL DEFAULT (datetime('now')),
+		updated_at TEXT NOT NULL DEFAULT (datetime('now')),
+		FOREIGN KEY(submitter_user_id) REFERENCES users(id)
+	);
+	`);
+
+	db.run(`
+	CREATE TABLE IF NOT EXISTS recruitment_comments (
+		id INTEGER PRIMARY KEY AUTOINCREMENT,
+		application_id INTEGER NOT NULL,
+		author_id INTEGER NOT NULL,
+		body_markdown TEXT NOT NULL,
+		created_at TEXT NOT NULL DEFAULT (datetime('now')),
+		updated_at TEXT NOT NULL DEFAULT (datetime('now')),
+		FOREIGN KEY(application_id) REFERENCES recruitment_applications(id) ON DELETE CASCADE,
+		FOREIGN KEY(author_id) REFERENCES users(id)
+	);
+	`);
+
+	db.run(`
+	CREATE TABLE IF NOT EXISTS recruitment_comment_likes (
+		comment_id INTEGER NOT NULL,
+		user_id INTEGER NOT NULL,
+		created_at TEXT NOT NULL DEFAULT (datetime('now')),
+		PRIMARY KEY (comment_id, user_id),
+		FOREIGN KEY(comment_id) REFERENCES recruitment_comments(id) ON DELETE CASCADE,
+		FOREIGN KEY(user_id) REFERENCES users(id)
+	);
+	`);
+
+	db.run(`
+	CREATE TABLE IF NOT EXISTS recruitment_application_tags (
+		application_id INTEGER NOT NULL,
+		tag TEXT NOT NULL,
+		created_by INTEGER NOT NULL,
+		created_at TEXT NOT NULL DEFAULT (datetime('now')),
+		PRIMARY KEY (application_id, tag),
+		FOREIGN KEY(application_id) REFERENCES recruitment_applications(id) ON DELETE CASCADE,
+		FOREIGN KEY(created_by) REFERENCES users(id)
+	);
+	`);
+
+	db.run(
+		`CREATE INDEX IF NOT EXISTS idx_recruitment_apps_dept_time ON recruitment_applications(department_sort_order, created_at)`,
+	);
+	db.run(`CREATE INDEX IF NOT EXISTS idx_recruitment_comments_app ON recruitment_comments(application_id, created_at)`);
 }
 
 export async function startSQLite(): Promise<Database> {

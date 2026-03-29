@@ -4,6 +4,12 @@ import type { Role, UserStatus } from './types/auth';
 import type { User } from './types/user';
 import type { AccountApplication } from './types/application';
 import type { Schedule, ScheduleParticipant } from './types/schedule';
+import type {
+	RecruitmentApplication,
+	RecruitmentComment,
+	RecruitmentDepartment,
+	RecruitmentInterviewSlot,
+} from './types/recruitment';
 
 export interface DB {
 	findUserByUsername(username: string): Promise<User | null>;
@@ -72,6 +78,53 @@ export interface DB {
 		}
 	): Promise<void>;
 	updateUserPasswordHash(userId: string, passwordHash: string): Promise<void>;
+
+	createRecruitmentApplication(input: {
+		submitterUserId: string;
+		fullName: string;
+		contact: string;
+		qq: string;
+		department: RecruitmentDepartment;
+		departmentSortOrder: number;
+		isStudent: boolean;
+		schoolCollege: string | null;
+		grade: string | null;
+		wantsOfflineInterview: boolean;
+		offlineInterviewSlot: RecruitmentInterviewSlot | null;
+		wantsOnlineInterview: boolean;
+		onlineInterviewSlot: RecruitmentInterviewSlot | null;
+		introMarkdown: string;
+		worksMarkdown: string;
+		attachmentPath: string | null;
+	}): Promise<RecruitmentApplication>;
+
+	listRecruitmentApplications(input: { timeOrder: 'asc' | 'desc' }): Promise<RecruitmentApplication[]>;
+
+	findRecruitmentApplicationById(id: string): Promise<RecruitmentApplication | null>;
+
+	countRecruitmentApplicationsBySubmitter(submitterUserId: string): Promise<number>;
+
+	listRecruitmentApplicationTags(applicationId: string): Promise<string[]>;
+
+	addRecruitmentApplicationTag(input: { applicationId: string; tag: string; createdBy: string }): Promise<void>;
+
+	removeRecruitmentApplicationTag(input: { applicationId: string; tag: string }): Promise<void>;
+
+	findRecruitmentTagCreatedBy(input: { applicationId: string; tag: string }): Promise<string | null>;
+
+	listRecruitmentComments(applicationId: string, viewerUserId: string): Promise<RecruitmentComment[]>;
+
+	createRecruitmentComment(input: { applicationId: string; authorId: string; bodyMarkdown: string }): Promise<RecruitmentComment>;
+
+	updateRecruitmentComment(input: { commentId: string; authorId: string; bodyMarkdown: string }): Promise<RecruitmentComment>;
+
+	findRecruitmentCommentMeta(
+		commentId: string,
+	): Promise<{ id: string; applicationId: string; authorId: string; authorRole: Role } | null>;
+
+	deleteRecruitmentComment(commentId: string): Promise<void>;
+
+	toggleRecruitmentCommentLike(input: { commentId: string; userId: string }): Promise<{ liked: boolean; likeCount: number }>;
 }
 
 export interface Cache {
@@ -136,6 +189,45 @@ function mapApplication(row: any): AccountApplication {
 		reviewedBy: row.reviewed_by ? String(row.reviewed_by) : null,
 		reviewedAt: row.reviewed_at ? String(row.reviewed_at) : null,
 		createdAt: String(row.created_at),
+	};
+}
+
+function mapRecruitmentApplication(row: any): RecruitmentApplication {
+	return {
+		id: String(row.id),
+		submitterUserId: String(row.submitter_user_id),
+		fullName: String(row.full_name),
+		contact: String(row.contact),
+		qq: String(row.qq),
+		department: row.department as RecruitmentDepartment,
+		departmentSortOrder: Number(row.department_sort_order),
+		isStudent: Boolean(row.is_student),
+		schoolCollege: row.school_college ?? null,
+		grade: row.grade ?? null,
+		wantsOfflineInterview: Boolean(row.wants_offline_interview),
+		offlineInterviewSlot: (row.offline_interview_slot ?? null) as RecruitmentInterviewSlot | null,
+		wantsOnlineInterview: Boolean(row.wants_online_interview),
+		onlineInterviewSlot: (row.online_interview_slot ?? null) as RecruitmentInterviewSlot | null,
+		introMarkdown: String(row.intro_markdown),
+		worksMarkdown: String(row.works_markdown),
+		attachmentPath: row.attachment_path ?? null,
+		createdAt: String(row.created_at),
+		updatedAt: String(row.updated_at),
+	};
+}
+
+function mapRecruitmentCommentRow(row: any): RecruitmentComment {
+	return {
+		id: String(row.id),
+		applicationId: String(row.application_id),
+		authorId: String(row.author_id),
+		authorUsername: String(row.author_username),
+		authorRole: row.author_role as Role,
+		bodyMarkdown: String(row.body_markdown),
+		createdAt: String(row.created_at),
+		updatedAt: String(row.updated_at),
+		likeCount: Number(row.like_count ?? 0),
+		likedByMe: Boolean(row.liked_by_me),
 	};
 }
 
@@ -368,6 +460,178 @@ export function createDb(sqlite: Database): DB {
 				sqlite.query(`DELETE FROM schedules WHERE id = ?`).run(id);
 			});
 			tx(scheduleId);
+		},
+
+		async createRecruitmentApplication(input) {
+			const r = sqlite
+				.query(
+					`INSERT INTO recruitment_applications (
+						submitter_user_id, full_name, contact, qq, department, department_sort_order,
+						is_student, school_college, grade,
+						wants_offline_interview, offline_interview_slot,
+						wants_online_interview, online_interview_slot,
+						intro_markdown, works_markdown, attachment_path
+					) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+				)
+				.run(
+					input.submitterUserId,
+					input.fullName,
+					input.contact,
+					input.qq,
+					input.department,
+					input.departmentSortOrder,
+					input.isStudent ? 1 : 0,
+					input.schoolCollege,
+					input.grade,
+					input.wantsOfflineInterview ? 1 : 0,
+					input.offlineInterviewSlot,
+					input.wantsOnlineInterview ? 1 : 0,
+					input.onlineInterviewSlot,
+					input.introMarkdown,
+					input.worksMarkdown,
+					input.attachmentPath,
+				);
+			const row = sqlite.query(`SELECT * FROM recruitment_applications WHERE id = ?`).get(r.lastInsertRowid);
+			return mapRecruitmentApplication(row);
+		},
+
+		async listRecruitmentApplications(input) {
+			const dir = input.timeOrder === 'asc' ? 'ASC' : 'DESC';
+			const rows = sqlite
+				.query(`SELECT * FROM recruitment_applications ORDER BY department_sort_order ASC, created_at ${dir}`)
+				.all();
+			return rows.map(mapRecruitmentApplication);
+		},
+
+		async findRecruitmentApplicationById(id) {
+			const row = sqlite.query(`SELECT * FROM recruitment_applications WHERE id = ? LIMIT 1`).get(id);
+			return row ? mapRecruitmentApplication(row) : null;
+		},
+
+		async countRecruitmentApplicationsBySubmitter(submitterUserId) {
+			const row = sqlite
+				.query(`SELECT COUNT(*) AS c FROM recruitment_applications WHERE submitter_user_id = ?`)
+				.get(submitterUserId) as any;
+			return Number(row?.c ?? 0);
+		},
+
+		async listRecruitmentApplicationTags(applicationId) {
+			const rows = sqlite
+				.query(`SELECT tag FROM recruitment_application_tags WHERE application_id = ? ORDER BY tag ASC`)
+				.all(applicationId);
+			return rows.map((r: any) => String(r.tag));
+		},
+
+		async addRecruitmentApplicationTag(input) {
+			sqlite
+				.query(`INSERT OR REPLACE INTO recruitment_application_tags (application_id, tag, created_by) VALUES (?, ?, ?)`)
+				.run(input.applicationId, input.tag, input.createdBy);
+		},
+
+		async removeRecruitmentApplicationTag(input) {
+			sqlite.query(`DELETE FROM recruitment_application_tags WHERE application_id = ? AND tag = ?`).run(input.applicationId, input.tag);
+		},
+
+		async findRecruitmentTagCreatedBy(input) {
+			const row = sqlite
+				.query(`SELECT created_by FROM recruitment_application_tags WHERE application_id = ? AND tag = ? LIMIT 1`)
+				.get(input.applicationId, input.tag) as any;
+			return row?.created_by != null ? String(row.created_by) : null;
+		},
+
+		async listRecruitmentComments(applicationId, viewerUserId) {
+			const rows = sqlite
+				.query(
+					`SELECT c.*, u.username AS author_username, u.role AS author_role,
+						(SELECT COUNT(*) FROM recruitment_comment_likes l WHERE l.comment_id = c.id) AS like_count,
+						EXISTS(SELECT 1 FROM recruitment_comment_likes lx WHERE lx.comment_id = c.id AND lx.user_id = ?) AS liked_by_me
+					 FROM recruitment_comments c
+					 INNER JOIN users u ON u.id = c.author_id
+					 WHERE c.application_id = ?
+					 ORDER BY c.created_at ASC`,
+				)
+				.all(viewerUserId, applicationId);
+			return rows.map(mapRecruitmentCommentRow);
+		},
+
+		async createRecruitmentComment(input) {
+			const r = sqlite
+				.query(`INSERT INTO recruitment_comments (application_id, author_id, body_markdown) VALUES (?, ?, ?)`)
+				.run(input.applicationId, input.authorId, input.bodyMarkdown);
+			const row = sqlite
+				.query(
+					`SELECT c.*, u.username AS author_username, u.role AS author_role,
+						(SELECT COUNT(*) FROM recruitment_comment_likes l WHERE l.comment_id = c.id) AS like_count,
+						EXISTS(SELECT 1 FROM recruitment_comment_likes lx WHERE lx.comment_id = c.id AND lx.user_id = ?) AS liked_by_me
+					 FROM recruitment_comments c
+					 INNER JOIN users u ON u.id = c.author_id
+					 WHERE c.id = ?`,
+				)
+				.get(input.authorId, r.lastInsertRowid);
+			return mapRecruitmentCommentRow(row);
+		},
+
+		async updateRecruitmentComment(input) {
+			const n = sqlite
+				.query(
+					`UPDATE recruitment_comments SET body_markdown = ?, updated_at = datetime('now') WHERE id = ? AND author_id = ?`,
+				)
+				.run(input.bodyMarkdown, input.commentId, input.authorId).changes;
+			if (!n) throw new Error('COMMENT_NOT_FOUND_OR_FORBIDDEN');
+			const row = sqlite
+				.query(
+					`SELECT c.*, u.username AS author_username, u.role AS author_role,
+						(SELECT COUNT(*) FROM recruitment_comment_likes l WHERE l.comment_id = c.id) AS like_count,
+						EXISTS(SELECT 1 FROM recruitment_comment_likes lx WHERE lx.comment_id = c.id AND lx.user_id = ?) AS liked_by_me
+					 FROM recruitment_comments c
+					 INNER JOIN users u ON u.id = c.author_id
+					 WHERE c.id = ?`,
+				)
+				.get(input.authorId, input.commentId);
+			return mapRecruitmentCommentRow(row);
+		},
+
+		async findRecruitmentCommentMeta(commentId) {
+			const row = sqlite
+				.query(
+					`SELECT c.id, c.application_id, c.author_id, u.role AS author_role
+					 FROM recruitment_comments c
+					 INNER JOIN users u ON u.id = c.author_id
+					 WHERE c.id = ? LIMIT 1`,
+				)
+				.get(commentId) as any;
+			if (!row) return null;
+			return {
+				id: String(row.id),
+				applicationId: String(row.application_id),
+				authorId: String(row.author_id),
+				authorRole: row.author_role as Role,
+			};
+		},
+
+		async deleteRecruitmentComment(commentId) {
+			sqlite.query(`DELETE FROM recruitment_comments WHERE id = ?`).run(commentId);
+		},
+
+		async toggleRecruitmentCommentLike(input) {
+			const likeCount = sqlite.transaction(() => {
+				const exists = sqlite
+					.query(`SELECT 1 FROM recruitment_comment_likes WHERE comment_id = ? AND user_id = ?`)
+					.get(input.commentId, input.userId);
+				if (exists) {
+					sqlite.query(`DELETE FROM recruitment_comment_likes WHERE comment_id = ? AND user_id = ?`).run(input.commentId, input.userId);
+				} else {
+					sqlite.query(`INSERT INTO recruitment_comment_likes (comment_id, user_id) VALUES (?, ?)`).run(input.commentId, input.userId);
+				}
+				const cnt = sqlite
+					.query(`SELECT COUNT(*) AS c FROM recruitment_comment_likes WHERE comment_id = ?`)
+					.get(input.commentId) as any;
+				return Number(cnt?.c ?? 0);
+			})();
+			const liked = Boolean(
+				sqlite.query(`SELECT 1 FROM recruitment_comment_likes WHERE comment_id = ? AND user_id = ?`).get(input.commentId, input.userId),
+			);
+			return { liked, likeCount };
 		},
 	};
 }

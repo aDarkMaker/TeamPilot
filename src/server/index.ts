@@ -14,6 +14,8 @@ import { AuthService } from './services/auth.service';
 import { AuthController } from './controller/auth.controller';
 import { ScheduleService } from './services/schedule.service';
 import { ScheduleController } from './controller/schedule.controller';
+import { RecruitmentService } from './services/recruitment.service';
+import { RecruitmentController } from './controller/recruitment.controller';
 import serve from 'koa-static';
 import mount from 'koa-mount';
 import { join } from 'node:path';
@@ -54,10 +56,13 @@ async function main() {
 	const scheduleService = new ScheduleService(db);
 	const scheduleController = new ScheduleController(scheduleService);
 
+	const recruitmentService = new RecruitmentService(db);
+	const recruitmentController = new RecruitmentController(recruitmentService);
+
 	const app = new Koa();
 	applyGlobalMiddleware(app);
 
-	const apiRouter = composeApiRouter({ applicationController, adminController, authController, profileController, scheduleController });
+	const apiRouter = composeApiRouter({ applicationController, adminController, authController, profileController, scheduleController, recruitmentController });
 	app.use(apiRouter.routes());
 	app.use(apiRouter.allowedMethods());
 

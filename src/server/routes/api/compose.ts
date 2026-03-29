@@ -6,6 +6,7 @@ import { buildProfileRoutes } from '../profile.routes';
 import { registerHealthRoutes } from './health.routes';
 import { buildScheduleRoutes } from '../schedule.routes';
 import type { ApiRouteDeps } from './types';
+import { buildRecruitmentRoutes } from '../recruitment.routes';
 
 function mountChildRouter(parent: Router, child: Router): void {
 	parent.use(child.routes());
@@ -22,6 +23,6 @@ export function composeApiRouter(deps: ApiRouteDeps): Router {
 	mountChildRouter(api, buildAdminRoutes(deps.adminController));
 	mountChildRouter(api, buildProfileRoutes(deps.profileController));
 	mountChildRouter(api, buildScheduleRoutes(deps.scheduleController));
-	
+	mountChildRouter(api, buildRecruitmentRoutes(deps.recruitmentController));
 	return api;
 }
