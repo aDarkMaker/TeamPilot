@@ -13,6 +13,12 @@ type Me = { id: string; username: string; role: Role };
 
 const now = new Date();
 
+const SERVER_SCHEDULE_SNAPSHOT: {
+	byDay: Record<string, { items: ScheduleDayItem[]; updatedAt: number }>;
+} = {
+	byDay: {},
+};
+
 function toYmd(d: Date) {
 	return { year: d.getFullYear(), month: d.getMonth() + 1, day: d.getDate() };
 }
@@ -188,7 +194,7 @@ export default function Calendar() {
 	const storeState = useSyncExternalStore(
 		scheduleStore.subscribe,
 		scheduleStore.getSnapshot,
-		() => ({ byDay: {} as Record<string, { items: ScheduleDayItem[]; updatedAt: number }> })
+		() => SERVER_SCHEDULE_SNAPSHOT
 	);
 	const rowsByDay = useMemo(() => {
 		const out: Record<string, ScheduleDayItem[]> = {};

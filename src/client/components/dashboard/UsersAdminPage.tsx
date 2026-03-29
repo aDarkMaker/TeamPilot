@@ -21,6 +21,14 @@ type UserRow = {
 
 type AppRow = PendingApplication;
 
+const SERVER_PENDING_SNAPSHOT: {
+	items: PendingApplication[];
+	updatedAt: number;
+} = {
+	items: [],
+	updatedAt: 0,
+};
+
 async function api<T>(input: RequestInfo, init?: RequestInit): Promise<T> {
 	const res = await fetch(input, { credentials: 'include', ...init });
 	const json = await res.json().catch(() => ({}));
@@ -37,7 +45,7 @@ export default function UserAdminPage() {
 	const pendingState = useSyncExternalStore(
 		pendingApplicationsStore.subscribe,
 		pendingApplicationsStore.getSnapshot,
-		() => ({ items: [], updatedAt: 0 })
+		() => SERVER_PENDING_SNAPSHOT
 	);
 	const pending = pendingState.items;
 
