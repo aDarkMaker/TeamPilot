@@ -14,6 +14,15 @@ function ensureUserColumn(db: Database, column: string, type: string): void {
 	db.run(`ALTER TABLE users ADD COLUMN ${column} ${type}`);
 }
 
+function ensureHomeAnnouncementColumn(db: Database, column: string, type: string): void {
+	const cols = db
+		.query(`PRAGMA table_info(home_announcements)`)
+		.all()
+		.map((r: any) => String(r.name));
+	if (cols.includes(column)) return;
+	db.run(`ALTER TABLE home_announcements ADD COLUMN ${column} ${type}`);
+}
+
 function initSchema(db: Database): void {
 	db.run(`
     CREATE TABLE IF NOT EXISTS users (
@@ -85,6 +94,22 @@ function initSchema(db: Database): void {
 
 	db.run(`CREATE INDEX IF NOT EXISTS idx_schedules_date ON schedules(year, month, day)`);
 	db.run(`CREATE INDEX IF NOT EXISTS idx_schedule_participants_user ON schedule_participants(user_id)`);
+
+	db.run(`
+	CREATE TABLE IF NOT EXISTS home_announcements (
+		id INTEGER PRIMARY KEY AUTOINCREMENT,
+		title TEXT NOT NULL,
+		content_markdown TEXT NOT NULL,
+		is_pinned INTEGER NOT NULL DEFAULT 0 CHECK (is_pinned IN (0, 1)),
+		created_by INTEGER NOT NULL,
+		created_at TEXT NOT NULL DEFAULT (datetime('now')),
+		updated_at TEXT NOT NULL DEFAULT (datetime('now')),
+		FOREIGN KEY(created_by) REFERENCES users(id)
+	);
+	`);
+	ensureHomeAnnouncementColumn(db, 'is_pinned', 'INTEGER NOT NULL DEFAULT 0 CHECK (is_pinned IN (0, 1))');
+	db.run(`CREATE INDEX IF NOT EXISTS idx_home_announcements_created_at ON home_announcements(created_at DESC)`);
+	db.run(`CREATE INDEX IF NOT EXISTS idx_home_announcements_pinned_created ON home_announcements(is_pinned DESC, created_at DESC)`);
 
 	db.run(`
 	CREATE TABLE IF NOT EXISTS recruitment_applications (

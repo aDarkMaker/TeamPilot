@@ -1,7 +1,9 @@
 ---
 import DashboardLayout from "../../layouts/DashboardLayout.astro";
+import HomePage from '../../components/dashboard/HomePage';
+import '../../styles/home.css';
 ---
 
 <DashboardLayout title="工作主页">
-	<p style="color: #4a5568;">Home 内容稍后补充。</p>
+	<HomePage client:load />
 </DashboardLayout>
