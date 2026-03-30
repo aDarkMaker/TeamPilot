@@ -1,7 +1,7 @@
 .joinus-form-apply {
-	--joinus-primary: var(--joinus-accent, #e5a820);
+	--joinus-primary: var(--joinus-accent, #ffc900);
 	--joinus-primary-light: rgba(229, 168, 32, 0.14);
-	--joinus-primary-dark: #c49210;
+	--joinus-primary-dark: #ffb800;
 	--joinus-card-bg: #ffffff;
 	--joinus-text: var(--joinus-fg, #1a1d24);
 	--joinus-text-muted: var(--joinus-muted, #5c6370);
@@ -9,8 +9,8 @@
 	--joinus-input-bg: #f5f7fb;
 	--joinus-radius: 12px;
 	--joinus-font-title: var(--joinus-font-display, 'JoinUsTitle', sans-serif);
-	--joinus-btn-start: var(--joinus-accent, #e5a820);
-	--joinus-btn-end: #d49a12;
+	--joinus-btn-start: var(--joinus-accent, #ffc900);
+	--joinus-btn-end: #ffc900;
 	--joinus-btn-shadow: 0 4px 16px rgba(229, 168, 32, 0.28);
 	--joinus-btn-shadow-hover: 0 8px 24px rgba(229, 168, 32, 0.38);
 	--joinus-select-option-hover-bg: rgba(229, 168, 32, 0.12);

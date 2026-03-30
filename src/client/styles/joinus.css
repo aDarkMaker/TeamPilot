@@ -34,7 +34,7 @@ html.joinus-page::-webkit-scrollbar {
 .joinus-root {
 	--joinus-font-display: 'JoinUsTitle', sans-serif;
 	--joinus-font-body: 'HxkFont', sans-serif;
-	--joinus-accent: #e5a820;
+	--joinus-accent: #ffc900;
 	--joinus-muted: #5c6370;
 	--joinus-line: rgba(15, 23, 42, 0.08);
 	--joinus-fg: #1a1d24;
@@ -177,11 +177,11 @@ html.joinus-page::-webkit-scrollbar {
 
 .joinus-hero__kicker {
 	display: inline-block;
-	font-size: 0.75rem;
+	font-size: 1.25rem;
 	font-weight: 600;
 	text-transform: uppercase;
 	letter-spacing: 0.12em;
-	color: var(--joinus-accent);
+	color: #ffae00;
 	margin-bottom: 0.75rem;
 }
 
@@ -282,7 +282,6 @@ html.joinus-page::-webkit-scrollbar {
 	margin: 0;
 	color: var(--joinus-muted);
 	font-size: 0.95rem;
-	max-width: 40rem;
 }
 
 .joinus-grid {

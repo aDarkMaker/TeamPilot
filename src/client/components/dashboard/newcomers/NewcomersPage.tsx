@@ -61,7 +61,6 @@ export default function NewcomersPage() {
 		return applications.filter((a) => a.department === deptFilter);
 	}, [applications, deptFilter]);
 
-	/** 当前在「筛选后列表」中生效的报名 id（换组别时若原选中不在列表内则落到第一项） */
 	const listSelectedId = useMemo(
 		() => filteredApps.find((a) => a.id === selectedId)?.id ?? filteredApps[0]?.id ?? '',
 		[filteredApps, selectedId],
@@ -215,7 +214,7 @@ export default function NewcomersPage() {
 		}
 	};
 
-	if (listLoading) {
+	if (listLoading && applications.length === 0) {
 		return (
 			<div className="nc-page">
 				<div className="nc-empty">加载中…</div>

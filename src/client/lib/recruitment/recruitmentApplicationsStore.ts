@@ -25,7 +25,7 @@ let inflight: Promise<void> | null = null;
 async function refreshInternal(): Promise<void> {
 	if (inflight) return inflight;
 	inflight = (async () => {
-		setState({ loading: true, error: null });
+		setState({ loading: state.items.length === 0, error: null });
 		try {
 			const list = await fetchApplications();
 			setState({ items: list, loading: false, error: null, updatedAt: Date.now() });
