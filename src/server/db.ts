@@ -1,5 +1,6 @@
 import type { Database, SQLQueryBindings } from 'bun:sqlite';
 import type Redis from 'ioredis';
+import { JOINUS_PUBLIC_USERNAME } from './auth/joinusPublic';
 import type { Role, UserStatus } from './types/auth';
 import type { User } from './types/user';
 import type { AccountApplication } from './types/application';
@@ -98,9 +99,31 @@ export interface DB {
 		attachmentPath: string | null;
 	}): Promise<RecruitmentApplication>;
 
+	upsertRecruitmentApplicationByContact(input: {
+		submitterUserId: string;
+		fullName: string;
+		contact: string;
+		qq: string;
+		department: RecruitmentDepartment;
+		departmentSortOrder: number;
+		isStudent: boolean;
+		schoolCollege: string | null;
+		grade: string | null;
+		wantsOfflineInterview: boolean;
+		offlineInterviewSlot: RecruitmentInterviewSlot | null;
+		wantsOnlineInterview: boolean;
+		onlineInterviewSlot: RecruitmentInterviewSlot | null;
+		introMarkdown: string;
+		worksMarkdown: string;
+		attachmentPath: string | null;
+	}): Promise<RecruitmentApplication>;
+
+	findRecruitmentApplicationByContact(contact: string): Promise<RecruitmentApplication | null>;
+
 	listRecruitmentApplications(input: { timeOrder: 'asc' | 'desc' }): Promise<RecruitmentApplication[]>;
 
 	findRecruitmentApplicationById(id: string): Promise<RecruitmentApplication | null>;
+	deleteRecruitmentApplicationById(id: string): Promise<void>;
 
 	countRecruitmentApplicationsBySubmitter(submitterUserId: string): Promise<number>;
 
@@ -256,7 +279,9 @@ export function createDb(sqlite: Database): DB {
 			sqlite.query("UPDATE users SET role = ?, updated_at = datetime('now') WHERE id = ?").run(role, userId);
 		},
 		async listUsers() {
-			const rows = sqlite.query('SELECT * FROM users ORDER BY created_at DESC').all();
+			const rows = sqlite
+				.query('SELECT * FROM users WHERE username != ? ORDER BY created_at DESC')
+				.all(JOINUS_PUBLIC_USERNAME);
 			return rows.map(mapUser);
 		},
 		async updateUserStatus(userId, status) {
@@ -447,8 +472,10 @@ export function createDb(sqlite: Database): DB {
 
 		async searchUsersByUsername(keyword, limit = 8) {
 			const rows = sqlite
-				.query(`SELECT id, username, avatar_path FROM users WHERE username LIKE ? ORDER BY username ASC LIMIT ?`)
-				.all(`%${keyword}%`, limit);
+				.query(
+					`SELECT id, username, avatar_path FROM users WHERE username LIKE ? AND username != ? ORDER BY username ASC LIMIT ?`,
+				)
+				.all(`%${keyword}%`, JOINUS_PUBLIC_USERNAME, limit);
 			return rows.map((r: any) => ({ id: String(r.id), username: String(r.username), avatarPath: r.avatar_path ?? null }));
 		},
 
@@ -495,6 +522,65 @@ export function createDb(sqlite: Database): DB {
 			return mapRecruitmentApplication(row);
 		},
 
+		async upsertRecruitmentApplicationByContact(input) {
+			const contact = input.contact.trim();
+			sqlite
+				.query(
+					`INSERT INTO recruitment_applications (
+						submitter_user_id, full_name, contact, qq, department, department_sort_order,
+						is_student, school_college, grade,
+						wants_offline_interview, offline_interview_slot,
+						wants_online_interview, online_interview_slot,
+						intro_markdown, works_markdown, attachment_path
+					) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+					ON CONFLICT(contact) DO UPDATE SET
+						submitter_user_id = excluded.submitter_user_id,
+						full_name = excluded.full_name,
+						qq = excluded.qq,
+						department = excluded.department,
+						department_sort_order = excluded.department_sort_order,
+						is_student = excluded.is_student,
+						school_college = excluded.school_college,
+						grade = excluded.grade,
+						wants_offline_interview = excluded.wants_offline_interview,
+						offline_interview_slot = excluded.offline_interview_slot,
+						wants_online_interview = excluded.wants_online_interview,
+						online_interview_slot = excluded.online_interview_slot,
+						intro_markdown = excluded.intro_markdown,
+						works_markdown = excluded.works_markdown,
+						attachment_path = excluded.attachment_path,
+						updated_at = datetime('now')`,
+				)
+				.run(
+					input.submitterUserId,
+					input.fullName,
+					contact,
+					input.qq,
+					input.department,
+					input.departmentSortOrder,
+					input.isStudent ? 1 : 0,
+					input.schoolCollege,
+					input.grade,
+					input.wantsOfflineInterview ? 1 : 0,
+					input.offlineInterviewSlot,
+					input.wantsOnlineInterview ? 1 : 0,
+					input.onlineInterviewSlot,
+					input.introMarkdown,
+					input.worksMarkdown,
+					input.attachmentPath,
+				);
+			const row = sqlite.query(`SELECT * FROM recruitment_applications WHERE contact = ? LIMIT 1`).get(contact);
+			if (!row) throw new Error('UPSERT_RECRUITMENT_FAILED');
+			return mapRecruitmentApplication(row);
+		},
+
+		async findRecruitmentApplicationByContact(contact) {
+			const row = sqlite
+				.query(`SELECT * FROM recruitment_applications WHERE contact = ? LIMIT 1`)
+				.get(String(contact).trim());
+			return row ? mapRecruitmentApplication(row) : null;
+		},
+
 		async listRecruitmentApplications(input) {
 			const dir = input.timeOrder === 'asc' ? 'ASC' : 'DESC';
 			const rows = sqlite
@@ -506,6 +592,10 @@ export function createDb(sqlite: Database): DB {
 		async findRecruitmentApplicationById(id) {
 			const row = sqlite.query(`SELECT * FROM recruitment_applications WHERE id = ? LIMIT 1`).get(id);
 			return row ? mapRecruitmentApplication(row) : null;
+		},
+
+		async deleteRecruitmentApplicationById(id) {
+			sqlite.query(`DELETE FROM recruitment_applications WHERE id = ?`).run(id);
 		},
 
 		async countRecruitmentApplicationsBySubmitter(submitterUserId) {

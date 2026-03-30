@@ -112,6 +112,15 @@ export async function deleteTag(applicationId: string, tag: string): Promise<voi
 	if (!res.ok || !json.ok) throw new Error(json.message || 'DELETE_TAG_FAILED');
 }
 
+export async function deleteApplication(applicationId: string): Promise<void> {
+	const res = await fetch(`/api/recruitment/applications/${encodeURIComponent(applicationId)}`, {
+		method: 'DELETE',
+		credentials: 'include',
+	});
+	const json = await parseJson<unknown>(res);
+	if (!res.ok || !json.ok) throw new Error(json.message || 'DELETE_APPLICATION_FAILED');
+}
+
 export function isStaffRole(role: string | undefined): boolean {
 	return role === 'admin' || role === 'super_admin';
 }

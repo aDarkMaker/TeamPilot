@@ -54,4 +54,9 @@ export class RecruitmentController {
 		await this.service.removeTag(ctx.params.id, ctx.state.user!, tag);
 		ctx.body = { ok: true, data: { applicationId: ctx.params.id } };
 	};
+
+	deleteApplication = async (ctx: Context) => {
+		const data = await this.service.deleteApplication(ctx.params.id);
+		ctx.body = { ok: true, data };
+	};
 }

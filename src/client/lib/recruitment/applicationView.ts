@@ -41,17 +41,45 @@ function publicUrlFromStoredPath(path: string): string {
 	if (!p) return '';
 	if (p.startsWith('http://') || p.startsWith('https://')) return p;
 	if (p.startsWith('/')) return p;
+
+	if (p.startsWith('joinus/')) {
+		return `/joinus-files/${p.replace(/^joinus\//, '')}`;
+	}
+
 	return `/uploads/${p.replace(/^\/+/, '')}`;
 }
 
 function attachmentsFromPath(attachmentPath: string | null): RecruitmentAttachment[] {
 	if (!attachmentPath?.trim()) return [];
-	const raw = attachmentPath.trim();
-	const fileName = raw.split(/[/\\]/).pop() || '附件';
-	const url = publicUrlFromStoredPath(raw);
-	if (!url) return [];
-	const { kind, mimeType } = inferAttachmentMeta(fileName);
-	return [{ id: 'main', fileName, url, mimeType, kind }];
+
+	const parts = attachmentPath
+		.split('|')
+		.map((x) => x.trim())
+		.filter(Boolean);
+	
+	return parts
+		.map((raw, i) => {
+			const storedName = raw.split(/[/\\]/).pop() || '附件';
+			const fileName = displayNameFromStoredName(storedName);
+			const url = publicUrlFromStoredPath(raw);
+			const { kind, mimeType } = inferAttachmentMeta(fileName);
+			return { id: String(i), fileName, url, mimeType, kind } as RecruitmentAttachment;
+		})
+		.filter((x) => Boolean(x));
+}
+
+function displayNameFromStoredName(storedName: string): string {
+	const name = (storedName ?? '').trim();
+	if (!name) return '附件';
+
+	// 新格式：<uuid>_<i>__<original>
+	const idx = name.indexOf('__');
+	const raw = idx >= 0 ? name.slice(idx + 2) : name;
+	try {
+		return decodeURIComponent(raw);
+	} catch {
+		return raw;
+	}
 }
 
 export function mapRecruitmentApplicationDtoToView(dto: RecruitmentApplicationDto): NewcomerApplicationView {

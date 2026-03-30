@@ -312,6 +312,30 @@
 	margin-bottom: 6px;
 }
 
+.nc-detail-delete {
+	margin-left: auto;
+	padding: 2px 10px;
+	font-size: 18px;
+	line-height: 1;
+	border: 1px solid rgba(197, 48, 48, 0.35);
+	background: rgba(255, 255, 255, 0.92);
+	border-radius: 10px;
+	transition: background 0.18s ease, border-color 0.18s ease, transform 0.15s ease;
+	position: relative;
+	z-index: 5;
+	isolation: isolate;
+	mix-blend-mode: normal;
+}
+
+.nc-detail-delete:hover:not(:disabled) {
+	background: rgba(255, 255, 255, 1);
+	border-color: rgba(197, 48, 48, 0.6);
+}
+
+.nc-detail-delete:active:not(:disabled) {
+	transform: translateY(0) scale(0.98);
+}
+
 .nc-detail-name {
 	margin: 0;
 	font-size: 22px;
@@ -496,6 +520,26 @@
 	background: rgba(255, 255, 255, 0.52);
 	border: 1px solid rgba(255, 255, 255, 0.7);
 	min-height: 2em;
+}
+
+.nc-markdown-shell--intro {
+	max-height: 260px;
+	overflow: auto;
+	overscroll-behavior: contain;
+	scrollbar-width: thin;
+}
+
+.nc-markdown-shell--intro::-webkit-scrollbar {
+	width: 8px;
+}
+
+.nc-markdown-shell--intro::-webkit-scrollbar-thumb {
+	border-radius: 999px;
+	background: rgba(0, 0, 0, 0.18);
+}
+
+.nc-markdown-shell--intro::-webkit-scrollbar-track {
+	background: transparent;
 }
 
 .nc-prose {
@@ -926,6 +970,7 @@
 
 .nc-attach-image-wrap {
 	text-align: center;
+	position: relative;
 }
 
 .nc-attach-image {

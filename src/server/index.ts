@@ -2,6 +2,7 @@ import Koa from 'koa';
 import { config } from './config';
 import { createDb, createCache } from './db';
 import { bootstrapSuperAdmin } from './auth/bootstrapSuperAdmin';
+import { bootstrapJoinUsPublicUser } from './auth/bootstrapJoinUsPublicUser';
 import { applyGlobalMiddleware } from './middleware/applyGlobalMiddleware';
 import { ApplicationService } from './services/application.service';
 import { AdminService } from './services/admin.service';
@@ -16,9 +17,12 @@ import { ScheduleService } from './services/schedule.service';
 import { ScheduleController } from './controller/schedule.controller';
 import { RecruitmentService } from './services/recruitment.service';
 import { RecruitmentController } from './controller/recruitment.controller';
+import { JoinUsSubmitService } from './services/joinusSubmit.service';
+import { JoinusSubmitController } from './controller/joinusSubmit.controller';
 import serve from 'koa-static';
 import mount from 'koa-mount';
 import { join } from 'node:path';
+import { mkdirSync } from 'node:fs';
 import { ProfileService } from './services/profile.service';
 import { ProfileController } from './controller/profile.controller';
 import type { Socket } from 'node:net';
@@ -41,6 +45,7 @@ async function main() {
 	const cache = createCache(redis);
 
 	await bootstrapSuperAdmin(db);
+	await bootstrapJoinUsPublicUser(db);
 
 	const applicationService = new ApplicationService(db);
 	const adminService = new AdminService(db);
@@ -59,15 +64,23 @@ async function main() {
 	const recruitmentService = new RecruitmentService(db);
 	const recruitmentController = new RecruitmentController(recruitmentService);
 
+	const joinusSubmitService = new JoinUsSubmitService(db);
+	const joinusSubmitController = new JoinusSubmitController(joinusSubmitService);
+
 	const app = new Koa();
 	applyGlobalMiddleware(app);
 
-	const apiRouter = composeApiRouter({ applicationController, adminController, authController, profileController, scheduleController, recruitmentController });
+	const apiRouter = composeApiRouter({ applicationController, adminController, authController, profileController, scheduleController, recruitmentController, joinusSubmitController });
 	app.use(apiRouter.routes());
 	app.use(apiRouter.allowedMethods());
 
 	const uploadRoot = join(process.cwd(), 'data', 'uploads');
+	mkdirSync(uploadRoot, { recursive: true });
 	app.use(mount('/uploads', serve(uploadRoot)));
+	
+	const joinusRoot = join(process.cwd(), 'data', 'joinus');
+	mkdirSync(joinusRoot, { recursive: true });
+	app.use(mount('/joinus-files', serve(joinusRoot)));
 
 	const server = app.listen(config.port, () => {
 		console.log(`Server running at http://localhost:${config.port}`);

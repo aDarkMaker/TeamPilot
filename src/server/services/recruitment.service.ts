@@ -5,6 +5,9 @@ import { canDeleteOthersComment, canReviewApplication } from '../auth/rbac';
 import { departmentOrderFromSlug } from "../recruitment/departmentOrder";
 import type { RecruitmentDepartment, RecruitmentInterviewSlot } from "../types/recruitment";
 import type { Role } from "../types/auth";
+import { join } from 'node:path';
+import { rm } from 'node:fs/promises';
+import { broadcastRecruitmentApplicationsUpdated } from '../recruitment/recruitmentEvents';
 
 const DEPARTMENT_VALUES = [
 	"vup",
@@ -94,7 +97,7 @@ export class RecruitmentService {
 		const offlineSlot = p.wantsOfflineInterview ? p.offlineInterviewSlot! : null;
 		const onlineSlot = p.wantsOnlineInterview ? p.onlineInterviewSlot! : null;
 
-        return this.db.createRecruitmentApplication({
+        const created = await this.db.createRecruitmentApplication({
             submitterUserId: user.id,
 			fullName: p.fullName.trim(),
 			contact: p.contact.trim(),
@@ -112,6 +115,8 @@ export class RecruitmentService {
 			worksMarkdown: p.worksMarkdown,
 			attachmentPath: p.attachmentPath?.trim() || null,
 		});
+		broadcastRecruitmentApplicationsUpdated();
+		return created;
     }
 
     async listApplications(query: unknown) {
@@ -201,5 +206,26 @@ export class RecruitmentService {
 		const isOwner = createdBy === actor.id;
 		if (!isAdmin && !isOwner) throwMap('FORBIDDEN');
 		await this.db.removeRecruitmentApplicationTag({ applicationId, tag });
+	}
+
+	async deleteApplication(applicationId: string): Promise<{ id: string }> {
+		const app = await this.db.findRecruitmentApplicationById(applicationId);
+		if (!app) throwMap('APPLICATION_NOT_FOUND');
+
+		await this.db.deleteRecruitmentApplicationById(applicationId);
+
+		const attachmentPath = app.attachmentPath?.trim() ?? '';
+		if (attachmentPath.startsWith('joinus/')) {
+			const first = attachmentPath.split('|')[0]?.trim() ?? '';
+			const parts = first.split('/').filter(Boolean);
+			const slug = parts[1] ?? '';
+			if (slug && /^[a-z0-9_]+$/.test(slug)) {
+				const dir = join(process.cwd(), 'data', 'joinus', slug);
+				await rm(dir, { recursive: true, force: true }).catch(() => undefined);
+			}
+		}
+
+		broadcastRecruitmentApplicationsUpdated();
+		return { id: applicationId };
 	}
 }

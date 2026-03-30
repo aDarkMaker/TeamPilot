@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, useSyncExternalStore } from 'react';
 
 import { CommentsPanel } from './CommentsPanel';
 import { DepartmentSelect } from './DepartmentSelect';
@@ -6,8 +6,8 @@ import { NewcomerDetail } from './NewcomerDetail';
 
 import {
 	deleteComment,
+	deleteApplication,
 	deleteTag,
-	fetchApplications,
 	fetchComments,
 	fetchMe,
 	patchComment,
@@ -18,12 +18,18 @@ import {
 	type RecruitmentCommentDto,
 } from '../../../lib/recruitment/recruitmentClient';
 import type { NewcomerApplicationView, RecruitmentDepartmentSlug } from '../../../types/recruitmentUi';
+import { recruitmentApplicationsStore } from '../../../lib/recruitment/recruitmentApplicationsStore';
 
 export default function NewcomersPage() {
 	const [me, setMe] = useState<MeBrief | null>(null);
-	const [applications, setApplications] = useState<NewcomerApplicationView[]>([]);
-	const [listLoading, setListLoading] = useState(true);
-	const [listError, setListError] = useState<string | null>(null);
+	const appsState = useSyncExternalStore(
+		recruitmentApplicationsStore.subscribe,
+		recruitmentApplicationsStore.getSnapshot,
+		recruitmentApplicationsStore.getServerSnapshot,
+	);
+	const applications: NewcomerApplicationView[] = appsState.items;
+	const listLoading = appsState.loading;
+	const listError = appsState.error;
 	const [deptFilter, setDeptFilter] = useState<RecruitmentDepartmentSlug | 'all'>('all');
 	const [selectedId, setSelectedId] = useState('');
 	const [commentsMap, setCommentsMap] = useState<Record<string, RecruitmentCommentDto[]>>({});
@@ -32,31 +38,23 @@ export default function NewcomersPage() {
 	const [tagsError, setTagsError] = useState<string | null>(null);
 	const [commentBusy, setCommentBusy] = useState(false);
 	const [commentError, setCommentError] = useState<string | null>(null);
+	const [deleteBusy, setDeleteBusy] = useState(false);
+	const [deleteError, setDeleteError] = useState<string | null>(null);
+	const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
+	const [confirmDeleteTarget, setConfirmDeleteTarget] = useState<{ id: string; fullName: string } | null>(null);
 
 	useEffect(() => {
 		void fetchMe().then(setMe);
 	}, []);
 
 	useEffect(() => {
-		let cancelled = false;
-		(async () => {
-			setListLoading(true);
-			setListError(null);
-			try {
-				const list = await fetchApplications();
-				if (cancelled) return;
-				setApplications(list);
-				setSelectedId((prev) => prev || list[0]?.id || '');
-			} catch (e) {
-				if (!cancelled) setListError(e instanceof Error ? e.message : '加载报名列表失败');
-			} finally {
-				if (!cancelled) setListLoading(false);
-			}
-		})();
-		return () => {
-			cancelled = true;
-		};
+		void recruitmentApplicationsStore.refresh();
 	}, []);
+
+	useEffect(() => {
+		if (selectedId) return;
+		setSelectedId(applications[0]?.id ?? '');
+	}, [applications, selectedId]);
 
 	const filteredApps = useMemo(() => {
 		if (deptFilter === 'all') return applications;
@@ -97,8 +95,8 @@ export default function NewcomersPage() {
 		setTagsError(null);
 		setTagsBusy(true);
 		try {
-			const next = await postTag(selected.id, tag);
-			setApplications((prev) => prev.map((a) => (a.id === selected.id ? { ...a, tags: next } : a)));
+			await postTag(selected.id, tag);
+			void recruitmentApplicationsStore.refresh();
 		} catch (e) {
 			setTagsError(e instanceof Error ? e.message : '标签添加失败');
 		} finally {
@@ -112,9 +110,7 @@ export default function NewcomersPage() {
 		setTagsBusy(true);
 		try {
 			await deleteTag(selected.id, tag);
-			setApplications((prev) =>
-				prev.map((a) => (a.id === selected.id ? { ...a, tags: a.tags.filter((t) => t !== tag) } : a)),
-			);
+			void recruitmentApplicationsStore.refresh();
 		} catch (e) {
 			setTagsError(e instanceof Error ? e.message : '标签删除失败');
 		} finally {
@@ -192,6 +188,33 @@ export default function NewcomersPage() {
 		}
 	};
 
+	const onApplicationDelete = async () => {
+		if (!selected || !me) return;
+		if (me.role !== 'super_admin') return;
+
+		setConfirmDeleteTarget({ id: selected.id, fullName: selected.fullName });
+		setConfirmDeleteOpen(true);
+	};
+
+	const performDeleteApplication = async () => {
+		if (!confirmDeleteTarget) return;
+		setConfirmDeleteOpen(false);
+
+		setDeleteBusy(true);
+		setDeleteError(null);
+		try {
+			await deleteApplication(confirmDeleteTarget.id);
+			await recruitmentApplicationsStore.refresh();
+			setSelectedId(recruitmentApplicationsStore.getSnapshot().items[0]?.id ?? '');
+			setCommentsMap({});
+		} catch (e) {
+			setDeleteError(e instanceof Error ? e.message : '删除失败');
+		} finally {
+			setDeleteBusy(false);
+			setConfirmDeleteTarget(null);
+		}
+	};
+
 	if (listLoading) {
 		return (
 			<div className="nc-page">
@@ -213,6 +236,69 @@ export default function NewcomersPage() {
 
 	return (
 		<div className="nc-page">
+			{confirmDeleteOpen && confirmDeleteTarget ? (
+				<div
+					className="calendar-modal"
+					role="dialog"
+					aria-modal="true"
+					onClick={() => {
+						if (!deleteBusy) {
+							setConfirmDeleteOpen(false);
+							setConfirmDeleteTarget(null);
+						}
+					}}
+				>
+					<div className="calendar-modal-card" onClick={(e) => e.stopPropagation()}>
+						<div className="calendar-modal-head">
+							<div className="calendar-modal-title">确认删除报名</div>
+							<div className="calendar-modal-head-actions">
+								<button
+									type="button"
+									className="nc-btn nc-btn--text nc-btn--danger"
+									disabled={deleteBusy}
+									onClick={() => {
+										if (!deleteBusy) {
+											setConfirmDeleteOpen(false);
+											setConfirmDeleteTarget(null);
+										}
+									}}
+									aria-label="关闭"
+								>
+									×
+								</button>
+							</div>
+						</div>
+						<div className="users-admin-msg err" style={{ marginBottom: 12 }}>
+							确定删除「{confirmDeleteTarget.fullName}」的报名记录？该操作不可撤销。
+						</div>
+						<div className="calendar-modal-head-actions" style={{ justifyContent: 'flex-end' }}>
+							<button
+								type="button"
+								className="users-admin-btn"
+								disabled={deleteBusy}
+								onClick={() => {
+									if (!deleteBusy) {
+										setConfirmDeleteOpen(false);
+										setConfirmDeleteTarget(null);
+									}
+								}}
+							>
+								取消
+							</button>
+							<button
+								type="button"
+								className="users-admin-btn danger"
+								disabled={deleteBusy}
+								onClick={() => void performDeleteApplication()}
+								style={{ marginLeft: 10 }}
+							>
+								确定删除
+							</button>
+						</div>
+					</div>
+				</div>
+			) : null}
+
 			<aside className="nc-list" aria-label="按组别筛选">
 				<div className="nc-list-head">
 					<span className="nc-list-title">报名列表</span>
@@ -238,6 +324,7 @@ export default function NewcomersPage() {
 			</aside>
 
 			<div className="nc-center">
+				{deleteError ? <div className="nc-inline-err">{deleteError}</div> : null}
 				{selected ? (
 					<NewcomerDetail
 						application={selected}
@@ -246,6 +333,8 @@ export default function NewcomersPage() {
 						tagsError={tagsError}
 						onTagAdd={onTagAdd}
 						onTagRemove={onTagRemove}
+						deleteBusy={deleteBusy}
+						onApplicationDelete={onApplicationDelete}
 					/>
 				) : (
 					<div className="nc-empty">{emptyCenterHint}</div>

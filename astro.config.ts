@@ -17,7 +17,11 @@ export default defineConfig({
                 '/uploads/': {
                     target: backendOrigin,
                     changeOrigin: true,
-                }
+                },
+                '/joinus-files/': {
+                    target: backendOrigin,
+                    changeOrigin: true,
+                },
             }
         }
     }

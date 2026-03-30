@@ -74,8 +74,7 @@
 			"label": "是否线下面试",
 			"required": true,
 			"placeholder": "请选择",
-			"icon": "ri-group-line",
-			"showWhen": { "questionId": "student", "value": "是" }
+			"icon": "ri-group-line"
 		},
 		{
 			"id": "interview_time_offline",
@@ -85,7 +84,7 @@
 			"placeholder": "请选择面试时间",
 			"icon": "ri-time-line",
 			"options": ["3月14号上午", "3月14号下午"],
-			"showWhen": { "questionId": "student", "value": "是" }
+			"showWhen": { "questionId": "offline_interview", "value": "是" }
 		},
 		{
 			"id": "online_interview",
@@ -94,7 +93,7 @@
 			"required": true,
 			"placeholder": "请选择",
 			"icon": "ri-video-line",
-			"showWhen": { "questionId": "student", "value": "否" }
+			"showWhen": { "questionId": "offline_interview", "value": "否" }
 		},
 		{
 			"id": "interview_time_online",
@@ -104,7 +103,7 @@
 			"placeholder": "请选择面试时间",
 			"icon": "ri-time-line",
 			"options": ["3月14号上午", "3月14号下午"],
-			"showWhen": { "questionId": "student", "value": "否" }
+			"showWhen": { "questionId": "online_interview", "value": "是" }
 		},
 		{
 			"id": "intro",
@@ -127,6 +126,7 @@
 	],
 	"submit": {
 		"label": "立即提交",
+		"url": "/api/joinus/submit",
 		"successMessage": "报名成功",
 		"successTitle": "真是个明智的选择",
 		"successSubtitle": "期待我们的相遇",

@@ -151,6 +151,22 @@ function initSchema(db: Database): void {
 		`CREATE INDEX IF NOT EXISTS idx_recruitment_apps_dept_time ON recruitment_applications(department_sort_order, created_at)`,
 	);
 	db.run(`CREATE INDEX IF NOT EXISTS idx_recruitment_comments_app ON recruitment_comments(application_id, created_at)`);
+
+	ensureRecruitmentContactUniqueIndex(db);
+}
+
+/** 同一手机号唯一，配合 INSERT … ON CONFLICT(contact) 在 DB 层串行化「同号覆盖」，避免并发双插。 */
+function ensureRecruitmentContactUniqueIndex(db: Database): void {
+	try {
+		db.run(
+			`CREATE UNIQUE INDEX IF NOT EXISTS idx_recruitment_applications_contact ON recruitment_applications(contact)`,
+		);
+	} catch (e) {
+		console.warn(
+			'[sqlite] Could not create UNIQUE index on recruitment_applications(contact). Clear duplicate contacts or fix DB.',
+			e,
+		);
+	}
 }
 
 export async function startSQLite(): Promise<Database> {
