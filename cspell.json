@@ -3,7 +3,13 @@
 		"aboutyou",
 		"AUTOINCREMENT",
 		"DBFILENAME",
+		"DEPTS",
+		"dotgrid",
+		"Fraunces",
+		"haspopup",
 		"hxktoolbox",
+		"joinus",
+		"nums",
 		"procs",
 		"setex",
 		"topbar"

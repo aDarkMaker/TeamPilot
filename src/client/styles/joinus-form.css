@@ -1,0 +1,710 @@
+.joinus-form-apply {
+	--joinus-primary: var(--joinus-accent, #e5a820);
+	--joinus-primary-light: rgba(229, 168, 32, 0.14);
+	--joinus-primary-dark: #c49210;
+	--joinus-card-bg: #ffffff;
+	--joinus-text: var(--joinus-fg, #1a1d24);
+	--joinus-text-muted: var(--joinus-muted, #5c6370);
+	--joinus-border: rgba(15, 23, 42, 0.1);
+	--joinus-input-bg: #f5f7fb;
+	--joinus-radius: 12px;
+	--joinus-font-title: var(--joinus-font-display, 'JoinUsTitle', sans-serif);
+	--joinus-btn-start: var(--joinus-accent, #e5a820);
+	--joinus-btn-end: #d49a12;
+	--joinus-btn-shadow: 0 4px 16px rgba(229, 168, 32, 0.28);
+	--joinus-btn-shadow-hover: 0 8px 24px rgba(229, 168, 32, 0.38);
+	--joinus-select-option-hover-bg: rgba(229, 168, 32, 0.12);
+	--joinus-select-option-hover-text: var(--joinus-fg, #1a1d24);
+}
+
+.joinus-form-apply,
+.joinus-form-apply *,
+.joinus-form-apply *::before,
+.joinus-form-apply *::after {
+	box-sizing: border-box;
+}
+
+.joinus-apply-shell {
+	width: 100%;
+	max-width: 40rem;
+	margin-inline: auto;
+	padding: 1.75rem var(--joinus-pad-x) 2.75rem;
+	box-sizing: border-box;
+}
+
+.joinus-apply-panel.joinus-form-apply {
+	position: relative;
+	color: var(--joinus-text);
+	font-family: inherit;
+	line-height: 1.6;
+	background: var(--joinus-card-bg);
+	border: 1px solid var(--joinus-border);
+	border-radius: 1rem;
+	box-shadow: 0 2px 16px rgba(15, 23, 42, 0.07);
+	overflow: visible;
+	animation: joinus-panel-in 0.4s ease forwards;
+}
+
+@keyframes joinus-panel-in {
+	from {
+		opacity: 0;
+		transform: translateY(10px);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
+
+.joinus-apply-panel .joinus-form-hero {
+	margin: 0;
+	padding: 1.5rem 1.5rem 1.5rem;
+	text-align: left;
+}
+
+.joinus-apply-panel__body {
+	padding: 1.5rem 1.5rem 1.75rem;
+	min-width: 0;
+}
+
+.joinus-apply-panel #joinus-form-container {
+	position: relative;
+	min-width: 0;
+	max-width: 100%;
+}
+
+.joinus-form-apply input:not([type='hidden']),
+.joinus-form-apply textarea {
+	user-select: text;
+	-webkit-user-select: text;
+}
+
+.joinus-form-hero {
+	margin-bottom: 0;
+	text-align: inherit;
+}
+
+.joinus-title {
+	font-family: var(--joinus-font-title);
+	font-size: clamp(1.75rem, 5vw, 2.25rem);
+	font-weight: 700;
+	color: var(--joinus-text);
+	line-height: 1.2;
+	margin-bottom: 0.5rem;
+}
+
+.joinus-title-line {
+	width: 80px;
+	height: 6px;
+	background: var(--joinus-primary);
+	border-radius: 3px;
+	margin-top: 10px;
+}
+
+.joinus-subtitle {
+	font-size: 16px;
+	color: var(--joinus-text-muted);
+	letter-spacing: 0.4em;
+	margin-top: 15px;
+	text-transform: uppercase;
+	font-weight: 600;
+}
+
+.joinus-welcome {
+	font-size: 1.05rem;
+	color: var(--joinus-text-muted);
+	margin-top: 1.25rem;
+	max-width: 34rem;
+	line-height: 1.75;
+}
+
+.joinus-field {
+	margin-bottom: 30px;
+	min-width: 0;
+}
+
+.joinus-field.joinus-field-logic {
+	max-height: 1200px;
+	opacity: 1;
+	overflow: visible;
+	transition:
+		max-height 0.35s ease,
+		opacity 0.35s ease,
+		margin 0.35s ease,
+		padding 0.35s ease;
+}
+.joinus-field.joinus-field-logic.joinus-field-hidden {
+	max-height: 0;
+	opacity: 0;
+	margin-top: 0;
+	margin-bottom: 0;
+	padding-top: 0;
+	padding-bottom: 0;
+	overflow: hidden;
+	pointer-events: none;
+}
+
+.joinus-label {
+	display: flex;
+	align-items: center;
+	font-family: var(--joinus-font-title);
+	font-size: 16px;
+	color: var(--joinus-text);
+	margin-bottom: 12px;
+	transition: color 0.3s ease;
+}
+
+.joinus-label-decor {
+	width: 4px;
+	height: 16px;
+	background: var(--joinus-primary);
+	margin-right: 12px;
+	border-radius: 2px;
+	transition: box-shadow 0.3s ease;
+}
+
+.joinus-field:focus-within .joinus-label {
+	color: var(--joinus-text);
+}
+.joinus-field:focus-within .joinus-label-decor {
+	box-shadow: 0 0 8px var(--joinus-primary-light);
+}
+
+.joinus-input-wrap {
+	position: relative;
+	min-width: 0;
+	max-width: 100%;
+}
+
+.joinus-input-icon {
+	position: absolute;
+	left: 18px;
+	top: 50%;
+	transform: translateY(-50%);
+	color: var(--joinus-text-muted);
+	font-size: 20px;
+	transition: color 0.3s ease;
+	z-index: 2;
+}
+
+.joinus-form-apply input:not([type='hidden']),
+.joinus-form-apply select,
+.joinus-form-apply textarea {
+	width: 100%;
+	max-width: 100%;
+	border: 2px solid var(--joinus-border);
+	border-radius: var(--joinus-radius);
+	background: var(--joinus-input-bg);
+	padding: 16px 18px 16px 52px;
+	font-size: 16px;
+	color: var(--joinus-text);
+	font-family: inherit;
+	transition: all 0.3s ease;
+	appearance: none;
+	-webkit-appearance: none;
+	outline: none;
+	cursor: text;
+}
+
+.joinus-form-apply select {
+	cursor: pointer;
+}
+
+.joinus-form-apply textarea {
+	padding-left: 20px;
+	height: 150px;
+	min-height: 150px;
+	resize: vertical;
+	line-height: 1.6;
+}
+
+.joinus-form-apply input:focus,
+.joinus-form-apply select:focus,
+.joinus-form-apply textarea:focus {
+	border-color: var(--joinus-primary);
+	background: #fff;
+	box-shadow: 0 0 0 3px var(--joinus-primary-light);
+}
+
+.joinus-form-apply input:not([type='hidden']):not(:placeholder-shown),
+.joinus-form-apply textarea:not(:placeholder-shown) {
+	border-color: var(--joinus-primary);
+	background: #fff;
+}
+
+.joinus-input-wrap:has(input:focus) .joinus-input-icon,
+.joinus-input-wrap:not(.joinus-select-custom):has(input:not(:placeholder-shown)) .joinus-input-icon,
+.joinus-input-wrap:has(select:focus) .joinus-input-icon,
+.joinus-select-custom.is-open .joinus-input-icon,
+.joinus-select-custom.has-value .joinus-input-icon {
+	color: var(--joinus-primary);
+}
+
+/* custom select: theme-adaptive */
+.joinus-select-custom {
+	position: relative;
+	min-width: 0;
+	max-width: 100%;
+}
+
+.joinus-select-trigger {
+	width: 100%;
+	border: 2px solid var(--joinus-border);
+	border-radius: var(--joinus-radius);
+	background: var(--joinus-input-bg);
+	padding: 16px 20px 16px 52px;
+	min-height: 52px;
+	font-size: 16px;
+	color: var(--joinus-text);
+	font-family: inherit;
+	text-align: left;
+	cursor: pointer;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	transition: all 0.3s ease;
+	outline: none;
+}
+
+.joinus-select-trigger:focus,
+.joinus-select-custom.is-open .joinus-select-trigger {
+	border-color: var(--joinus-primary);
+	background: #fff;
+	box-shadow: 0 0 0 3px var(--joinus-primary-light);
+}
+
+.joinus-select-custom.has-value .joinus-select-trigger {
+	border-color: var(--joinus-primary);
+	background: #fff;
+}
+
+.joinus-select-custom.has-value .joinus-input-icon,
+.joinus-select-custom.has-value .joinus-select-arrow {
+	color: var(--joinus-primary);
+}
+
+.joinus-field.has-value textarea {
+	border-color: var(--joinus-primary);
+	background: #fff;
+}
+
+.joinus-select-value {
+	flex: 1;
+	color: inherit;
+}
+.joinus-select-value.placeholder {
+	color: var(--joinus-text-muted);
+}
+
+.joinus-select-arrow {
+	color: var(--joinus-text-muted);
+	font-size: 20px;
+	transition:
+		transform 0.3s ease,
+		color 0.3s ease;
+	margin-left: 8px;
+	flex-shrink: 0;
+}
+.joinus-select-custom.is-open .joinus-select-arrow {
+	color: var(--joinus-primary);
+	transform: rotate(180deg);
+}
+
+.joinus-select-dropdown {
+	position: absolute;
+	top: 100%;
+	left: 0;
+	right: 0;
+	margin-top: 4px;
+	background: var(--joinus-card-bg);
+	border: 2px solid var(--joinus-border);
+	border-radius: var(--joinus-radius);
+	box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+	max-height: 200px;
+	overflow-y: auto;
+	z-index: 100;
+	opacity: 0;
+	visibility: hidden;
+	transform: translateY(-8px);
+	transition:
+		opacity 0.2s ease,
+		transform 0.2s ease,
+		visibility 0.2s;
+}
+.joinus-select-custom.is-open .joinus-select-dropdown {
+	opacity: 1;
+	visibility: visible;
+	transform: translateY(0);
+}
+
+.joinus-select-option {
+	padding: 12px 18px;
+	cursor: pointer;
+	transition:
+		background 0.2s,
+		color 0.2s;
+	color: var(--joinus-text);
+}
+.joinus-select-option:hover {
+	background: var(--joinus-select-option-hover-bg);
+	color: var(--joinus-select-option-hover-text);
+}
+
+/* file upload */
+.joinus-file-wrap {
+	position: relative;
+	min-width: 0;
+	max-width: 100%;
+}
+.joinus-file-wrap input[type='file'] {
+	position: absolute;
+	opacity: 0;
+	width: 0.1px;
+	height: 0.1px;
+	overflow: hidden;
+	clip: rect(0, 0, 0, 0);
+}
+.joinus-file-trigger {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	width: 100%;
+	border: 2px dashed var(--joinus-border);
+	border-radius: var(--joinus-radius);
+	background: var(--joinus-input-bg);
+	padding: 16px 20px;
+	font-size: 16px;
+	color: var(--joinus-text-muted);
+	cursor: pointer;
+	transition: all 0.3s ease;
+}
+.joinus-file-trigger:hover {
+	border-color: var(--joinus-primary);
+	background: var(--joinus-primary-light);
+	color: var(--joinus-primary);
+}
+.joinus-file-wrap.joinus-file-dragover .joinus-file-trigger {
+	border-color: var(--joinus-primary);
+	background: var(--joinus-primary-light);
+	color: var(--joinus-primary);
+	border-style: solid;
+}
+.joinus-file-icon {
+	font-size: 24px;
+}
+.joinus-file-list {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 12px;
+	margin-top: 12px;
+}
+.joinus-file-item {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	padding: 8px 12px;
+	background: var(--joinus-input-bg);
+	border: 1px solid var(--joinus-border);
+	border-radius: var(--joinus-radius);
+	font-size: 14px;
+	position: relative;
+	isolation: isolate;
+}
+.joinus-file-preview {
+	width: 40px;
+	height: 40px;
+	border-radius: 6px;
+	overflow: hidden;
+	background: var(--joinus-border);
+	flex-shrink: 0;
+}
+.joinus-file-preview img {
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+}
+.joinus-file-name {
+	flex: 1;
+	min-width: 0;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+.joinus-file-remove {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 28px;
+	height: 28px;
+	min-width: 28px;
+	min-height: 28px;
+	padding: 0;
+	border: none;
+	background: transparent;
+	color: var(--joinus-text-muted);
+	cursor: pointer;
+	border-radius: 6px;
+	transition:
+		color 0.2s,
+		background 0.2s;
+	position: relative;
+	z-index: 10;
+	flex-shrink: 0;
+}
+.joinus-file-remove i {
+	pointer-events: none;
+	font-size: 18px;
+}
+.joinus-file-remove:hover,
+.joinus-file-remove:focus-visible {
+	color: #f5222d;
+	background: rgba(245, 34, 45, 0.08);
+}
+.joinus-file-remove:hover i,
+.joinus-file-remove:focus-visible i {
+	color: inherit;
+}
+
+.joinus-label.required .joinus-label-decor {
+	position: relative;
+}
+.joinus-label.required::after {
+	content: ' *';
+	color: #f5222d;
+}
+
+.joinus-form-apply .joinus-btn {
+	width: 100%;
+	height: 64px;
+	min-height: 44px;
+	background: linear-gradient(135deg, var(--joinus-btn-start) 0%, var(--joinus-btn-end) 100%);
+	border: none;
+	border-radius: var(--joinus-radius);
+	font-size: 18px;
+	font-weight: 700;
+	color: #14151a;
+	cursor: pointer;
+	transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+	box-shadow: var(--joinus-btn-shadow);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 12px;
+	letter-spacing: 1px;
+	margin-top: 16px;
+}
+
+.joinus-form-apply .joinus-btn:hover {
+	box-shadow: var(--joinus-btn-shadow-hover);
+	background: linear-gradient(135deg, var(--joinus-btn-end) 0%, var(--joinus-primary-dark) 100%);
+}
+
+.joinus-form-apply .joinus-btn:active {
+	transform: translateY(0) scale(0.98);
+	box-shadow: 0 2px 8px var(--joinus-primary-light);
+}
+
+.joinus-form-apply form {
+	transition:
+		opacity 0.35s ease,
+		transform 0.35s ease;
+}
+.joinus-form-apply form.joinus-form-submitting {
+	opacity: 0;
+	transform: scale(0.98) translateY(-8px);
+	pointer-events: none;
+}
+
+/* success screen */
+.joinus-success {
+	display: block;
+	padding: 24px 0 0;
+	opacity: 0;
+	transform: translateY(12px);
+	transition:
+		opacity 0.4s ease,
+		transform 0.4s ease;
+}
+.joinus-success.joinus-success-hidden {
+	position: absolute;
+	inset: 0;
+	pointer-events: none;
+	visibility: hidden;
+}
+.joinus-success.joinus-success-visible {
+	opacity: 1;
+	transform: translateY(0);
+	position: relative;
+	visibility: visible;
+	pointer-events: auto;
+}
+.joinus-success-title {
+	margin: 0 0 16px;
+	font-size: 28px;
+	font-weight: 700;
+	color: var(--joinus-text);
+	line-height: 1.35;
+	text-align: center;
+}
+.joinus-success-subtitle {
+	margin: 0 0 12px;
+	font-size: 18px;
+	color: var(--joinus-text);
+	opacity: 0.9;
+	text-align: center;
+}
+.joinus-success-note {
+	margin: 0 0 28px;
+	font-size: 14px;
+	color: var(--joinus-text-muted);
+	text-align: center;
+	line-height: 1.6;
+}
+.joinus-success-back {
+	text-decoration: none;
+	text-align: center;
+	margin-top: 0;
+}
+
+/* overwrite duplicate modal */
+.joinus-modal-overlay {
+	position: fixed;
+	inset: 0;
+	z-index: 1000;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding: 24px;
+	background: rgba(0, 0, 0, 0.4);
+	opacity: 0;
+	visibility: hidden;
+	transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+.joinus-modal-overlay.joinus-modal-visible {
+	opacity: 1;
+	visibility: visible;
+}
+.joinus-modal-card {
+	background: var(--joinus-card-bg);
+	border-radius: 24px;
+	box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+	padding: 40px 36px;
+	max-width: 400px;
+	width: 100%;
+	border: 1px solid var(--joinus-border);
+	transform: scale(0.95);
+	transition: transform 0.3s ease;
+}
+.joinus-modal-overlay.joinus-modal-visible .joinus-modal-card {
+	transform: scale(1);
+}
+.joinus-modal-title {
+	margin: 0 0 12px;
+	font-size: 24px;
+	font-weight: 700;
+	color: var(--joinus-text);
+	line-height: 1.3;
+	text-align: center;
+	font-family: var(--joinus-font-title);
+}
+.joinus-modal-subtitle {
+	margin: 0 0 28px;
+	font-size: 16px;
+	color: var(--joinus-text-muted);
+	text-align: center;
+	line-height: 1.5;
+}
+.joinus-modal-actions {
+	display: flex;
+	gap: 12px;
+}
+.joinus-form-apply .joinus-modal-actions .joinus-btn {
+	flex: 1;
+	margin-top: 0;
+}
+.joinus-form-apply .joinus-btn-secondary {
+	background: var(--joinus-input-bg);
+	color: var(--joinus-text);
+	box-shadow: none;
+	border: 2px solid var(--joinus-border);
+}
+.joinus-form-apply .joinus-btn-secondary:hover {
+	background: var(--joinus-border);
+	border-color: var(--joinus-text-muted);
+	box-shadow: none;
+}
+
+.joinus-form-apply .joinus-btn i {
+	transition: transform 0.3s ease;
+}
+.joinus-form-apply .joinus-btn:hover i {
+	transform: translateX(4px);
+}
+
+.joinus-form-load-error {
+	margin: 0 0 1rem;
+	padding: 12px 16px;
+	border-radius: var(--joinus-radius);
+	background: rgba(245, 34, 45, 0.08);
+	color: #cf1322;
+	font-size: 14px;
+	line-height: 1.5;
+	max-width: 100%;
+}
+
+@media (max-width: 768px) {
+	.joinus-apply-shell {
+		padding-left: 1rem;
+		padding-right: 1rem;
+	}
+	.joinus-apply-panel .joinus-form-hero {
+		padding: 1.25rem 1rem 1.25rem;
+	}
+	.joinus-apply-panel__body {
+		padding: 1.25rem 1rem 1.5rem;
+	}
+	.joinus-title {
+		font-size: clamp(1.5rem, 6vw, 2rem);
+	}
+	.joinus-field {
+		margin-bottom: 24px;
+	}
+	.joinus-form-apply input:not([type='hidden']),
+	.joinus-form-apply select,
+	.joinus-select-trigger {
+		padding: 14px 20px 14px 48px;
+		min-height: 44px;
+	}
+	.joinus-form-apply textarea {
+		padding: 14px 16px;
+		min-height: 120px;
+		height: 120px;
+	}
+	.joinus-form-apply .joinus-btn {
+		min-height: 48px;
+		height: 48px;
+		padding: 12px 20px;
+	}
+	.joinus-file-trigger {
+		padding: 14px 16px;
+	}
+	.joinus-success-title {
+		font-size: 22px;
+	}
+	.joinus-success-subtitle {
+		font-size: 16px;
+	}
+	.joinus-modal-card {
+		padding: 28px 24px;
+	}
+	.joinus-modal-title {
+		font-size: 20px;
+	}
+	.joinus-modal-subtitle {
+		font-size: 15px;
+		margin-bottom: 24px;
+	}
+	.joinus-modal-actions {
+		flex-direction: column;
+	}
+}

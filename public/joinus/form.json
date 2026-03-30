@@ -1,0 +1,137 @@
+{
+	"title": "加入我们",
+	"subtitle": "JOIN US",
+	"welcome": "如果你喜欢华小科Official……\n或者只是希望给大学生活增添一份色彩……\n加入我们吧！\n我们会尽力做到不负所望！",
+	"theme": "yellow",
+	"questions": [
+		{
+			"id": "name",
+			"type": "input",
+			"inputType": "text",
+			"label": "姓名",
+			"required": true,
+			"placeholder": "请输入您的真实姓名",
+			"icon": "ri-user-smile-line"
+		},
+		{
+			"id": "contact",
+			"type": "input",
+			"inputType": "tel",
+			"label": "联系方式",
+			"required": true,
+			"placeholder": "请输入您的手机号码",
+			"icon": "ri-smartphone-line"
+		},
+		{
+			"id": "qq",
+			"type": "input",
+			"inputType": "text",
+			"label": "QQ号",
+			"required": true,
+			"placeholder": "请输入您的QQ号",
+			"icon": "ri-qq-line"
+		},
+		{
+			"id": "department",
+			"type": "select",
+			"label": "意向部门",
+			"required": true,
+			"placeholder": "请选择您感兴趣的部门",
+			"icon": "ri-team-line",
+			"options": ["中之人", "视频组", "美术组", "直播组", "文案组", "切片组", "技术组"]
+		},
+		{
+			"id": "student",
+			"type": "boolean",
+			"label": "是否为在校生",
+			"required": true,
+			"placeholder": "请选择",
+			"icon": "ri-school-line"
+		},
+		{
+			"id": "college",
+			"type": "input",
+			"inputType": "text",
+			"label": "学院",
+			"required": true,
+			"placeholder": "请输入您的学院",
+			"icon": "ri-building-line",
+			"showWhen": { "questionId": "student", "value": "是" }
+		},
+		{
+			"id": "grade",
+			"type": "input",
+			"inputType": "text",
+			"label": "年级",
+			"required": true,
+			"placeholder": "请输入您的年级",
+			"icon": "ri-calendar-line",
+			"showWhen": { "questionId": "student", "value": "是" }
+		},
+		{
+			"id": "offline_interview",
+			"type": "boolean",
+			"label": "是否线下面试",
+			"required": true,
+			"placeholder": "请选择",
+			"icon": "ri-group-line",
+			"showWhen": { "questionId": "student", "value": "是" }
+		},
+		{
+			"id": "interview_time_offline",
+			"type": "select",
+			"label": "可以的面试时间",
+			"required": true,
+			"placeholder": "请选择面试时间",
+			"icon": "ri-time-line",
+			"options": ["3月14号上午", "3月14号下午"],
+			"showWhen": { "questionId": "student", "value": "是" }
+		},
+		{
+			"id": "online_interview",
+			"type": "boolean",
+			"label": "是否参加线上面试",
+			"required": true,
+			"placeholder": "请选择",
+			"icon": "ri-video-line",
+			"showWhen": { "questionId": "student", "value": "否" }
+		},
+		{
+			"id": "interview_time_online",
+			"type": "select",
+			"label": "面试时间",
+			"required": true,
+			"placeholder": "请选择面试时间",
+			"icon": "ri-time-line",
+			"options": ["3月14号上午", "3月14号下午"],
+			"showWhen": { "questionId": "student", "value": "否" }
+		},
+		{
+			"id": "intro",
+			"type": "textarea",
+			"label": "个人简介",
+			"required": false,
+			"placeholder": "简单介绍一下你自己，让我们更快了解你！",
+			"rows": 5
+		},
+		{
+			"id": "portfolio",
+			"type": "file",
+			"label": "个人作品",
+			"required": false,
+			"placeholder": "上传附件",
+			"icon": "ri-upload-cloud-line",
+			"accept": "*",
+			"multiple": true
+		}
+	],
+	"submit": {
+		"label": "立即提交",
+		"successMessage": "报名成功",
+		"successTitle": "真是个明智的选择",
+		"successSubtitle": "期待我们的相遇",
+		"successNote": "注意查收短信，不要错过哦",
+		"successBackUrl": "/joinus",
+		"successBackLabel": "返回招新介绍"
+	}
+}

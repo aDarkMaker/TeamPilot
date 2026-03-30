@@ -1,0 +1,45 @@
+---
+import { ClientRouter } from 'astro:transitions';
+import '../styles/global.css';
+import '../styles/joinus.css';
+import '../styles/joinus-transitions.css';
+import { assetUrl } from '../lib/assetUrl';
+import favicon from '../assets/img/icon/icon-hxk.png';
+
+interface Props {
+	title: string;
+	description?: string;
+	skipHref: string;
+	skipLabel: string;
+}
+
+const { title, description, skipHref, skipLabel } = Astro.props;
+---
+
+<html lang="zh-CN" class="joinus-page">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<link rel="icon" type="image/png" href={assetUrl(favicon)} />
+		{description && <meta name="description" content={description} />}
+		<title>{title}</title>
+		<ClientRouter />
+		<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/remixicon@4.6.0/fonts/remixicon.css" />
+	</head>
+	<body class="joinus-body">
+		<div class="joinus-root">
+			<a class="joinus-skip" href={skipHref}>{skipLabel}</a>
+			<header class="joinus-header">
+				<div class="joinus-header__inner">
+					<a class="joinus-brand" href="/joinus" transition:persist="joinus-brand">华小科招新</a>
+					<div class="joinus-header-actions">
+						<slot name="header-actions" />
+					</div>
+				</div>
+			</header>
+			<div class="joinus-page-transition" transition:animate="fade">
+				<slot />
+			</div>
+		</div>
+	</body>
+</html>

@@ -1,0 +1,13 @@
+---
+import JoinUsLayout from '../../layouts/JoinUsLayout.astro';
+import '../../styles/joinus-form.css';
+import ApplyPage from '../../components/joinus/ApplyPage';
+---
+
+<JoinUsLayout title="报名表 · HXK" skipHref="#apply-main" skipLabel="跳到报名表单区域">
+	<a slot="header-actions" class="joinus-btn joinus-btn--ghost joinus-apply-back" href="/joinus">
+		<i class="ri-arrow-left-line" aria-hidden="true"></i>
+		返回首页
+	</a>
+	<ApplyPage client:load />
+</JoinUsLayout>
