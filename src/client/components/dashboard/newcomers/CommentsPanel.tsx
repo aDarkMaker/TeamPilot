@@ -4,6 +4,7 @@ import { MarkdownBlock } from './MarkdownBlock';
 
 import type { MeBrief, RecruitmentCommentDto } from '../../../lib/recruitment/recruitmentClient';
 import { isStaffRole } from '../../../lib/recruitment/recruitmentClient';
+import { formatCstMonthDayTime } from '../../../lib/timeCst';
 
 type Props = {
 	me: MeBrief | null;
@@ -142,7 +143,7 @@ function canDeleteComment(me: MeBrief | null, c: RecruitmentCommentDto): boolean
 
 function formatShort(iso: string): string {
 	try {
-		return new Date(iso).toLocaleString('zh-CN', { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+		return formatCstMonthDayTime(iso);
 	} catch {
 		return iso;
 	}

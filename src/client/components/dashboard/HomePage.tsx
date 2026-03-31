@@ -3,6 +3,7 @@ import { MarkdownBlock } from './newcomers/MarkdownBlock';
 import { DashboardToast, useDashboardToast } from './DashboardToast';
 import { assetUrl } from '../../lib/assetUrl';
 import circlePlus from '../../assets/img/icon/circle-plus.png';
+import { formatCstDateTime } from '../../lib/timeCst';
 import {
 	createAnnouncement,
 	deleteAnnouncement,
@@ -22,9 +23,12 @@ import {
 
 function formatTime(isoOrTs: string | number | null | undefined): string {
 	if (isoOrTs == null) return '未知时间';
-	const d = typeof isoOrTs === 'number' ? new Date(isoOrTs * 1000) : new Date(isoOrTs);
-	if (Number.isNaN(d.getTime())) return String(isoOrTs);
-	return d.toLocaleString('zh-CN', { dateStyle: 'medium', timeStyle: 'short' });
+	if (typeof isoOrTs === 'number') {
+		const d = new Date(isoOrTs * 1000);
+		if (Number.isNaN(d.getTime())) return String(isoOrTs);
+		return new Intl.DateTimeFormat('zh-CN', { timeZone: 'Asia/Shanghai', dateStyle: 'medium', timeStyle: 'short' }).format(d);
+	}
+	return formatCstDateTime(isoOrTs);
 }
 
 export default function HomePage() {

@@ -5,6 +5,7 @@ import { TagsSection } from './TagsSection';
 import { DEPARTMENT_LABELS } from '../../../lib/recruitment/departmentLabels';
 import type { MeBrief } from '../../../lib/recruitment/recruitmentClient';
 import type { NewcomerApplicationView } from '../../../types/recruitmentUi';
+import { formatCstDateTime } from '../../../lib/timeCst';
 
 type Props = {
 	application: NewcomerApplicationView;
@@ -126,12 +127,7 @@ export function NewcomerDetail({
 }
 
 function formatCnTime(iso: string): string {
-	try {
-		const d = new Date(iso);
-		return d.toLocaleString('zh-CN', { dateStyle: 'medium', timeStyle: 'short' });
-	} catch {
-		return iso;
-	}
+	return formatCstDateTime(iso);
 }
 
 function extractInterviewTimes(introMarkdown: string): {

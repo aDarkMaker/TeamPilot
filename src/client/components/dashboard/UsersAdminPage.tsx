@@ -6,6 +6,7 @@ import {
 	type PendingApplication,
 } from '../../lib/pendingApplicationsStore';
 import { DashboardToast, useDashboardToast } from './DashboardToast';
+import { formatCstDateTime } from '../../lib/timeCst';
 
 type Role = 'user' | 'admin' | 'super_admin';
 type Status = 'active' | 'disabled';
@@ -199,9 +200,7 @@ export default function UserAdminPage() {
 	};
 
 	const fmt = (iso: string) => {
-		const d = new Date(iso);
-		if (Number.isNaN(d.getTime())) return iso;
-		return d.toLocaleString();
+		return formatCstDateTime(iso);
 	};
 
 	useEffect(() => {

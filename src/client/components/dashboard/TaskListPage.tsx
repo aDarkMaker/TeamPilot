@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { DashboardToast, useDashboardToast } from './DashboardToast';
 import { decideTask, fetchMyTasks, type TaskCard, type TaskStatus } from '../../lib/tasks/taskClient';
+import { formatCstDateTime } from '../../lib/timeCst';
 
 type TaskPayload = {
 	startAtIso?: string;
@@ -11,10 +12,7 @@ type TaskPayload = {
 };
 
 function fmtTime(iso: string | null | undefined): string {
-	if (!iso) return '未知时间';
-	const d = new Date(iso);
-	if (Number.isNaN(d.getTime())) return String(iso);
-	return d.toLocaleString('zh-CN', { dateStyle: 'medium', timeStyle: 'short' });
+	return formatCstDateTime(iso);
 }
 
 function parsePayload(raw: string | null): TaskPayload | null {
