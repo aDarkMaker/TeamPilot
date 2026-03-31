@@ -14,6 +14,8 @@ const patchSchema = z.object({
         .regex(/^[1-9]\d{4,10}$/)
         .optional()
         .nullable(),
+    birthdayMonth: z.number().min(1).max(12).optional().nullable(),
+    birthdayDay: z.number().min(1).max(31).optional().nullable(),
 });
 
 const passwordSchema = z.object({
@@ -35,6 +37,11 @@ function toPublicUrl(storedPath: string | null): string | null {
     return `/uploads/${storedPath.replace(/^\/+/, '')}`;
 }
 
+function isValidMonthDay(month: number, day: number): boolean {
+    const maxDay = new Date(2024, month, 0).getDate();
+    return day >= 1 && day <= maxDay;
+}
+
 function toPublicProfile(user: import('../types/user').User): UserProfilePublic {
     return {
         id: user.id,
@@ -47,6 +54,8 @@ function toPublicProfile(user: import('../types/user').User): UserProfilePublic 
         role: user.role,
         createdAt: user.createdAt,
         updatedAt: user.updatedAt,
+        birthdayMonth: user.birthdayMonth,
+        birthdayDay: user.birthdayDay,
     };
 }
 
@@ -62,9 +71,31 @@ export class ProfileService {
     async updateProfile(userId: string, body: unknown): Promise<UserProfilePublic> {
         const parsed = patchSchema.parse(body);
         const patch: Parameters<DB['updateUserProfile']>[1] = {};
+        
+        const hasMonth = Object.prototype.hasOwnProperty.call(parsed, 'birthdayMonth');
+        const hasDay = Object.prototype.hasOwnProperty.call(parsed, 'birthdayDay');
+
         if ('nickname' in parsed) patch.nickname = parsed.nickname ?? null;
         if ('signature' in parsed) patch.signature = parsed.signature ?? null;
         if ('qq' in parsed) patch.qq = parsed.qq ?? null;
+
+        if (hasMonth || hasDay) {
+            const m = parsed.birthdayMonth ?? null;
+            const d = parsed.birthdayDay ?? null;
+
+            if (m == null && d == null) {
+                patch.birthdayMonth = null;
+                patch.birthdayDay = null;
+            } else if (m == null || d == null) {
+                throw new AppError(400, 'INVALID_BIRTHDATE', '告诉我几月几号呗');
+            } else if (!isValidMonthDay(m, d)) {
+                throw new AppError(400, 'INVALID_BIRTHDATE', '真的存在这一天吗！');
+            } else {
+                patch.birthdayMonth = m;
+                patch.birthdayDay = d;
+            }
+        }
+        
         await this.db.updateUserProfile(userId, patch);
         const user = await this.db.findUserById(userId);
         if (!user) throw new AppError(404, 'USER_NOT_FOUND', 'USER_NOT_FOUND');

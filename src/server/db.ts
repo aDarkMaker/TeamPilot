@@ -12,6 +12,7 @@ import type {
 	RecruitmentDepartment,
 	RecruitmentInterviewSlot,
 } from './types/recruitment';
+import { string } from 'astro:schema';
 
 export interface DB {
 	findUserByUsername(username: string): Promise<User | null>;
@@ -20,6 +21,13 @@ export interface DB {
 	updateUserRole(userId: string, role: Role): Promise<void>;
 	listUsers(): Promise<User[]>;
 	updateUserStatus(userId: string, status: UserStatus): Promise<void>;
+	listUsersByBirthday(input: { month: number; day: number }): Promise<Array<{ id: string; username: string; nickname: string | null; avatarPath: string | null }>>;
+	listBirthdayWishes(input: { recipientUserId: string; wishDate: string }): Promise<
+		Array<{ id: string; message: string; createdAt: string; authorId: string; authorUsername: string; authorNickname: string | null; authorAvatarPath: string | null }>
+	>;
+	createBirthdayWish(input: { recipientUserId: string; authorUserId: string; message: string; wishDate: string }): Promise<
+		{ id: string; message: string; createdAt: string; authorId: string; authorUsername: string; authorNickname: string | null; authorAvatarPath: string | null }
+	>;
 
 	createSchedule(input: {
 		title: string;
@@ -77,6 +85,8 @@ export interface DB {
 			qq?: string | null;
 			avatarPath?: string | null;
 			profileBgPath?: string | null;
+			birthdayMonth?: number | null;
+			birthdayDay?: number | null;
 		}
 	): Promise<void>;
 	updateUserPasswordHash(userId: string, passwordHash: string): Promise<void>;
@@ -205,6 +215,8 @@ function mapUser(row: any): User {
 		profileBgPath: row.profile_bg_path ?? null,
 		createdAt: String(row.created_at),
 		updatedAt: String(row.updated_at),
+		birthdayMonth: row.birthday_month == null ? null: Number(row.birthday_month),
+		birthdayDay: row.birthday_day == null ? null: Number(row.birthday_day),
 	};
 }
 
@@ -348,6 +360,14 @@ export function createDb(sqlite: Database): DB {
 			if (patch.profileBgPath !== undefined) {
 				set.push('profile_bg_path = ?');
 				vals.push(patch.profileBgPath);
+			}
+			if (patch.birthdayMonth !== undefined) {
+				set.push('birthday_month = ?');
+				vals.push(patch.birthdayMonth);
+			}
+			if (patch.birthdayDay !== undefined) {
+				set.push('birthday_day = ?');
+				vals.push(patch.birthdayDay);
 			}
 			if (set.length === 0) {
 				return;
@@ -807,6 +827,90 @@ export function createDb(sqlite: Database): DB {
 			);
 			return { liked, likeCount };
 		},
+
+		async listUsersByBirthday(input) {
+			const rows = sqlite
+				.query(
+					`SELECT id, username, nickname, avatar_path
+				FROM users
+				WHERE status = 'active'
+					AND birthday_month = ?
+					AND birthday_day = ?
+				ORDER BY role DESC, created_at ASC`,
+				)
+				.all(input.month, input.day) as any[];
+
+			return rows.map((r) => ({
+				id: String(r.id),
+				username: String(r.username),
+				nickname: r.nickname ?? null,
+				avatarPath: r.avatar_path ?? null,
+			}));
+		},
+
+		async listBirthdayWishes(input) {
+			const rows = sqlite
+				.query(
+					`SELECT
+						w.id,
+						w.message,
+						w.created_at,
+						u.id AS author_id,
+						u.username AS author_username,
+						u.nickname AS author_nickname,
+						u.avatar_path AS author_avatar_path
+					FROM birthday_wishes w
+					INNER JOIN users u ON u.id = w.author_user_id
+					WHERE w.recipient_user_id = ? AND w.wish_date = ?
+					ORDER BY w.created_at ASC`,
+				)
+				.all(input.recipientUserId, input.wishDate) as any[];
+			
+			return rows.map((r) => ({
+				id: String(r.id),
+				message: String(r.message),
+				createdAt: String(r.created_at),
+				authorId: String(r.author_id),
+				authorUsername: String(r.author_username),
+				authorNickname: r.author_nickname ?? null,
+				authorAvatarPath: r.author_avatar_path ?? null,
+			}));
+		},
+
+		async createBirthdayWish(input) {
+			const r = sqlite
+				.query(
+					`INSERT INTO birthday_wishes (recipient_user_id, author_user_id, message, wish_date)
+						VALUES (?, ?, ?, ?)`,
+				)
+				.run(input.recipientUserId, input.authorUserId, input.message, input.wishDate);
+
+			const row = sqlite
+				.query(
+					`SELECT
+						w.id,
+						w.message,
+						w.created_at,
+						u.id AS author_id,
+						u.username AS author_username,
+						u.nickname AS author_nickname,
+						u.avatar_path AS author_avatar_path
+					FROM birthday_wishes w
+					INNER JOIN users u ON u.id = w.author_user_id
+					WHERE w.id = ?`,
+				)
+				.get(r.lastInsertRowid) as any;
+
+			return {
+				id: String(row.id),
+				message: String(row.message),
+				createdAt: String(row.created_at),
+				authorId: String(row.author_id),
+				authorUsername: String(row.author_username),
+				authorNickname: row.author_nickname ?? null,
+				authorAvatarPath: row.author_avatar_path ?? null,
+			};
+		}
 	};
 }
 

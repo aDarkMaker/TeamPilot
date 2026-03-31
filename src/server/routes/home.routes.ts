@@ -12,5 +12,10 @@ export function buildHomeRoutes(controller: HomeController): Router {
 
 	router.get('/bili-dynamics', requireLogin, controller.listBiliDynamics);
 
+	router.get('/birthdays/today', requireLogin, controller.listTodayBirthdays);
+
+	router.get('/birthdays/wishes', requireLogin, controller.listBirthdayWishes);
+	router.post('/birthdays/wishes', requireLogin, controller.createBirthdayWish);
+
 	return router;
 }

@@ -70,6 +70,7 @@
 
 .settings-field input[type='text'],
 .settings-field input[type='password'],
+.settings-field select,
 .settings-field textarea {
 	width: 100%;
 	box-sizing: border-box;
@@ -78,6 +79,26 @@
 	border: 1px solid rgba(0, 0, 0, 0.08);
 	background: rgba(255, 255, 255, 0.85);
 	font-size: 0.95rem;
+}
+
+.settings-divider {
+	height: 1px;
+	background: rgba(0, 0, 0, 0.08);
+	margin: 1rem 0;
+}
+
+.settings-birthday-row {
+	display: grid;
+	grid-template-columns: 1fr 1fr auto;
+	gap: 0.6rem;
+	align-items: center;
+}
+
+.settings-birthday-pick {
+	width: 100%;
+	justify-content: center;
+	padding: 10px 12px;
+	border-radius: 10px;
 }
 
 .settings-field textarea {

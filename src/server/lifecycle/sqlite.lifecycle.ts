@@ -14,6 +14,11 @@ function ensureUserColumn(db: Database, column: string, type: string): void {
 	db.run(`ALTER TABLE users ADD COLUMN ${column} ${type}`);
 }
 
+function ensureBirthdayColumn(db: Database): void {
+	ensureUserColumn(db, 'birthday_month', 'INTEGER');
+	ensureUserColumn(db, 'birthday_day', 'INTEGER');
+}
+
 function ensureHomeAnnouncementColumn(db: Database, column: string, type: string): void {
 	const cols = db
 		.query(`PRAGMA table_info(home_announcements)`)
@@ -46,6 +51,7 @@ function initSchema(db: Database): void {
 	ensureUserColumn(db, 'nickname', 'TEXT');
 	ensureUserColumn(db, 'signature', 'TEXT');
 	ensureUserColumn(db, 'qq', 'TEXT');
+	ensureBirthdayColumn(db);
 
 	db.run(`
     CREATE TABLE IF NOT EXISTS account_applications (
@@ -110,6 +116,29 @@ function initSchema(db: Database): void {
 	ensureHomeAnnouncementColumn(db, 'is_pinned', 'INTEGER NOT NULL DEFAULT 0 CHECK (is_pinned IN (0, 1))');
 	db.run(`CREATE INDEX IF NOT EXISTS idx_home_announcements_created_at ON home_announcements(created_at DESC)`);
 	db.run(`CREATE INDEX IF NOT EXISTS idx_home_announcements_pinned_created ON home_announcements(is_pinned DESC, created_at DESC)`);
+	
+	db.run(`
+		CREATE TABLE IF NOT EXISTS birthday_wishes (
+			id INTEGER PRIMARY KEY AUTOINCREMENT,
+			recipient_user_id INTEGER NOT NULL,
+			author_user_id INTEGER NOT NULL,
+			message TEXT NOT NULL,
+			wish_date TEXT NOT NULL,
+			created_at TEXT NOT NULL DEFAULT (datetime('now')),
+			FOREIGN KEY(recipient_user_id) REFERENCES users(id) ON DELETE CASCADE,
+			FOREIGN KEY(author_user_id) REFERENCES users(id) ON DELETE CASCADE
+	);
+	`);
+		
+	db.run(`
+		CREATE UNIQUE INDEX IF NOT EXISTS idx_birthday_wishes_unique
+		ON birthday_wishes(recipient_user_id, author_user_id, wish_date);
+	`);
+		
+	db.run(`
+		CREATE INDEX IF NOT EXISTS idx_birthday_wishes_recipient_date
+		ON birthday_wishes(recipient_user_id, wish_date, created_at);
+	`);
 
 	db.run(`
 	CREATE TABLE IF NOT EXISTS recruitment_applications (

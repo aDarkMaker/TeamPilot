@@ -6,12 +6,17 @@ import {
 	createAnnouncement,
 	deleteAnnouncement,
 	fetchAnnouncements,
+	fetchBirthdayWishes,
 	fetchBiliDynamics,
 	fetchMeRole,
+	fetchTodayBirthdays,
+	postBirthdayWish,
 	setAnnouncementPinned,
 	type Announcement,
+	type BirthdayWish,
 	type BiliDynamic,
 	type MeRole,
+	type TodayBirthdayUser,
 } from '../../lib/home/homeClient';
 
 function formatTime(isoOrTs: string | number | null | undefined): string {
@@ -25,6 +30,9 @@ export default function HomePage() {
 	const [role, setRole] = useState<MeRole | null>(null);
 	const [announcements, setAnnouncements] = useState<Announcement[]>([]);
 	const [dynamics, setDynamics] = useState<BiliDynamic[]>([]);
+	const [birthdayUsers, setBirthdayUsers] = useState<TodayBirthdayUser[]>([]);
+	const [wishMap, setWishMap] = useState<Record<string, BirthdayWish[]>>({});
+	const [wishInputMap, setWishInputMap] = useState<Record<string, string>>({});
 	const [loading, setLoading] = useState(true);
 	const [busy, setBusy] = useState(false);
 	const [error, setError] = useState<string | null>(null);
@@ -36,10 +44,27 @@ export default function HomePage() {
 	const canPublish = role === 'admin' || role === 'super_admin';
 
 	const loadHomeData = async () => {
-		const [r, anns, dyns] = await Promise.all([fetchMeRole(), fetchAnnouncements(3), fetchBiliDynamics()]);
+		const [r, anns, dyns, birthdays] = await Promise.all([
+			fetchMeRole(),
+			fetchAnnouncements(3),
+			fetchBiliDynamics(),
+			fetchTodayBirthdays(),
+		]);
 		setRole(r);
 		setAnnouncements(anns);
 		setDynamics(dyns);
+		setBirthdayUsers(birthdays.users);
+		if (birthdays.users.length > 0) {
+			const wishEntries = await Promise.all(
+				birthdays.users.map(async (u) => {
+					const rows = await fetchBirthdayWishes(u.id);
+					return [u.id, rows.items] as const;
+				}),
+			);
+			setWishMap(Object.fromEntries(wishEntries));
+		} else {
+			setWishMap({});
+		}
 	};
 
 	useEffect(() => {
@@ -48,11 +73,26 @@ export default function HomePage() {
 			setLoading(true);
 			setError(null);
 			try {
-				const [r, anns, dyns] = await Promise.all([fetchMeRole(), fetchAnnouncements(3), fetchBiliDynamics()]);
+				const [r, anns, dyns, birthdays] = await Promise.all([
+					fetchMeRole(),
+					fetchAnnouncements(3),
+					fetchBiliDynamics(),
+					fetchTodayBirthdays(),
+				]);
 				if (cancelled) return;
 				setRole(r);
 				setAnnouncements(anns);
 				setDynamics(dyns);
+				setBirthdayUsers(birthdays.users);
+				if (birthdays.users.length > 0) {
+					const wishEntries = await Promise.all(
+						birthdays.users.map(async (u) => {
+							const rows = await fetchBirthdayWishes(u.id);
+							return [u.id, rows.items] as const;
+						}),
+					);
+					setWishMap(Object.fromEntries(wishEntries));
+				}
 			} catch (e) {
 				if (!cancelled) setError(e instanceof Error ? e.message : '加载主页失败');
 			} finally {
@@ -106,6 +146,25 @@ export default function HomePage() {
 			await loadHomeData();
 		} catch (e) {
 			setError(e instanceof Error ? e.message : '置顶操作失败');
+		} finally {
+			setBusy(false);
+		}
+	};
+
+	const onPostWish = async (recipientUserId: string) => {
+		const message = (wishInputMap[recipientUserId] ?? '').trim();
+		if (!message) return;
+		setBusy(true);
+		setError(null);
+		try {
+			const created = await postBirthdayWish({ recipientUserId, message });
+			setWishMap((prev) => ({
+				...prev,
+				[recipientUserId]: [...(prev[recipientUserId] ?? []), created],
+			}));
+			setWishInputMap((prev) => ({ ...prev, [recipientUserId]: '' }));
+		} catch (e) {
+			setError(e instanceof Error ? e.message : '发送祝福失败');
 		} finally {
 			setBusy(false);
 		}
@@ -208,44 +267,90 @@ export default function HomePage() {
 				</div>
 			</section>
 
-			<section className="home-card">
-				<div className="home-card-head">
-					<h2>B站动态</h2>
-				</div>
-				<div className="home-list">
-					{dynamics.length === 0 ? (
-						<div className="home-muted">暂无动态</div>
-					) : (
-						dynamics.slice(0, 1).map((d) => (
-							<article key={d.id} className="home-dyn-item home-dyn-item--hero">
-								<div className="home-dyn-meta">{d.pubTimeText ?? formatTime(d.pubTs)}</div>
-								<h3 className="home-dyn-title">
-									{d.jumpUrl ? (
-										<a className="home-dyn-title-link" href={d.jumpUrl} target="_blank" rel="noreferrer">
-											{d.title}
-										</a>
-									) : (
-										d.title
-									)}
-								</h3>
-								<p className="home-dyn-text">{d.text}</p>
-								{d.mediaType === 'image' && d.mediaUrl ? (
-									<img className="home-dyn-cover" src={d.mediaUrl} alt={d.title} loading="lazy" />
-								) : null}
-								{d.mediaType === 'video' && d.videoEmbedUrl ? (
-									<iframe
-										className="home-dyn-video"
-										src={d.videoEmbedUrl}
-										title={d.title}
-										allowFullScreen
-										loading="lazy"
-									/>
-								) : null}
-							</article>
-						))
-					)}
-				</div>
-			</section>
+			<div className="home-right-col">
+				{birthdayUsers.length > 0 ? (
+					<section className="home-card">
+						<div className="home-card-head">
+							<h2>今日寿星</h2>
+						</div>
+						<div className="home-list">
+							{birthdayUsers.map((u) => (
+								<article key={u.id} className="home-birthday-item">
+									<div className="home-birthday-user">
+										<div className="home-birthday-avatar">
+											{u.avatarUrl ? <img src={u.avatarUrl} alt="" loading="lazy" /> : <span>{(u.nickname ?? u.username).slice(0, 1)}</span>}
+										</div>
+										<div className="home-birthday-name">{u.nickname ?? u.username}</div>
+									</div>
+									<div className="home-birthday-wishes">
+										{(wishMap[u.id] ?? []).length === 0 ? (
+											<div className="home-muted">空空如也，速速送上祝福！</div>
+										) : (
+											(wishMap[u.id] ?? []).map((w) => (
+												<div key={w.id} className="home-birthday-wish-line">
+													<span className="home-birthday-wish-author">{w.author.nickname ?? w.author.username}:</span>
+													<span>{w.message}</span>
+												</div>
+											))
+										)}
+									</div>
+									<div className="home-birthday-send">
+										<input
+											className="home-input"
+											placeholder={`给 ${u.nickname ?? u.username} 送上祝福`}
+											value={wishInputMap[u.id] ?? ''}
+											disabled={busy}
+											onChange={(e) => setWishInputMap((prev) => ({ ...prev, [u.id]: e.target.value }))}
+										/>
+										<button className="home-btn" type="button" disabled={busy} onClick={() => void onPostWish(u.id)}>
+											发送
+										</button>
+									</div>
+								</article>
+							))}
+						</div>
+					</section>
+				) : null}
+
+				<section className="home-card">
+					<div className="home-card-head">
+						<h2>B站动态</h2>
+					</div>
+					<div className="home-list">
+						{dynamics.length === 0 ? (
+							<div className="home-muted">暂无动态</div>
+						) : (
+							dynamics.slice(0, 1).map((d) => (
+								<article key={d.id} className="home-dyn-item home-dyn-item--hero">
+									<div className="home-dyn-meta">{d.pubTimeText ?? formatTime(d.pubTs)}</div>
+									<h3 className="home-dyn-title">
+										{d.jumpUrl ? (
+											<a className="home-dyn-title-link" href={d.jumpUrl} target="_blank" rel="noreferrer">
+												{d.title}
+											</a>
+										) : (
+											d.title
+										)}
+									</h3>
+									<p className="home-dyn-text">{d.text}</p>
+									{d.mediaType === 'image' && d.mediaUrl ? (
+										<img className="home-dyn-cover" src={d.mediaUrl} alt={d.title} loading="lazy" />
+									) : null}
+									{d.mediaType === 'video' && d.videoEmbedUrl ? (
+										<iframe
+											className="home-dyn-video"
+											src={d.videoEmbedUrl}
+											title={d.title}
+											allowFullScreen
+											loading="lazy"
+										/>
+									) : null}
+								</article>
+							))
+						)}
+					</div>
+				</section>
+			</div>
 		</div>
 	);
 }

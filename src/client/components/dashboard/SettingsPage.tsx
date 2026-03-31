@@ -18,6 +18,8 @@ type Me = {
     nickname: string | null;
     signature: string | null;
     qq: string | null;
+	birthdayMonth: number | null;
+	birthdayDay: number | null;
     avatarUrl: string | null;
     profileBackgroundUrl: string | null;
     role: string;
@@ -102,6 +104,13 @@ export default function SettingsPage() {
 	const [newPw2, setNewPw2] = useState('');
 	const bgPickId = useId();
 
+	const [birthdayMonth, setBirthdayMonth] = useState<number | ''>('');
+	const [birthdayDay, setBirthdayDay] = useState<number | ''>('');
+	const [birthdayPicker, setBirthdayPicker] = useState<{ open: boolean; field: 'month' | 'day' | null }>({
+		open: false,
+		field: null,
+	});
+
 	const dispatchProfileUpdated = (detail: Partial<Me>) => {
 		window.dispatchEvent(new CustomEvent('hxk:profile-updated', { detail }));
 	};
@@ -120,6 +129,8 @@ export default function SettingsPage() {
             setNickname(u.nickname ?? '');
             setSignature(u.signature ?? '');
             setQq(u.qq ?? '');
+			setBirthdayMonth(u.birthdayMonth ?? '');
+			setBirthdayDay(u.birthdayDay ?? '');
             setAvatarUrl(u.avatarUrl);
             setBgUrl(u.profileBackgroundUrl);
         } catch (err) {
@@ -137,10 +148,18 @@ export default function SettingsPage() {
         setSaving(true);
         setMsg(null);
         try {
-            const body: { nickname: string | null; signature: string | null; qq: string | null } = {
+            const body: {
+				nickname: string | null;
+				signature: string | null;
+				qq: string | null;
+				birthdayMonth: number | null;
+				birthdayDay: number | null;
+			} = {
                 nickname: nickname.trim() ? nickname.trim() : null,
                 signature: signature.trim() ? signature.trim() : null,
                 qq: qq.trim() ? qq.trim() : null,
+				birthdayMonth: birthdayMonth === '' ? null : birthdayMonth,
+				birthdayDay: birthdayDay === '' ? null : birthdayDay,
             };
             const res = await fetch('/api/users/me', {
                 method: 'PATCH',
@@ -338,6 +357,11 @@ export default function SettingsPage() {
         }
     };
 
+	const monthOptions = Array.from({ length: 12 }).map((_, i) => i + 1);
+	const dayOptions = Array.from({ length: 31 }).map((_, i) => i + 1);
+	const pickerOptions = birthdayPicker.field === 'month' ? monthOptions : dayOptions;
+	const pickerValue = birthdayPicker.field === 'month' ? birthdayMonth : birthdayDay;
+
     if (loading) {
         return <p className="settings-page">加载中……</p>;
     }
@@ -449,8 +473,81 @@ export default function SettingsPage() {
 								更新密码
 							</SettingsButton>
 						</div>
+
+						<div className="settings-divider" />
+
+						<h2>我的生日</h2>
+						<div className="settings-field">
+							<div className="settings-birthday-row">
+								<button
+									type="button"
+									className="calendar-btn settings-birthday-pick"
+									disabled={saving}
+									onClick={() => setBirthdayPicker({ open: true, field: 'month' })}
+								>
+									{birthdayMonth === '' ? '月' : `${birthdayMonth} 月`}
+								</button>
+								<button
+									type="button"
+									className="calendar-btn settings-birthday-pick"
+									disabled={saving}
+									onClick={() => setBirthdayPicker({ open: true, field: 'day' })}
+								>
+									{birthdayDay === '' ? '日' : `${birthdayDay} 日`}
+								</button>
+								<SettingsButton
+									variant="secondary"
+									disabled={saving}
+									onClick={() => {
+										setBirthdayMonth('');
+										setBirthdayDay('');
+									}}
+								>
+									清空
+								</SettingsButton>
+							</div>
+						</div>
+
+						<div className="settings-actions">
+							<SettingsButton disabled={saving} onClick={() => void saveProfile()}>
+								保存生日
+							</SettingsButton>
+						</div>
 					</section>
 				</div>
+				{birthdayPicker.open ? (
+					<div
+						className="time-picker open"
+						role="dialog"
+						aria-modal="true"
+						onClick={() => setBirthdayPicker({ open: false, field: null })}
+					>
+						<div className="time-picker-card" onClick={(e) => e.stopPropagation()}>
+							<div className="time-picker-head">
+								<div className="time-picker-title">{birthdayPicker.field === 'month' ? '选择月份' : '选择日期'}</div>
+							</div>
+							<div className="time-picker-list">
+								{pickerOptions.map((v) => {
+									const active = pickerValue === v;
+									return (
+										<button
+											key={v}
+											type="button"
+											className={`time-picker-item ${active ? 'active' : ''}`}
+											onClick={() => {
+												if (birthdayPicker.field === 'month') setBirthdayMonth(v);
+												else setBirthdayDay(v);
+												setBirthdayPicker({ open: false, field: null });
+											}}
+										>
+											{birthdayPicker.field === 'month' ? `${v} 月` : `${v} 日`}
+										</button>
+									);
+								})}
+							</div>
+						</div>
+					</div>
+				) : null}
 			</div>
     );
 }

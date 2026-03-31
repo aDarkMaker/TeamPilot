@@ -13,6 +13,8 @@ export interface User {
 	profileBgPath: string | null;
 	createdAt: string;
 	updatedAt: string;
+	birthdayMonth: number | null;
+	birthdayDay: number | null;
 }
 
 export interface UserProfilePublic {
@@ -26,4 +28,6 @@ export interface UserProfilePublic {
 	role: Role;
 	createdAt: string;
 	updatedAt: string;
+	birthdayMonth: number | null;
+	birthdayDay: number | null;
 }

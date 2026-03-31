@@ -66,6 +66,92 @@ export class HomeService {
         private cfg: AppConfig
     ) {}
 
+    private toDayYmd(): { ymd: string; month: number; day: number } {
+        const now = new Date();
+        const parts = new Intl.DateTimeFormat('zh-CN', {
+            timeZone: 'Asia/Shanghai',
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+        }).formatToParts(now);
+
+        const get = (t: string) => parts.find((p) => p.type === t)?.value ?? '';
+        const y = get('year');
+        const m = get('month');
+        const d = get('day');
+        return { ymd: `${y}-${m}-${d}`, month: Number(m), day: Number(d) };
+    }
+
+    async listTodayBirthdays() {
+        const { month, day, ymd } = this.toDayYmd();
+        const users = await this.db.listUsersByBirthday({ month, day });
+        const data = users.map((u) => ({
+            id: u.id,
+            username: u.username,
+            nickname: u.nickname,
+            avatarUrl: u.avatarPath ? `/uploads/${u.avatarPath.replace(/^\/+/, '')}` : null,
+        }));
+        return { ymd, users: data };
+    }
+
+    async listWishes(recipientUserId: string) {
+        const { ymd } = this.toDayYmd();
+        const rows = await this.db.listBirthdayWishes({ recipientUserId, wishDate: ymd });
+        return {
+            recipientUserId,
+            wishDate: ymd,
+            items: rows.map((r) => ({
+                id: r.id,
+                message: r.message,
+                createdAt: r.createdAt,
+                author: {
+                    id: r.authorId,
+                    username: r.authorUsername,
+                    nickname: r.authorNickname,
+                    avatarUrl: r.authorAvatarPath ? `/uploads/${r.authorAvatarPath.replace(/^\/+/, '')}` : null,
+                },
+            })),
+        };
+    }
+
+    async createWish(actor: { id: string }, body: unknown) {
+        const schema = z.object({
+            recipientUserId: z.string().trim().min(1),
+            message: z.string().trim().min(1).max(120),
+        });
+        const p = schema.parse(body);
+
+        const { month, day, ymd } = this.toDayYmd();
+        const b = await this.db.listUsersByBirthday({ month, day });
+        const ok = b.some((u) => String(u.id) === String(p.recipientUserId));
+        if (!ok) throw new AppError(400, 'NOT_BIRTHDAY_TODAY', '今天不是TA的生日哦！');
+
+        try {
+            const created = await this.db.createBirthdayWish({
+                recipientUserId: p.recipientUserId,
+                authorUserId: actor.id,
+                message: p.message,
+                wishDate: ymd,
+            });
+            return {
+                id: created.id,
+                message: created.message,
+                author: {
+                    id: created.authorId,
+                    username: created.authorUsername,
+                    nickname: created.authorNickname,
+                    avatarUrl: created.authorAvatarPath ? `/uploads/${created.authorAvatarPath.replace(/^\/+/, '')}` : null,
+                },
+            };
+        } catch (e) {
+            const msg = e instanceof Error ? e.message : '';
+            if (msg.includes('UNIQUE') || msg.includes('idx_birthday_wishes_unique')) {
+                throw new AppError(409, 'ALREADY_WISHED', '祝福弥足珍贵，一次就够啦')
+            }
+            throw e;
+        }
+    }
+
     listAnnouncements(limit = 3) {
         return this.db.listHomeAnnouncements(limit);
     }

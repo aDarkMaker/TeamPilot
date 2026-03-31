@@ -23,6 +23,25 @@ export type BiliDynamic = {
 	pubTimeText: string | null;
 };
 
+export type TodayBirthdayUser = {
+	id: string;
+	username: string;
+	nickname: string | null;
+	avatarUrl: string | null;
+}
+
+export type TodayBirthdaysPayload = {
+	ymd: string;
+	users: TodayBirthdayUser[];
+};
+
+export type BirthdayWish = {
+	id: string;
+	message: string;
+	createdAt: string;
+	author: { id: string; username: string; nickname: string | null; avatarUrl: string | null };
+};
+
 type ApiSuccess<T> = { ok: true; data: T };
 type ApiFailure = { ok: false; code: string; message: string };
 
@@ -90,4 +109,31 @@ export async function fetchBiliDynamics(): Promise<BiliDynamic[]> {
 	const json = await parseJson<{ uid: string; items: BiliDynamic[]; fetchedAt: number }>(res);
 	if (!res.ok || !json.ok || !json.data) throw new Error(errText(json, 'LOAD_BILI_DYNAMICS_FAILED'));
 	return json.data.items ?? [];
+}
+
+export async function fetchTodayBirthdays(): Promise<TodayBirthdaysPayload> {
+	const res = await fetch('/api/home/birthdays/today', { credentials: 'include' });
+	const json = await parseJson<TodayBirthdaysPayload>(res);
+	if (!res.ok || !json.ok || !json.data) throw new Error(errText(json, 'LOAD_TODAY_BIRTHDAYS_FAILED'));
+	return json.data;
+}
+
+export async function fetchBirthdayWishes(recipientUserId: string) {
+	const q = new URLSearchParams({ recipientUserId });
+	const res = await fetch(`/api/home/birthdays/wishes?${q}`, { credentials: 'include' });
+	const json = await parseJson<{ recipientUserId: string; wishDate: string; items: BirthdayWish[] }>(res);
+	if (!res.ok || !json.ok || !json.data) throw new Error(errText(json, 'LOAD_BIRTHDAY_WISHES_FAILED'));
+	return json.data;
+}
+
+export async function postBirthdayWish(input: { recipientUserId: string; message: string }): Promise<BirthdayWish> {
+	const res = await fetch('/api/home/birthdays/wishes', {
+		method: 'POST',
+		credentials: 'include',
+		headers: { 'Content-Type': 'application/json' },
+		body: JSON.stringify(input),
+	});
+	const json = await parseJson<BirthdayWish>(res);
+	if (!res.ok || !json.ok || !json.data) throw new Error(errText(json, 'POST_BIRTHDAY_WISH_FAILED'));
+	return json.data;
 }
