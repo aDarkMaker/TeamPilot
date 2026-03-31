@@ -13,10 +13,28 @@
 	backdrop-filter: blur(10px);
 	font-size: 0.9rem;
 	font-weight: 600;
+	animation: hxk-toast-in 360ms cubic-bezier(0.25, 0.8, 0.25, 1) both;
 }
 
 .users-admin-msg.err {
 	color: #c53030;
+}
+
+@keyframes hxk-toast-in {
+	from {
+		opacity: 0;
+		transform: translateY(6px);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.users-admin-msg {
+		animation: none;
+	}
 }
 
 .users-admin-card {

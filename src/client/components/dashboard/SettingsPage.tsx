@@ -11,6 +11,7 @@ import {
 import UserAvatar from "./UserAvatar";
 import bgDefault from "../../assets/img/image/bg-dashboard.png";
 import { assetUrl } from "../../lib/assetUrl";
+import { DashboardToast, useDashboardToast } from "./DashboardToast";
 
 type Me = {
     id: string;
@@ -90,6 +91,7 @@ export default function SettingsPage() {
 	const [loading, setLoading] = useState(true);
 	const [saving, setSaving] = useState(false);
 	const [msg, setMsg] = useState<{ type: 'ok' | 'err'; text: string } | null>(null);
+	const toast = useDashboardToast();
 	
     const [username, setUsername] = useState('');
 	const [nickname, setNickname] = useState('');
@@ -143,6 +145,12 @@ export default function SettingsPage() {
     useEffect(() => {
         void loadMe();
     }, [loadMe]);
+
+	useEffect(() => {
+		if (!msg) return;
+		toast.show({ text: msg.text, type: msg.type, durationMs: 3000 });
+		setMsg(null);
+	}, [msg, toast]);
 
     const saveProfile = async () => {
         setSaving(true);
@@ -368,9 +376,8 @@ export default function SettingsPage() {
 
     return (
 			<div className="settings-page">
+				<DashboardToast toast={toast.toast} />
 				<div className="settings-card">
-					{msg && <div className={`settings-top-msg ${msg.type}`}>{msg.text}</div>}
-
 					<section className="settings-section">
 						<h2>基本资料</h2>
 						<div className="settings-username">实名：{username}</div>

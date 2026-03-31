@@ -5,6 +5,7 @@ import {
 	broadcastApplicationsUpdated,
 	type PendingApplication,
 } from '../../lib/pendingApplicationsStore';
+import { DashboardToast, useDashboardToast } from './DashboardToast';
 
 type Role = 'user' | 'admin' | 'super_admin';
 type Status = 'active' | 'disabled';
@@ -41,6 +42,7 @@ export default function UserAdminPage() {
 	const [users, setUsers] = useState<UserRow[]>([]);
 	const [err, setErr] = useState<string | null>(null);
 	const [busyId, setBusyId] = useState<string | null>(null);
+	const toast = useDashboardToast();
 
 	const pendingState = useSyncExternalStore(
 		pendingApplicationsStore.subscribe,
@@ -202,9 +204,15 @@ export default function UserAdminPage() {
 		return d.toLocaleString();
 	};
 
+	useEffect(() => {
+		if (!err) return;
+		toast.show({ text: err, type: 'err', durationMs: 3000 });
+		setErr(null);
+	}, [err, toast]);
+
 	return (
 		<div className="users-admin">
-			{err && <div className="users-admin-msg err">{err}</div>}
+			<DashboardToast toast={toast.toast} />
 
 			<section className="users-admin-card">
 				<div className="users-admin-card-head">

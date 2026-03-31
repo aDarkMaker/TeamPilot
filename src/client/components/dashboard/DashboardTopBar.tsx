@@ -26,6 +26,7 @@ export default function DashboardTopBar({ title, notifyVariant = 'read' }: Props
     return (
         <header className="dashboard-topbar">
             <h1>{title}</h1>
+            <div id="dashboard-topbar-toast-slot" className="dashboard-topbar-toast-slot" aria-live="polite" />
             <div className="dashboard-topbar-tools">
                 <div className="dashboard-search">
                     <img src={assetUrl(iconSearch)} alt="" />

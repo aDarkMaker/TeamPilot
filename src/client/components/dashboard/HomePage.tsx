@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { MarkdownBlock } from './newcomers/MarkdownBlock';
+import { DashboardToast, useDashboardToast } from './DashboardToast';
 import { assetUrl } from '../../lib/assetUrl';
 import circlePlus from '../../assets/img/icon/circle-plus.png';
 import {
@@ -35,7 +36,8 @@ export default function HomePage() {
 	const [wishInputMap, setWishInputMap] = useState<Record<string, string>>({});
 	const [loading, setLoading] = useState(true);
 	const [busy, setBusy] = useState(false);
-	const [error, setError] = useState<string | null>(null);
+	const [error, setError] = useState<{ text: string; seq: number } | null>(null);
+	const toast = useDashboardToast();
 
 	const [title, setTitle] = useState('');
 	const [contentMarkdown, setContentMarkdown] = useState('');
@@ -94,7 +96,10 @@ export default function HomePage() {
 					setWishMap(Object.fromEntries(wishEntries));
 				}
 			} catch (e) {
-				if (!cancelled) setError(e instanceof Error ? e.message : '加载主页失败');
+				if (!cancelled) {
+					const text = e instanceof Error ? e.message : '加载主页失败';
+					setError({ text, seq: Date.now() });
+				}
 			} finally {
 				if (!cancelled) setLoading(false);
 			}
@@ -119,7 +124,8 @@ export default function HomePage() {
 			setContentMarkdown('');
 			setPublishOpen(false);
 		} catch (e) {
-			setError(e instanceof Error ? e.message : '发布公告失败');
+			const text = e instanceof Error ? e.message : '发布公告失败';
+			setError({ text, seq: Date.now() });
 		} finally {
 			setBusy(false);
 		}
@@ -132,7 +138,8 @@ export default function HomePage() {
 			await deleteAnnouncement(id);
 			await loadHomeData();
 		} catch (e) {
-			setError(e instanceof Error ? e.message : '删除公告失败');
+			const text = e instanceof Error ? e.message : '删除公告失败';
+			setError({ text, seq: Date.now() });
 		} finally {
 			setBusy(false);
 		}
@@ -145,7 +152,8 @@ export default function HomePage() {
 			await setAnnouncementPinned(item.id, !item.isPinned);
 			await loadHomeData();
 		} catch (e) {
-			setError(e instanceof Error ? e.message : '置顶操作失败');
+			const text = e instanceof Error ? e.message : '置顶操作失败';
+			setError({ text, seq: Date.now() });
 		} finally {
 			setBusy(false);
 		}
@@ -164,23 +172,35 @@ export default function HomePage() {
 			}));
 			setWishInputMap((prev) => ({ ...prev, [recipientUserId]: '' }));
 		} catch (e) {
-			setError(e instanceof Error ? e.message : '发送祝福失败');
+			const text = e instanceof Error ? e.message : '发送祝福失败';
+			setError({ text, seq: Date.now() });
 		} finally {
 			setBusy(false);
 		}
 	};
 
+	const fatalError = error && announcements.length === 0 && dynamics.length === 0 && birthdayUsers.length === 0;
+
+	useEffect(() => {
+		if (!error) return;
+		if (fatalError) return;
+		toast.show({ text: error.text, type: 'err', durationMs: 3000 });
+		setError(null);
+	}, [error?.seq, fatalError, toast]);
+
 	if (loading) {
 		return <div className="home-empty">加载中…</div>;
 	}
 
-	if (error && announcements.length === 0 && dynamics.length === 0) {
-		return <div className="home-empty">{error}</div>;
+	if (fatalError) {
+		return <div className="home-empty">{error?.text}</div>;
 	}
 
 	return (
-		<div className="home-grid">
-			<section className="home-card">
+		<div className="home-page">
+			<DashboardToast toast={toast.toast} />
+			<div className="home-grid">
+				<section className="home-card">
 				<div className="home-card-head">
 					<h2>公告栏</h2>
 					{canPublish ? (
@@ -225,8 +245,6 @@ export default function HomePage() {
 						</div>
 					</div>
 				) : null}
-
-				{error ? <div className="home-inline-err">{error}</div> : null}
 
 				<div className="home-list">
 					{announcements.length === 0 ? (
@@ -350,6 +368,7 @@ export default function HomePage() {
 						)}
 					</div>
 				</section>
+			</div>
 			</div>
 		</div>
 	);

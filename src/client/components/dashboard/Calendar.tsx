@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react';
 
 import { dayKey, scheduleStore, broadcastScheduleUpdated, type Role, type ScheduleDayItem } from '../../lib/scheduleStore';
+import { DashboardToast, useDashboardToast } from './DashboardToast';
 
 type MentionUser = {
 	id: string;
@@ -157,6 +158,7 @@ export default function Calendar() {
 
 	const [msg, setMsg] = useState<string | null>(null);
 	const [err, setErr] = useState<string | null>(null);
+	const toast = useDashboardToast();
 	const [createErr, setCreateErr] = useState<string | null>(null);
 	const [loading, setLoading] = useState(false);
 	const [modalOpen, setModalOpen] = useState(false);
@@ -474,8 +476,16 @@ export default function Calendar() {
 		};
 	}, [draftRange?.active]);
 
+	useEffect(() => {
+		if (!err && !msg) return;
+		toast.show({ text: err ?? msg ?? '', type: err ? 'err' : 'ok', durationMs: 3000 });
+		setErr(null);
+		setMsg(null);
+	}, [err, msg, toast]);
+
 	return (
 		<div className="calendar-page">
+			<DashboardToast toast={toast.toast} />
 				<div className="calendar-head">
 				<div className="calendar-head-title">
 					<button type="button" className="calendar-date-btn" onClick={() => setAnchorDate((d) => addDays(d, -7))}>
@@ -505,10 +515,6 @@ export default function Calendar() {
 					</button>
 				</div>
 			</div>
-
-			{(msg || err) && (
-				<div className={`calendar-msg ${err ? 'err' : 'ok'}`}>{err ?? msg}</div>
-			)}
 
 			<section className="calendar-card">
 				<div className="calendar-card-head">
