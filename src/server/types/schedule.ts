@@ -5,6 +5,7 @@ export interface Schedule {
     title: string;
     description: string;
     location: string;
+	isAll: boolean;
 
     year: number;
     month: number;

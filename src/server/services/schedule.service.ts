@@ -33,6 +33,48 @@ const weekSchema = z.object({
 export class ScheduleService {
     constructor(private db: DB) {}
 
+	private getNowShanghaiParts() {
+		const parts = new Intl.DateTimeFormat('zh-CN', {
+			timeZone: 'Asia/Shanghai',
+			hour12: false,
+			year: 'numeric',
+			month: '2-digit',
+			day: '2-digit',
+			hour: '2-digit',
+			minute: '2-digit',
+		}).formatToParts(new Date());
+		const get = (type: Intl.DateTimeFormatPartTypes) =>
+			Number(parts.find((p) => p.type === type)?.value ?? 0);
+		return {
+			year: get('year'),
+			month: get('month'),
+			day: get('day'),
+			hour: get('hour'),
+			minute: get('minute'),
+		};
+	}
+
+	private assertScheduleStartNotPast(input: {
+		year: number;
+		month: number;
+		day: number;
+		startAt: string;
+	}) {
+		const [h, m] = input.startAt.split(':').map((x) => Number(x));
+		if (!Number.isFinite(h) || !Number.isFinite(m)) {
+			throw new AppError(400, 'INVALID_TIME', '开始时间格式不正确');
+		}
+		const now = this.getNowShanghaiParts();
+		const left = [input.year, input.month, input.day, h, m];
+		const right = [now.year, now.month, now.day, now.hour, now.minute];
+		for (let i = 0; i < left.length; i++) {
+			if (left[i]! > right[i]!) return;
+			if (left[i]! < right[i]!) {
+				throw new AppError(400, 'SCHEDULE_START_IN_PAST', '还在缅怀过去吗，混蛋！');
+			}
+		}
+	}
+
 	private toTaskStartIso(input: { year: number; month: number; day: number; startAt: string }) {
 		const mm = String(input.month).padStart(2, '0');
 		const dd = String(input.day).padStart(2, '0');
@@ -42,6 +84,7 @@ export class ScheduleService {
 	private async syncScheduleTaskCards(input: {
 		scheduleId: string;
 		actorId: string;
+		isAll: boolean;
 		title: string;
 		description: string | null;
 		year: number;
@@ -51,7 +94,12 @@ export class ScheduleService {
 		endAt: string;
 		participantIds: string[];
 	}) {
-		const uniqueTargets = Array.from(new Set([...input.participantIds, input.actorId])).filter(Boolean);
+		let targets = input.participantIds;
+		if (input.isAll) {
+			const all = await this.db.listUsers();
+			targets = all.filter((u) => u.status === 'active').map((u) => u.id);
+		}
+		const uniqueTargets = Array.from(new Set([...targets, input.actorId])).filter(Boolean);
 		if (uniqueTargets.length === 0) return;
 
 		const payload = JSON.stringify({
@@ -83,9 +131,18 @@ export class ScheduleService {
 		});
 	}
 
-	private async loadParticipantsWithTaskStatus(scheduleId: string) {
-		const participants = await this.db.listScheduleParticipants(scheduleId);
-		const taskCards = await this.db.listTaskCardsBySource({ sourceType: 'schedule_at', sourceId: scheduleId });
+	private async loadParticipantsWithTaskStatus(schedule: { id: string; isAll: boolean }) {
+		const participants = schedule.isAll
+			? (await this.db.listUsers())
+					.filter((u) => u.status === 'active')
+					.map((u) => ({
+						scheduleId: schedule.id,
+						userId: u.id,
+						username: u.username,
+						avatarPath: u.avatarPath ?? null,
+					}))
+			: await this.db.listScheduleParticipants(schedule.id);
+		const taskCards = await this.db.listTaskCardsBySource({ sourceType: 'schedule_at', sourceId: schedule.id });
 		const statusByUser = new Map<string, TaskStatus>(taskCards.map((t) => [String(t.targetUserId), t.status]));
 		return (participants as any[]).map((p) => ({
 			scheduleId: p.scheduleId,
@@ -129,13 +186,19 @@ export class ScheduleService {
 
 	async create(actor: { id: string; role: Role }, body: unknown) {
         const parsed = createSchema.parse(body);
+		this.assertScheduleStartNotPast({
+			year: parsed.year,
+			month: parsed.month,
+			day: parsed.day,
+			startAt: parsed.startAt,
+		});
 
 		let participantIds: string[] = [];
+		let isAll = false;
 		if (!canReviewApplication(actor.role)) {
 			participantIds = [actor.id];
 		} else if (parsed.scope === 'all') {
-			const all = await this.db.listUsers();
-			participantIds = all.filter((u) => u.status === 'active').map((u) => u.id);
+			isAll = true;
 		} else if (parsed.scope === 'custom') {
 			participantIds = Array.from(new Set(parsed.participantIds)).filter(Boolean);
 			if (participantIds.length === 0) {
@@ -148,6 +211,7 @@ export class ScheduleService {
         const schedule = await this.db.createSchedule({
             title: parsed.title,
 			participantIds,
+			isAll,
             description: parsed.description ?? null,
             year: parsed.year,
             month: parsed.month,
@@ -161,6 +225,7 @@ export class ScheduleService {
 		await this.syncScheduleTaskCards({
 			scheduleId: schedule.id,
 			actorId: actor.id,
+			isAll: schedule.isAll,
 			title: parsed.title,
 			description: parsed.description ?? null,
 			year: parsed.year,
@@ -170,7 +235,7 @@ export class ScheduleService {
 			endAt: parsed.endAt,
 			participantIds,
 		});
-        const participants = await this.loadParticipantsWithTaskStatus(schedule.id);
+        const participants = await this.loadParticipantsWithTaskStatus(schedule);
         return { ...schedule, participants };
     }
 
@@ -183,10 +248,27 @@ export class ScheduleService {
 			userId: actor.id,
 		});
 		return Promise.all(
-			schedules.map(async (s) => ({
-				...s,
-				participants: await this.loadParticipantsWithTaskStatus(s.id),
-			}))
+			schedules.map(async (s) => {
+				if (s.isAll) {
+					await this.syncScheduleTaskCards({
+						scheduleId: s.id,
+						actorId: s.createdBy,
+						isAll: true,
+						title: s.title,
+						description: s.description ?? null,
+						year: s.year,
+						month: s.month,
+						day: s.day,
+						startAt: s.startAt,
+						endAt: s.endAt,
+						participantIds: [],
+					});
+				}
+				return {
+					...s,
+					participants: await this.loadParticipantsWithTaskStatus(s),
+				};
+			})
 		);
     }
 
@@ -206,10 +288,27 @@ export class ScheduleService {
 		});
 
 		return Promise.all(
-			schedules.map(async (s) => ({
-				...s,
-				participants: await this.loadParticipantsWithTaskStatus(s.id),
-			}))
+			schedules.map(async (s) => {
+				if (s.isAll) {
+					await this.syncScheduleTaskCards({
+						scheduleId: s.id,
+						actorId: s.createdBy,
+						isAll: true,
+						title: s.title,
+						description: s.description ?? null,
+						year: s.year,
+						month: s.month,
+						day: s.day,
+						startAt: s.startAt,
+						endAt: s.endAt,
+						participantIds: [],
+					});
+				}
+				return {
+					...s,
+					participants: await this.loadParticipantsWithTaskStatus(s),
+				};
+			})
 		);
 	}
 
@@ -255,6 +354,7 @@ export class ScheduleService {
 		await this.syncScheduleTaskCards({
 			scheduleId: updated.id,
 			actorId: actor.id,
+			isAll: updated.isAll,
 			title: parsed.title,
 			description: parsed.description ?? null,
 			year: parsed.year,
@@ -265,7 +365,7 @@ export class ScheduleService {
 			participantIds: effectiveParticipantIds,
 		});
 
-		const participants = await this.loadParticipantsWithTaskStatus(updated.id);
+		const participants = await this.loadParticipantsWithTaskStatus(updated);
 		return {
 			...updated,
 			participants,

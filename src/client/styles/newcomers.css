@@ -690,6 +690,13 @@
 	flex-direction: column;
 	gap: 12px;
 	min-height: 0;
+	scrollbar-width: none;
+	-ms-overflow-style: none;
+}
+
+.nc-comments-list::-webkit-scrollbar {
+	width: 0;
+	height: 0;
 }
 
 .nc-comment-card {

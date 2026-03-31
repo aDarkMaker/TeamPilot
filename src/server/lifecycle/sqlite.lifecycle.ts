@@ -28,6 +28,15 @@ function ensureHomeAnnouncementColumn(db: Database, column: string, type: string
 	db.run(`ALTER TABLE home_announcements ADD COLUMN ${column} ${type}`);
 }
 
+function ensureScheduleColumn(db: Database, column: string, type: string): void {
+	const cols = db
+		.query(`PRAGMA table_info(schedules)`)
+		.all()
+		.map((r: any) => String(r.name));
+	if (cols.includes(column)) return;
+	db.run(`ALTER TABLE schedules ADD COLUMN ${column} ${type}`);
+}
+
 function initSchema(db: Database): void {
 	db.run(`
     CREATE TABLE IF NOT EXISTS users (
@@ -72,6 +81,7 @@ function initSchema(db: Database): void {
 		title TEXT NOT NULL,
 		description TEXT,
 		location TEXT,
+		is_all INTEGER NOT NULL DEFAULT 0 CHECK (is_all IN (0, 1)),
 		year INTEGER NOT NULL,
 		month INTEGER NOT NULL,
 		day INTEGER NOT NULL,
@@ -84,6 +94,24 @@ function initSchema(db: Database): void {
 		FOREIGN KEY(created_by) REFERENCES users(id)
 	);
 		`);
+	ensureScheduleColumn(db, 'is_all', `INTEGER NOT NULL DEFAULT 0 CHECK (is_all IN (0, 1))`);
+
+	try {
+		db.run(`
+			UPDATE schedules
+			   SET is_all = 1
+			 WHERE is_all = 0
+			   AND (SELECT COUNT(*) FROM schedule_participants sp WHERE sp.schedule_id = schedules.id) >= (
+					SELECT COUNT(*)
+					  FROM users u
+					 WHERE u.status = 'active'
+					   AND u.username != 'joinus-public'
+					   AND u.created_at <= schedules.created_at
+			   )
+		`);
+	} catch {
+		// ignore: best-effort backfill
+	}
 
 	db.run(`
 	CREATE TABLE IF NOT EXISTS schedule_participants (

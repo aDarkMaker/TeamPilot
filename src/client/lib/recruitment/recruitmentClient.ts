@@ -124,3 +124,19 @@ export async function deleteApplication(applicationId: string): Promise<void> {
 export function isStaffRole(role: string | undefined): boolean {
 	return role === 'admin' || role === 'super_admin';
 }
+
+const ROLE_RANK: Record<MeBrief['role'], number> = {
+	user: 1,
+	admin: 2,
+	super_admin: 3,
+};
+
+export function canDeleteOthersRecruitmentComment(actorRole: MeBrief['role'], authorRole: MeBrief['role']): boolean {
+	return ROLE_RANK[actorRole] > ROLE_RANK[authorRole];
+}
+
+export function canShowDeleteRecruitmentComment(me: MeBrief | null, c: RecruitmentCommentDto): boolean {
+	if (!me) return false;
+	if (me.id === c.authorId) return true;
+	return canDeleteOthersRecruitmentComment(me.role, c.authorRole);
+}

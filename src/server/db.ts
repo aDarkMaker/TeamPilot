@@ -21,6 +21,7 @@ export interface DB {
 	updateUserRole(userId: string, role: Role): Promise<void>;
 	listUsers(): Promise<User[]>;
 	updateUserStatus(userId: string, status: UserStatus): Promise<void>;
+	deleteUser(userId: string): Promise<void>;
 	listUsersByBirthday(input: { month: number; day: number }): Promise<Array<{ id: string; username: string; nickname: string | null; avatarPath: string | null }>>;
 	listBirthdayWishes(input: { recipientUserId: string; wishDate: string }): Promise<
 		Array<{ id: string; message: string; createdAt: string; authorId: string; authorUsername: string; authorNickname: string | null; authorAvatarPath: string | null }>
@@ -61,6 +62,7 @@ export interface DB {
 		title: string;
 		description: string | null;
 		location: string | null;
+		isAll: boolean;
 		year: number;
 		month: number;
 		day: number;
@@ -99,6 +101,8 @@ export interface DB {
 
 	searchUsersByUsername(keyword: string, limit?: number): Promise<Array<{ id: string; username: string; avatarPath: string | null }>>;
 	findScheduleById(scheduleId: string): Promise<Schedule | null>;
+	
+	listAllSchedulesFromDate(input: { startDate: string }): Promise<Schedule[]>;
 
 	deleteSchedule(scheduleId: string, actor: { id: string }): Promise<void>;
 
@@ -209,6 +213,7 @@ function mapSchedule(row: any): Schedule {
 		title: row.title,
 		description: row.description ?? null,
 		location: row.location ?? null,
+		isAll: Boolean(row.is_all),
 		year: Number(row.year),
 		month: Number(row.month),
 		day: Number(row.day),
@@ -347,6 +352,22 @@ export function createDb(sqlite: Database): DB {
 		async updateUserStatus(userId, status) {
 			sqlite.query("UPDATE users SET status = ?, updated_at = datetime('now') WHERE id = ?").run(status, userId);
 		},
+		async deleteUser(userId) {
+			const tx = sqlite.transaction((id: string) => {
+				sqlite.query(`DELETE FROM recruitment_applications WHERE submitter_user_id = ?`).run(id);
+				sqlite.query(`DELETE FROM recruitment_comment_likes WHERE user_id = ?`).run(id);
+				sqlite.query(`DELETE FROM recruitment_comments WHERE author_id = ?`).run(id);
+				sqlite.query(`DELETE FROM recruitment_application_tags WHERE created_by = ?`).run(id);
+				sqlite.query(`DELETE FROM schedule_participants WHERE user_id = ?`).run(id);
+				sqlite.query(`DELETE FROM schedules WHERE created_by = ?`).run(id);
+				sqlite.query(`DELETE FROM home_announcements WHERE created_by = ?`).run(id);
+				sqlite.query(`DELETE FROM birthday_wishes WHERE recipient_user_id = ? OR author_user_id = ?`).run(id, id);
+				sqlite.query(`DELETE FROM task_cards WHERE target_user_id = ?`).run(id);
+				sqlite.query(`UPDATE task_cards SET actor_user_id = NULL WHERE actor_user_id = ?`).run(id);
+				sqlite.query(`DELETE FROM users WHERE id = ?`).run(id);
+			});
+			tx(userId);
+		},
 		async createAccountApplication(input) {
 			const result = sqlite
 				.query(`INSERT INTO account_applications (username, password_hash, reason, status) VALUES (?, ?, ?, 'pending')`)
@@ -478,13 +499,14 @@ export function createDb(sqlite: Database): DB {
 				const result = sqlite
 					.query(
 						`INSERT INTO schedules
-							(title, description, location, year, month, day, start_at, end_at, duration_minutes, created_by)
-						VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+							(title, description, location, is_all, year, month, day, start_at, end_at, duration_minutes, created_by)
+						VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
 					)
 					.run(
 						payload.title,
 						payload.description,
 						payload.location,
+						payload.isAll ? 1 : 0,
 						payload.year,
 						payload.month,
 						payload.day,
@@ -496,11 +518,13 @@ export function createDb(sqlite: Database): DB {
 				
 				const scheduleId = String(result.lastInsertRowid);
 
-				const uniq = Array.from(new Set(payload.participantIds));
-				for (const userId of uniq) {
-					sqlite
-						.query(`INSERT OR IGNORE INTO schedule_participants (schedule_id, user_id) VALUES (?, ?)`)
-						.run(scheduleId, userId);
+				if (!payload.isAll) {
+					const uniq = Array.from(new Set(payload.participantIds));
+					for (const userId of uniq) {
+						sqlite
+							.query(`INSERT OR IGNORE INTO schedule_participants (schedule_id, user_id) VALUES (?, ?)`)
+							.run(scheduleId, userId);
+					}
 				}
 
 				const row = sqlite.query(`SELECT * FROM schedules WHERE id = ? LIMIT 1`).get(scheduleId);
@@ -567,8 +591,9 @@ export function createDb(sqlite: Database): DB {
 				.query(
 					`SELECT s.*
 					 FROM schedules s
-					 INNER JOIN schedule_participants sp ON sp.schedule_id = s.id
-					 WHERE s.year = ? AND s.month = ? AND s.day = ? AND sp.user_id = ?
+					 LEFT JOIN schedule_participants sp ON sp.schedule_id = s.id
+					 WHERE s.year = ? AND s.month = ? AND s.day = ?
+					   AND (s.is_all = 1 OR sp.user_id = ?)
 					 ORDER BY s.start_at ASC`
 				)
 				.all(input.year, input.month, input.day, input.userId);
@@ -580,13 +605,26 @@ export function createDb(sqlite: Database): DB {
 				.query(
 					`SELECT DISTINCT s.*
 					 FROM schedules s
-					 INNER JOIN schedule_participants sp ON sp.schedule_id = s.id
-					 WHERE sp.user_id = ?
+					 LEFT JOIN schedule_participants sp ON sp.schedule_id = s.id
+					 WHERE (s.is_all = 1 OR sp.user_id = ?)
 					   AND printf('%04d-%02d-%02d', s.year, s.month, s.day) >= ?
 					   AND printf('%04d-%02d-%02d', s.year, s.month, s.day) <= ?
 					 ORDER BY s.year ASC, s.month ASC, s.day ASC, s.start_at ASC`
 				)
 				.all(input.userId, input.startDate, input.endDate);
+			return rows.map(mapSchedule);
+		},
+
+		async listAllSchedulesFromDate(input) {
+			const rows = sqlite
+				.query(
+					`SELECT s.*
+					 FROM schedules s
+					 WHERE s.is_all = 1
+					   AND printf('%04d-%02d-%02d', s.year, s.month, s.day) >= ?
+					 ORDER BY s.year ASC, s.month ASC, s.day ASC, s.start_at ASC`,
+				)
+				.all(input.startDate);
 			return rows.map(mapSchedule);
 		},
 

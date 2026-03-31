@@ -844,6 +844,8 @@ export default function Calendar() {
 											setDescription(detail.description ?? '');
 											setLocation(detail.location ?? '');
 											setSelectedYmd({ year: detail.year, month: detail.month, day: detail.day });
+											setStartAt(detail.startAt);
+											setEndAt(detail.endAt);
 											setParticipants(
 												(detail.participants ?? []).map((p) => ({
 													id: p.userId,

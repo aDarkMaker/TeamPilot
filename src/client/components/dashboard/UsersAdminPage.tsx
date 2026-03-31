@@ -43,6 +43,8 @@ export default function UserAdminPage() {
 	const [users, setUsers] = useState<UserRow[]>([]);
 	const [err, setErr] = useState<string | null>(null);
 	const [busyId, setBusyId] = useState<string | null>(null);
+	const [confirmRemoveOpen, setConfirmRemoveOpen] = useState(false);
+	const [confirmRemoveTarget, setConfirmRemoveTarget] = useState<{ id: string; username: string } | null>(null);
 	const toast = useDashboardToast();
 
 	const pendingState = useSyncExternalStore(
@@ -125,15 +127,19 @@ export default function UserAdminPage() {
 		};
 	}, []);
 
-	const canDisable = (target: UserRow) => {
+	const canManageNonSuperUser = (target: UserRow) => {
 		if (!isAdminAbove) return false;
 		if (target.role === 'super_admin') return false;
 		if (me?.role === 'admin') return target.role === 'user';
 		return true;
 	};
 
-	const canAppointAdmin = (target: UserRow) => isSuper && target.role === 'user';
-	const canRevokeAdmin = (target: UserRow) => isSuper && target.role === 'admin';
+	/** 仅正常状态可禁用；已禁用则展示恢复/移除 */
+	const canDisable = (target: UserRow) => canManageNonSuperUser(target) && target.status === 'active';
+	const canRestoreOrRemove = (target: UserRow) => canManageNonSuperUser(target) && target.status === 'disabled';
+
+	const canAppointAdmin = (target: UserRow) => isSuper && target.role === 'user' && target.status === 'active';
+	const canRevokeAdmin = (target: UserRow) => isSuper && target.role === 'admin' && target.status === 'active';
 
 	const approve = async (appId: string) => {
 		setBusyId(appId);
@@ -168,6 +174,48 @@ export default function UserAdminPage() {
 		try {
 			await api(`/api/users/${userId}/disable`, { method: 'POST' });
 			setUsers((prev) => prev.map((u) => (u.id === userId ? { ...u, status: 'disabled' } : u)));
+			toast.show({ text: '已禁用该账号', type: 'ok', durationMs: 3000 });
+		} catch (e) {
+			setErr(e instanceof Error ? e.message : 'UNKNOWN_ERROR');
+		} finally {
+			setBusyId(null);
+		}
+	};
+
+	const enableUser = async (userId: string) => {
+		setBusyId(userId);
+		try {
+			await api(`/api/users/${userId}/enable`, { method: 'POST' });
+			setUsers((prev) => prev.map((u) => (u.id === userId ? { ...u, status: 'active' } : u)));
+			toast.show({ text: '已恢复该账号', type: 'ok', durationMs: 3000 });
+		} catch (e) {
+			setErr(e instanceof Error ? e.message : 'UNKNOWN_ERROR');
+		} finally {
+			setBusyId(null);
+		}
+	};
+
+	const openRemoveConfirm = (userId: string, username: string) => {
+		setConfirmRemoveTarget({ id: userId, username });
+		setConfirmRemoveOpen(true);
+	};
+
+	const closeRemoveConfirm = () => {
+		if (confirmRemoveTarget && busyId === confirmRemoveTarget.id) return;
+		setConfirmRemoveOpen(false);
+		setConfirmRemoveTarget(null);
+	};
+
+	const performRemoveUser = async () => {
+		if (!confirmRemoveTarget) return;
+		const userId = confirmRemoveTarget.id;
+		setBusyId(userId);
+		try {
+			await api(`/api/users/${userId}`, { method: 'DELETE' });
+			setUsers((prev) => prev.filter((u) => u.id !== userId));
+			toast.show({ text: '已移除该账号', type: 'ok', durationMs: 3000 });
+			setConfirmRemoveOpen(false);
+			setConfirmRemoveTarget(null);
 		} catch (e) {
 			setErr(e instanceof Error ? e.message : 'UNKNOWN_ERROR');
 		} finally {
@@ -212,6 +260,48 @@ export default function UserAdminPage() {
 	return (
 		<div className="users-admin">
 			<DashboardToast toast={toast.toast} />
+			{confirmRemoveOpen && confirmRemoveTarget ? (
+				<div className="calendar-modal" role="dialog" aria-modal="true" onClick={closeRemoveConfirm}>
+					<div className="calendar-modal-card" onClick={(e) => e.stopPropagation()}>
+						<div className="calendar-modal-head">
+							<div className="calendar-modal-title">确认移除账号</div>
+							<div className="calendar-modal-head-actions">
+								<button
+									type="button"
+									className="users-admin-modal-close"
+									disabled={busyId === confirmRemoveTarget.id}
+									onClick={closeRemoveConfirm}
+									aria-label="关闭"
+								>
+									×
+								</button>
+							</div>
+						</div>
+						<div className="users-admin-msg err" style={{ marginBottom: 12 }}>
+							确定删除「{confirmRemoveTarget.username}」的账号记录？该操作不可撤销。
+						</div>
+						<div className="calendar-modal-head-actions" style={{ justifyContent: 'flex-end' }}>
+							<button
+								type="button"
+								className="users-admin-btn"
+								disabled={busyId === confirmRemoveTarget.id}
+								onClick={closeRemoveConfirm}
+							>
+								取消
+							</button>
+							<button
+								type="button"
+								className="users-admin-btn danger"
+								disabled={busyId === confirmRemoveTarget.id}
+								onClick={() => void performRemoveUser()}
+								style={{ marginLeft: 10 }}
+							>
+								确定移除
+							</button>
+						</div>
+					</div>
+				</div>
+			) : null}
 
 			<section className="users-admin-card">
 				<div className="users-admin-card-head">
@@ -309,6 +399,24 @@ export default function UserAdminPage() {
 											onClick={() => void disableUser(u.id)}
 										>
 											禁用
+										</button>
+									)}
+									{canRestoreOrRemove(u) && (
+										<button
+											className="users-admin-btn primary"
+											disabled={busyId === u.id}
+											onClick={() => void enableUser(u.id)}
+										>
+											恢复使用
+										</button>
+									)}
+									{canRestoreOrRemove(u) && (
+										<button
+											className="users-admin-btn danger"
+											disabled={busyId === u.id}
+											onClick={() => openRemoveConfirm(u.id, u.username)}
+										>
+											移除
 										</button>
 									)}
 								</div>

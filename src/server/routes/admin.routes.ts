@@ -8,6 +8,8 @@ export function buildAdminRoutes(controller: AdminController): Router {
 	router.get('/', requireAdminOrAbove, controller.listUsers);
 
 	router.post('/:id/disable', requireAdminOrAbove, controller.disableUser);
+	router.post('/:id/enable', requireAdminOrAbove, controller.enableUser);
+	router.delete('/:id', requireAdminOrAbove, controller.deleteUser);
 
 	router.post('/:id/appoint-admin', requireSuperAdmin, controller.appointAdmin);
 	router.post('/:id/revoke-admin', requireSuperAdmin, controller.revokeAdmin);

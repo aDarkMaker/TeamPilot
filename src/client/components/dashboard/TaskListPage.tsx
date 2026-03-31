@@ -55,6 +55,13 @@ function statusText(s: TaskStatus): string {
 	return '待处理';
 }
 
+function statusBadge(task: TaskCard, started: boolean): { label: string; className: string } {
+	if (started && task.status === 'pending') {
+		return { label: '已截止', className: 'deadline' };
+	}
+	return { label: statusText(task.status), className: task.status };
+}
+
 export default function TaskListPage() {
 	const toast = useDashboardToast();
 	const [items, setItems] = useState<TaskCard[]>([]);
@@ -84,6 +91,7 @@ export default function TaskListPage() {
 	}, [items, activeTab]);
 
 	const onDecide = async (task: TaskCard, status: 'accepted' | 'leave') => {
+		if (task.status === status) return;
 		if (isStarted(task)) {
 			toast.show({ text: '现在想改，晚了～', type: 'info' });
 			return;
@@ -130,14 +138,15 @@ export default function TaskListPage() {
 			<div className="task-list">
 				{list.map((task) => {
 					const started = isStarted(task);
-					const done = task.status !== 'pending';
+					const done = task.status !== 'pending' || started;
 					const startIso = taskStartIso(task);
+					const badge = statusBadge(task, started);
 
 					return (
 						<article key={task.id} className={`task-card ${done ? 'is-done' : ''}`}>
 							<div className="task-card-row">
 								<h3>{task.title}</h3>
-								<span className={`task-status ${task.status}`}>{statusText(task.status)}</span>
+								<span className={`task-status ${badge.className}`}>{badge.label}</span>
 							</div>
 							<div className="task-meta">
 								创建时间：{fmtTime(task.createdAt)}
@@ -149,7 +158,7 @@ export default function TaskListPage() {
 								<button
 									type="button"
 									className={`task-action ${task.status === 'accepted' ? 'active' : ''}`}
-									disabled={busyId === task.id || started}
+									disabled={busyId === task.id || started || task.status === 'accepted'}
 									onClick={() => void onDecide(task, 'accepted')}
 								>
 									接受
@@ -157,12 +166,11 @@ export default function TaskListPage() {
 								<button
 									type="button"
 									className={`task-action ${task.status === 'leave' ? 'active' : ''}`}
-									disabled={busyId === task.id || started}
+									disabled={busyId === task.id || started || task.status === 'leave'}
 									onClick={() => void onDecide(task, 'leave')}
 								>
 									请假
 								</button>
-								{started ? <span className="task-lock">已开始，不可修改</span> : null}
 							</div>
 						</article>
 					);

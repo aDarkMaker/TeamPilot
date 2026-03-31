@@ -12,6 +12,48 @@ const loginSchema = z.object({
 export class AuthService {
     constructor(private db: DB) {}
 
+	private getShanghaiYmd() {
+		const parts = new Intl.DateTimeFormat('zh-CN', {
+			timeZone: 'Asia/Shanghai',
+			hour12: false,
+			year: 'numeric',
+			month: '2-digit',
+			day: '2-digit',
+		}).formatToParts(new Date());
+		const get = (type: Intl.DateTimeFormatPartTypes) => String(parts.find((p) => p.type === type)?.value ?? '');
+		return `${get('year')}-${get('month')}-${get('day')}`;
+	}
+
+	private toTaskStartIso(input: { year: number; month: number; day: number; startAt: string }) {
+		const mm = String(input.month).padStart(2, '0');
+		const dd = String(input.day).padStart(2, '0');
+		return `${input.year}-${mm}-${dd}T${input.startAt}:00`;
+	}
+
+	private async syncAllScheduleTasksForUser(user: { id: string }) {
+		const allSchedules = await this.db.listAllSchedulesFromDate({ startDate: this.getShanghaiYmd() });
+		await Promise.all(
+			allSchedules.map((s) =>
+				this.db.createOrReplaceTaskCard({
+					targetUserId: user.id,
+					actorUserId: s.createdBy ?? null,
+					sourceType: 'schedule_at',
+					sourceId: s.id,
+					title: `日程提醒：${s.title}`,
+					content: s.description ?? null,
+					payloadJson: JSON.stringify({
+						startAtIso: this.toTaskStartIso(s),
+						year: s.year,
+						month: s.month,
+						day: s.day,
+						startAt: s.startAt,
+						endAt: s.endAt,
+					}),
+				}),
+			),
+		);
+	}
+
     async login(input: unknown) {
         const parsed = loginSchema.parse(input);
 
@@ -28,6 +70,9 @@ export class AuthService {
         if (!ok) {
             throw new AppError(401, 'INVALID_CREDENTIALS', '再想想密码呢～');
         }
+
+		// 数据层兜底：登录即补齐“全体日程”任务卡，不依赖前端打开日历页。
+		await this.syncAllScheduleTasksForUser({ id: user.id });
 
         const token = signAccessToken({
             sub: user.id,

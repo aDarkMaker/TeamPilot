@@ -15,7 +15,50 @@ const decideBodySchema = z.object({
 export class TaskService {
     constructor(private db: DB) {}
 
+	private getShanghaiYmd() {
+		const parts = new Intl.DateTimeFormat('zh-CN', {
+			timeZone: 'Asia/Shanghai',
+			hour12: false,
+			year: 'numeric',
+			month: '2-digit',
+			day: '2-digit',
+		}).formatToParts(new Date());
+		const get = (type: Intl.DateTimeFormatPartTypes) => String(parts.find((p) => p.type === type)?.value ?? '');
+		return `${get('year')}-${get('month')}-${get('day')}`;
+	}
+
+	private toTaskStartIso(input: { year: number; month: number; day: number; startAt: string }) {
+		const mm = String(input.month).padStart(2, '0');
+		const dd = String(input.day).padStart(2, '0');
+		return `${input.year}-${mm}-${dd}T${input.startAt}:00`;
+	}
+
+	private async ensureAllScheduleTasksForUser(userId: string) {
+		const allSchedules = await this.db.listAllSchedulesFromDate({ startDate: this.getShanghaiYmd() });
+		await Promise.all(
+			allSchedules.map((s) =>
+				this.db.createOrReplaceTaskCard({
+					targetUserId: userId,
+					actorUserId: s.createdBy ?? null,
+					sourceType: 'schedule_at',
+					sourceId: s.id,
+					title: `日程提醒：${s.title}`,
+					content: s.description ?? null,
+					payloadJson: JSON.stringify({
+						startAtIso: this.toTaskStartIso(s),
+						year: s.year,
+						month: s.month,
+						day: s.day,
+						startAt: s.startAt,
+						endAt: s.endAt,
+					}),
+				}),
+			),
+		);
+	}
+
     async listMyTasks(actor: { id: string }, query: unknown) {
+		await this.ensureAllScheduleTasksForUser(actor.id);
         const q = listQuerySchema.parse(query);
         const rows = await this.db.listTaskCardsByUser({
             targetUserId: actor.id,
@@ -40,6 +83,7 @@ export class TaskService {
     }
 
     async countMyPending(actor: { id: string }) {
+		await this.ensureAllScheduleTasksForUser(actor.id);
         return await this.db.countPendingTaskCardsByUser(actor.id);
     }
 

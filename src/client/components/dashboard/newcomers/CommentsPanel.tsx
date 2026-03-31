@@ -1,9 +1,9 @@
-import { useState } from 'react';
+import { useLayoutEffect, useRef, useState } from 'react';
 
 import { MarkdownBlock } from './MarkdownBlock';
 
 import type { MeBrief, RecruitmentCommentDto } from '../../../lib/recruitment/recruitmentClient';
-import { isStaffRole } from '../../../lib/recruitment/recruitmentClient';
+import { canShowDeleteRecruitmentComment } from '../../../lib/recruitment/recruitmentClient';
 import { formatCstMonthDayTime } from '../../../lib/timeCst';
 
 type Props = {
@@ -17,10 +17,42 @@ type Props = {
 	onLike: (commentId: string) => Promise<void>;
 };
 
+const COMMENT_GAP_PX = 12;
+
 export function CommentsPanel({ me, comments, busy, error, onAdd, onEdit, onDelete, onLike }: Props) {
 	const [draft, setDraft] = useState('');
 	const [editingId, setEditingId] = useState<string | null>(null);
 	const [editDraft, setEditDraft] = useState('');
+	const listRef = useRef<HTMLDivElement>(null);
+	const [listMaxHeightPx, setListMaxHeightPx] = useState<number | null>(null);
+
+	useLayoutEffect(() => {
+		const list = listRef.current;
+		if (!list) return;
+
+		const measure = () => {
+			if (comments.length <= 3) {
+				setListMaxHeightPx(null);
+				return;
+			}
+			const cards = list.querySelectorAll('.nc-comment-card');
+			if (cards.length < 3) {
+				setListMaxHeightPx(null);
+				return;
+			}
+			let h = 0;
+			for (let i = 0; i < 3; i++) {
+				h += (cards[i] as HTMLElement).offsetHeight;
+			}
+			h += COMMENT_GAP_PX * 2;
+			setListMaxHeightPx(h);
+		};
+
+		measure();
+		const ro = new ResizeObserver(() => measure());
+		ro.observe(list);
+		return () => ro.disconnect();
+	}, [comments, editingId]);
 
 	const submit = async () => {
 		const t = draft.trim();
@@ -36,7 +68,11 @@ export function CommentsPanel({ me, comments, busy, error, onAdd, onEdit, onDele
 				<span className="nc-comments-count">{comments.length}</span>
 			</div>
 			{error ? <div className="nc-inline-err">{error}</div> : null}
-			<div className="nc-comments-list">
+			<div
+				ref={listRef}
+				className="nc-comments-list"
+				style={listMaxHeightPx != null ? { maxHeight: listMaxHeightPx } : undefined}
+			>
 				{comments.map((c) => (
 					<div key={c.id} className="nc-comment-card">
 						<div className="nc-comment-top">
@@ -108,7 +144,7 @@ export function CommentsPanel({ me, comments, busy, error, onAdd, onEdit, onDele
 									编辑
 								</button>
 							) : null}
-							{canDeleteComment(me, c) && editingId !== c.id ? (
+							{canShowDeleteRecruitmentComment(me, c) && editingId !== c.id ? (
 								<button type="button" className="nc-btn nc-btn--text nc-btn--danger" onClick={() => void onDelete(c.id)}>
 									删除
 								</button>
@@ -133,12 +169,6 @@ export function CommentsPanel({ me, comments, busy, error, onAdd, onEdit, onDele
 			</div>
 		</div>
 	);
-}
-
-function canDeleteComment(me: MeBrief | null, c: RecruitmentCommentDto): boolean {
-	if (!me) return false;
-	if (isStaffRole(me.role)) return true;
-	return me.id === c.authorId;
 }
 
 function formatShort(iso: string): string {

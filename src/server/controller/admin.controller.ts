@@ -23,4 +23,15 @@ export class AdminController {
 		await this.service.disableUser(ctx.params.id, ctx.state.user!.role);
 		ctx.body = { ok: true, data: { id: ctx.params.id, status: 'disabled' } };
 	};
+
+	enableUser = async (ctx: Context) => {
+		await this.service.enableUser(ctx.params.id, ctx.state.user!.role);
+		ctx.body = { ok: true, data: { id: ctx.params.id, status: 'active' } };
+	};
+
+	deleteUser = async (ctx: Context) => {
+		const u = ctx.state.user!;
+		await this.service.deleteUserPermanently(ctx.params.id, u.id, u.role);
+		ctx.body = { ok: true, data: { id: ctx.params.id, deleted: true } };
+	};
 }

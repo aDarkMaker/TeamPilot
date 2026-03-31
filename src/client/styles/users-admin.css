@@ -225,6 +225,35 @@
 	background: rgba(229, 62, 62, 1);
 }
 
+.users-admin-modal-close {
+	padding: 4px 8px;
+	border: none;
+	background: transparent;
+	font-weight: 900;
+	font-size: 18px;
+	line-height: 1;
+	color: #c53030;
+	cursor: pointer;
+	border-radius: 10px;
+	transition:
+		transform 0.18s var(--dash-nav-spring),
+		background 0.22s ease;
+}
+
+.users-admin-modal-close:hover:not(:disabled) {
+	background: rgba(229, 62, 62, 0.1);
+}
+
+.users-admin-modal-close:active:not(:disabled) {
+	transform: scale(0.98);
+}
+
+.users-admin-modal-close:disabled {
+	opacity: 0.6;
+	cursor: not-allowed;
+	transform: none;
+}
+
 .users-admin-table-wrap {
 	overflow: auto;
 	border-radius: 14px;
