@@ -1,13 +1,24 @@
 const CST_TZ = 'Asia/Shanghai';
 
-export function parseSqliteDateTimeAsUtc(raw: string): Date | null {
+function normalizeUtcLike(raw: string): string {
 	const s = String(raw ?? '').trim();
-	if (!s) return null;
-	if (s.includes('T')) {
-		const d = new Date(s);
-		return Number.isNaN(d.getTime()) ? null : d;
+	if (!s) return s;
+
+	if (/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/.test(s)) {
+		return s.replace(' ', 'T') + 'Z';
 	}
-	const d = new Date(s.replace(' ', 'T') + 'Z');
+
+	if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}$/.test(s)) {
+		return s + 'Z';
+	}
+
+	return s;
+}
+
+export function parseSqliteDateTimeAsUtc(raw: string): Date | null {
+	const s = normalizeUtcLike(raw);
+	if (!s) return null;
+	const d = new Date(s);
 	return Number.isNaN(d.getTime()) ? null : d;
 }
 
