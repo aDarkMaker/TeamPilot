@@ -9,7 +9,7 @@ export function applyGlobalMiddleware(app: Koa): void {
 		koaBody({
 			multipart: true,
 			formidable: {
-				maxFileSize: 5 * 1024 * 1024,
+				maxFileSize: 20 * 1024 * 1024,
 				keepExtensions: true,
 			},
 			jsonLimit: '1mb',
