@@ -78,6 +78,7 @@ async function main() {
 	const taskController = new TaskController(taskService);
 
 	const app = new Koa();
+	app.proxy = true; // X-forwarded-for 你家不要了
 	applyGlobalMiddleware(app);
 
 	const apiRouter = composeApiRouter({ applicationController, adminController, authController, profileController, scheduleController, recruitmentController, joinusSubmitController, homeController, taskController });
