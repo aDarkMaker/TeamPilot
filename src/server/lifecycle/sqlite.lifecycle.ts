@@ -141,6 +141,35 @@ function initSchema(db: Database): void {
 	`);
 
 	db.run(`
+	CREATE TABLE IF NOT EXISTS task_cards (
+		id INTEGER PRIMARY KEY AUTOINCREMENT,
+		target_user_id INTEGER NOT NULL,
+		actor_user_id INTEGER,
+		source_type TEXT NOT NULL,
+		source_id TEXT NOT NULL,
+		title TEXT NOT NULL,
+		content TEXT,
+		payload_json TEXT,
+		status TEXT NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'accepted', 'leave')),
+		decided_at TEXT,
+		created_at TEXT NOT NULL DEFAULT (datetime('now')),
+		updated_at TEXT NOT NULL DEFAULT (datetime('now')),
+		FOREIGN KEY(target_user_id) REFERENCES users(id) ON DELETE CASCADE,
+		FOREIGN KEY(actor_user_id) REFERENCES users(id) ON DELETE SET NULL
+	);	
+	`);
+
+	db.run(`
+	CREATE UNIQUE INDEX IF NOT EXISTS idx_task_cards_target_source
+	ON task_cards(target_user_id, source_type, source_id);	
+	`);
+
+	db.run(`
+		CREATE INDEX IF NOT EXISTS idx_task_cards_target_status_time
+		ON task_cards(target_user_id, status, created_at DESC);
+	`);
+
+	db.run(`
 	CREATE TABLE IF NOT EXISTS recruitment_applications (
 		id INTEGER PRIMARY KEY AUTOINCREMENT,
 		submitter_user_id INTEGER NOT NULL,

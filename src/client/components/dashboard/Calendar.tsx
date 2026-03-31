@@ -868,7 +868,7 @@ export default function Calendar() {
 							<div className="calendar-detail-title">{detail.title}</div>
 							<div className="calendar-detail-line">
 								<span className="pill">
-									{detail.startAt}–{detail.endAt}
+									{detail.startAt} ～ {detail.endAt}
 								</span>
 								{detail.location ? <span className="pill">{detail.location}</span> : null}
 								<span className="pill">{detail.durationMinutes} 分钟</span>
@@ -876,7 +876,7 @@ export default function Calendar() {
 							{detail.participants?.length ? (
 								<div className="calendar-detail-people">
 									{detail.participants.map((p) => (
-										<div key={p.userId} className="calendar-person">
+										<div key={p.userId} className={`calendar-person ${p.taskStatus === 'leave' ? 'is-leave' : ''}`}>
 											<span className="calendar-person-avatar">
 												{p.avatarUrl ? (
 													<img className="calendar-person-img" src={p.avatarUrl} alt="" decoding="async" loading="eager" />
@@ -884,6 +884,7 @@ export default function Calendar() {
 												<span className="calendar-person-fallback">{p.username.slice(0, 1)}</span>
 											</span>
 											<span className="calendar-person-name">{p.username}</span>
+											{p.taskStatus === 'leave' ? <span className="calendar-person-tag leave">已请假</span> : null}
 										</div>
 									))}
 								</div>

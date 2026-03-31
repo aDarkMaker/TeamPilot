@@ -19,6 +19,8 @@ import { RecruitmentService } from './services/recruitment.service';
 import { RecruitmentController } from './controller/recruitment.controller';
 import { JoinUsSubmitService } from './services/joinusSubmit.service';
 import { JoinusSubmitController } from './controller/joinusSubmit.controller';
+import { TaskService } from './services/task.service';
+import { TaskController } from './controller/task.controller';
 import { HomeService } from './services/home.service';
 import { HomeController } from './controller/home.controller';
 import serve from 'koa-static';
@@ -72,10 +74,13 @@ async function main() {
 	const homeService = new HomeService(db, cache, config);
 	const homeController = new HomeController(homeService);
 
+	const taskService = new TaskService(db);
+	const taskController = new TaskController(taskService);
+
 	const app = new Koa();
 	applyGlobalMiddleware(app);
 
-	const apiRouter = composeApiRouter({ applicationController, adminController, authController, profileController, scheduleController, recruitmentController, joinusSubmitController, homeController });
+	const apiRouter = composeApiRouter({ applicationController, adminController, authController, profileController, scheduleController, recruitmentController, joinusSubmitController, homeController, taskController });
 	app.use(apiRouter.routes());
 	app.use(apiRouter.allowedMethods());
 

@@ -4,6 +4,7 @@ export type ScheduleParticipant = {
 	userId: string;
 	username: string;
 	avatarUrl?: string | null;
+	taskStatus?: 'pending' | 'accepted' | 'leave';
 };
 
 export type ScheduleDayItem = {

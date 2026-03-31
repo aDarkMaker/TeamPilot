@@ -12,7 +12,7 @@ import type {
 	RecruitmentDepartment,
 	RecruitmentInterviewSlot,
 } from './types/recruitment';
-import { string } from 'astro:schema';
+import type { TaskCard, TaskSourceType, TaskStatus } from './types/task';
 
 export interface DB {
 	findUserByUsername(username: string): Promise<User | null>;
@@ -28,6 +28,34 @@ export interface DB {
 	createBirthdayWish(input: { recipientUserId: string; authorUserId: string; message: string; wishDate: string }): Promise<
 		{ id: string; message: string; createdAt: string; authorId: string; authorUsername: string; authorNickname: string | null; authorAvatarPath: string | null }
 	>;
+
+	listTaskCardsByUser(input: {
+		targetUserId: string;
+		status?: TaskStatus;
+		limit?: number;
+		offset?: number;
+	}): Promise<TaskCard[]>;
+
+	countPendingTaskCardsByUser(targetUserId: string): Promise<number>;
+
+	createOrReplaceTaskCard(input: {
+		targetUserId: string;
+		actorUserId: string | null;
+		sourceType: TaskSourceType;
+		sourceId: string;
+		title: string;
+		content?: string | null;
+		payloadJson?: string | null;
+	}): Promise<TaskCard>;
+
+	decideTaskCard(input: {
+		taskId: string;
+		targetUserId: string;
+		status: Extract<TaskStatus, 'accepted' | 'leave'>;
+	}): Promise<TaskCard>;
+	listTaskCardsBySource(input: { sourceType: TaskSourceType; sourceId: string }): Promise<TaskCard[]>;
+	pruneTaskCardsBySourceTargets(input: { sourceType: TaskSourceType; sourceId: string; keepTargetUserIds: string[] }): Promise<void>;
+	deleteTaskCardsBySource(input: { sourceType: TaskSourceType; sourceId: string }): Promise<void>;
 
 	createSchedule(input: {
 		title: string;
@@ -70,6 +98,7 @@ export interface DB {
 	listScheduleParticipants(scheduleId: string): Promise<ScheduleParticipant[]>;
 
 	searchUsersByUsername(keyword: string, limit?: number): Promise<Array<{ id: string; username: string; avatarPath: string | null }>>;
+	findScheduleById(scheduleId: string): Promise<Schedule | null>;
 
 	deleteSchedule(scheduleId: string, actor: { id: string }): Promise<void>;
 
@@ -574,6 +603,11 @@ export function createDb(sqlite: Database): DB {
 			return rows.map(mapScheduleParticipant);
 		},
 
+		async findScheduleById(scheduleId) {
+			const row = sqlite.query(`SELECT * FROM schedules WHERE id = ? LIMIT 1`).get(scheduleId);
+			return row ? mapSchedule(row) : null;
+		},
+
 		async searchUsersByUsername(keyword, limit = 8) {
 			const rows = sqlite
 				.query(
@@ -910,7 +944,244 @@ export function createDb(sqlite: Database): DB {
 				authorNickname: row.author_nickname ?? null,
 				authorAvatarPath: row.author_avatar_path ?? null,
 			};
-		}
+		},
+
+		async listTaskCardsByUser(input) {
+			const limit = Math.max(1, Math.min(100, Number(input.limit ?? 20)));
+			const offset = Math.max(0, Number(input.offset ?? 0));
+
+			const where: string[] = ['target_user_id = ?'];
+			const bindings: SQLQueryBindings[] = [input.targetUserId];
+
+			if (input.status) {
+				where.push('status = ?');
+				bindings.push(input.status);
+			}
+
+			const rows = sqlite
+				.query(
+					`SELECT
+						id,
+						target_user_id,
+						actor_user_id,
+						source_type,
+						source_id,
+						title,
+						content,
+						payload_json,
+						status,
+						decided_at,
+						created_at,
+						updated_at
+					FROM task_cards
+					WHERE ${where.join(' AND ')}
+					ORDER BY created_at DESC
+					LIMIT ? OFFSET ?`,
+				)
+				.all(...bindings, limit, offset) as any[];
+			
+			return rows.map((r) => ({
+				id: String(r.id),
+				targetUserId: String(r.target_user_id),
+				actorUserId: r.actor_user_id == null ? null : String(r.actor_user_id),
+				sourceType: String(r.source_type) as TaskSourceType,
+				sourceId: String(r.source_id),
+				title: String(r.title),
+				content: r.content ?? null,
+				payloadJson: r.payload_json ?? null,
+				status: String(r.status) as TaskStatus,
+				decidedAt: r.decided_at ?? null,
+				createdAt: String(r.created_at),
+				updatedAt: String(r.updated_at),
+			}));
+		},
+
+		async countPendingTaskCardsByUser(targetUserId) {
+			const row = sqlite
+				.query(`SELECT COUNT(*) AS c FROM task_cards WHERE target_user_id = ? AND status = 'pending'`)
+				.get(targetUserId) as any;
+			return Number(row?.c ?? 0);
+		},
+
+		async createOrReplaceTaskCard(input) {
+			// UPSERT KEEP UNIQUE
+			sqlite
+				.query(
+					`INSERT INTO task_cards (
+						target_user_id, actor_user_id, source_type, source_id, title, content, payload_json, status
+					) VALUES (?, ?, ?, ?, ?, ?, ?, 'pending')
+					ON CONFLICT(target_user_id, source_type, source_id) DO UPDATE SET
+						actor_user_id = excluded.actor_user_id,
+						title = excluded.title,
+						content = excluded.content,
+						payload_json = excluded.payload_json,
+						status = 'pending',
+						decided_at = NULL,
+						updated_at = datetime('now')`,
+				)
+				.run(
+					input.targetUserId,
+					input.actorUserId,
+					input.sourceType,
+					input.sourceId,
+					input.title,
+					input.content ?? null,
+					input.payloadJson ?? null,
+				);
+
+			const row = sqlite
+				.query(
+					`SELECT
+						id,
+						target_user_id,
+						actor_user_id,
+						source_type,
+						source_id,
+						title,
+						content,
+						payload_json,
+						status,
+						decided_at,
+						created_at,
+						updated_at
+					FROM task_cards
+					WHERE target_user_id = ? AND source_type = ? AND source_id = ?
+					LIMIT 1`,
+				)
+				.get(input.targetUserId, input.sourceType, input.sourceId) as any;
+			
+			return {
+				id: String(row.id),
+				targetUserId: String(row.target_user_id),
+				actorUserId: row.actor_user_id == null ? null : String(row.actor_user_id),
+				sourceType: String(row.source_type) as TaskSourceType,
+				sourceId: String(row.source_id),
+				title: String(row.title),
+				content: row.content ?? null,
+				payloadJson: row.payload_json ?? null,
+				status: String(row.status) as TaskStatus,
+				decidedAt: row.decided_at ?? null,
+				createdAt: String(row.created_at),
+				updatedAt: String(row.updated_at),
+			};
+		},
+
+		async decideTaskCard(input) {
+			const tx = sqlite.transaction((payload: typeof input) => {
+				const row = sqlite
+					.query(`SELECT id, target_user_id, status FROM task_cards WHERE id = ? LIMIT 1`)
+					.get(payload.taskId) as any;
+				if (!row) throw new Error('TASK_NOT_FOUND');
+				if (String(row.target_user_id) !== String(payload.targetUserId)) throw new Error('FORBIDDEN');
+				
+				sqlite
+					.query(
+						`UPDATE task_cards
+						SET status = ?, decided_at = datetime('now'), updated_at = datetime('now')
+						WHERE id = ?`,
+					)
+					.run(payload.status, payload.taskId);
+
+				const next = sqlite
+					.query(
+						`SELECT
+							id,
+							target_user_id,
+							actor_user_id,
+							source_type,
+							source_id,
+							title,
+							content,
+							payload_json,
+							status,
+							decided_at,
+							created_at,
+							updated_at
+						FROM task_cards WHERE id = ? LIMIT 1`,
+					)
+					.get(payload.taskId) as any;
+				
+				return next;
+			});
+
+			const row = tx(input);
+
+			return {
+				id: String(row.id),
+				targetUserId: String(row.target_user_id),
+				actorUserId: row.actor_user_id == null ? null : String(row.actor_user_id),
+				sourceType: String(row.source_type) as TaskSourceType,
+				sourceId: String(row.source_id),
+				title: String(row.title),
+				content: row.content ?? null,
+				payloadJson: row.payload_json ?? null,
+				status: String(row.status) as TaskStatus,
+				decidedAt: row.decided_at ?? null,
+				createdAt: String(row.created_at),
+				updatedAt: String(row.updated_at),
+			};
+		},
+
+		async listTaskCardsBySource(input) {
+			const rows = sqlite
+				.query(
+					`SELECT
+						id,
+						target_user_id,
+						actor_user_id,
+						source_type,
+						source_id,
+						title,
+						content,
+						payload_json,
+						status,
+						decided_at,
+						created_at,
+						updated_at
+					FROM task_cards
+					WHERE source_type = ? AND source_id = ?
+					ORDER BY created_at DESC`,
+				)
+				.all(input.sourceType, input.sourceId) as any[];
+			return rows.map((r) => ({
+				id: String(r.id),
+				targetUserId: String(r.target_user_id),
+				actorUserId: r.actor_user_id == null ? null : String(r.actor_user_id),
+				sourceType: String(r.source_type) as TaskSourceType,
+				sourceId: String(r.source_id),
+				title: String(r.title),
+				content: r.content ?? null,
+				payloadJson: r.payload_json ?? null,
+				status: String(r.status) as TaskStatus,
+				decidedAt: r.decided_at ?? null,
+				createdAt: String(r.created_at),
+				updatedAt: String(r.updated_at),
+			}));
+		},
+
+		async pruneTaskCardsBySourceTargets(input) {
+			const keep = Array.from(new Set(input.keepTargetUserIds)).filter(Boolean);
+			if (keep.length === 0) {
+				sqlite
+					.query(`DELETE FROM task_cards WHERE source_type = ? AND source_id = ?`)
+					.run(input.sourceType, input.sourceId);
+				return;
+			}
+			const placeholders = keep.map(() => '?').join(', ');
+			sqlite
+				.query(
+					`DELETE FROM task_cards
+					 WHERE source_type = ? AND source_id = ?
+					   AND target_user_id NOT IN (${placeholders})`,
+				)
+				.run(input.sourceType, input.sourceId, ...keep);
+		},
+
+		async deleteTaskCardsBySource(input) {
+			sqlite
+				.query(`DELETE FROM task_cards WHERE source_type = ? AND source_id = ?`)
+				.run(input.sourceType, input.sourceId);
+		},
 	};
 }
 

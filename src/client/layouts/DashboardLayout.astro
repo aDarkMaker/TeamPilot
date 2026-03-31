@@ -10,6 +10,7 @@ import favicon from '../assets/img/icon/icon-hxk.png';
 import DashboardSidebar from '../components/dashboard/DashboardSidebar';
 import DashboardTopBar from '../components/dashboard/DashboardTopBar';
 import DashboardBackground from '../components/dashboard/DashboardBackground';
+import DashboardAuthGuard from '../components/dashboard/DashboardAuthGuard';
 
 interface Props {
     title?: string;
@@ -30,6 +31,7 @@ const { title = '工作主页', notifyVariant = 'read' }: Props = Astro.props;
     </head>
     <body>
         <div class="dashboard-root">
+            <DashboardAuthGuard client:load />
             <DashboardSidebar
                 client:load
                 transition:persist="dashboard-sidebar"

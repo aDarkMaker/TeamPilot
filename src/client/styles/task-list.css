@@ -1,0 +1,145 @@
+.task-page {
+	display: grid;
+	gap: 14px;
+}
+
+.task-head {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	justify-content: space-between;
+}
+
+.task-tabs {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	flex-wrap: wrap;
+}
+
+.task-tab,
+.task-refresh-btn,
+.task-action {
+	border: 1px solid rgba(255, 255, 255, 0.66);
+	background: rgba(255, 255, 255, 0.52);
+	border-radius: 11px;
+	padding: 8px 12px;
+	font-size: 13px;
+	color: #2d3748;
+	cursor: pointer;
+	transition: background 0.16s ease, border-color 0.16s ease;
+}
+
+.task-tab:hover,
+.task-refresh-btn:hover,
+.task-action:hover {
+	background: rgba(255, 255, 255, 0.72);
+}
+
+.task-tab.active,
+.task-action.active {
+	background: rgba(49, 130, 206, 0.18);
+	border-color: rgba(49, 130, 206, 0.34);
+	color: #1e4f82;
+}
+
+.task-tab:disabled,
+.task-refresh-btn:disabled,
+.task-action:disabled {
+	opacity: 0.56;
+	cursor: not-allowed;
+}
+
+.task-empty {
+	padding: 16px;
+	border-radius: 14px;
+	background: rgba(255, 255, 255, 0.48);
+	border: 1px solid rgba(255, 255, 255, 0.58);
+	color: #4a5568;
+}
+
+.task-list {
+	display: grid;
+	gap: 12px;
+}
+
+.task-card {
+	padding: 14px;
+	border-radius: 14px;
+	background: rgba(255, 255, 255, 0.56);
+	border: 1px solid rgba(255, 255, 255, 0.64);
+	box-shadow: 0 10px 22px rgba(15, 23, 42, 0.06);
+	display: grid;
+	gap: 8px;
+}
+
+.task-card.is-done {
+	background: rgba(148, 163, 184, 0.2);
+	border-color: rgba(148, 163, 184, 0.42);
+	box-shadow: none;
+	filter: grayscale(0.18);
+}
+
+.task-card-row {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 10px;
+}
+
+.task-card h3 {
+	margin: 0;
+	font-size: 16px;
+	line-height: 1.35;
+	color: #1a202c;
+}
+
+.task-meta {
+	font-size: 12px;
+	color: #718096;
+}
+
+.task-content {
+	font-size: 13px;
+	line-height: 1.6;
+	color: #2d3748;
+	white-space: pre-wrap;
+}
+
+.task-status {
+	font-size: 12px;
+	border-radius: 999px;
+	padding: 4px 9px;
+	border: 1px solid transparent;
+}
+
+.task-status.pending {
+	color: #975a16;
+	background: rgba(246, 173, 85, 0.2);
+	border-color: rgba(246, 173, 85, 0.34);
+}
+
+.task-status.accepted {
+	color: #276749;
+	background: rgba(72, 187, 120, 0.18);
+	border-color: rgba(72, 187, 120, 0.34);
+}
+
+.task-status.leave {
+	color: #2b6cb0;
+	background: rgba(66, 153, 225, 0.16);
+	border-color: rgba(66, 153, 225, 0.32);
+}
+
+.task-actions {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+}
+
+.task-lock {
+	margin-left: auto;
+	font-size: 12px;
+	color: #718096;
+}
+

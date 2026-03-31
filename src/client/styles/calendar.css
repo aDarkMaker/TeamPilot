@@ -639,6 +639,12 @@
 	background: rgba(255, 255, 255, 0.55);
 }
 
+.calendar-person.is-leave {
+	background: rgba(148, 163, 184, 0.22);
+	border-color: rgba(148, 163, 184, 0.42);
+	filter: grayscale(0.2);
+}
+
 .calendar-person-avatar {
 	width: 26px;
 	height: 26px;
@@ -676,6 +682,16 @@
 	overflow: hidden;
 	text-overflow: ellipsis;
 	white-space: nowrap;
+}
+
+.calendar-person-tag.leave {
+	font-size: 11px;
+	font-weight: 800;
+	color: #64748b;
+	background: rgba(226, 232, 240, 0.85);
+	border: 1px solid rgba(148, 163, 184, 0.45);
+	border-radius: 999px;
+	padding: 2px 7px;
 }
 
 .calendar-detail-desc {

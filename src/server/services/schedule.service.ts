@@ -3,6 +3,7 @@ import type { DB } from '../db';
 import { canReviewApplication } from '../auth/rbac';
 import { AppError } from '../types/api';
 import type { Role } from '../types/auth';
+import type { TaskStatus } from '../types/task';
 import { pinyin } from 'pinyin-pro';
 
 const createSchema = z.object({
@@ -31,6 +32,69 @@ const weekSchema = z.object({
 
 export class ScheduleService {
     constructor(private db: DB) {}
+
+	private toTaskStartIso(input: { year: number; month: number; day: number; startAt: string }) {
+		const mm = String(input.month).padStart(2, '0');
+		const dd = String(input.day).padStart(2, '0');
+		return `${input.year}-${mm}-${dd}T${input.startAt}:00`;
+	}
+
+	private async syncScheduleTaskCards(input: {
+		scheduleId: string;
+		actorId: string;
+		title: string;
+		description: string | null;
+		year: number;
+		month: number;
+		day: number;
+		startAt: string;
+		endAt: string;
+		participantIds: string[];
+	}) {
+		const uniqueTargets = Array.from(new Set([...input.participantIds, input.actorId])).filter(Boolean);
+		if (uniqueTargets.length === 0) return;
+
+		const payload = JSON.stringify({
+			startAtIso: this.toTaskStartIso(input),
+			year: input.year,
+			month: input.month,
+			day: input.day,
+			startAt: input.startAt,
+			endAt: input.endAt,
+		});
+
+		await Promise.all(
+			uniqueTargets.map((targetUserId) =>
+				this.db.createOrReplaceTaskCard({
+					targetUserId,
+					actorUserId: input.actorId,
+					sourceType: 'schedule_at',
+					sourceId: input.scheduleId,
+					title: `日程提醒：${input.title}`,
+					content: input.description ?? null,
+					payloadJson: payload,
+				}),
+			),
+		);
+		await this.db.pruneTaskCardsBySourceTargets({
+			sourceType: 'schedule_at',
+			sourceId: input.scheduleId,
+			keepTargetUserIds: uniqueTargets,
+		});
+	}
+
+	private async loadParticipantsWithTaskStatus(scheduleId: string) {
+		const participants = await this.db.listScheduleParticipants(scheduleId);
+		const taskCards = await this.db.listTaskCardsBySource({ sourceType: 'schedule_at', sourceId: scheduleId });
+		const statusByUser = new Map<string, TaskStatus>(taskCards.map((t) => [String(t.targetUserId), t.status]));
+		return (participants as any[]).map((p) => ({
+			scheduleId: p.scheduleId,
+			userId: p.userId,
+			username: p.username,
+			avatarUrl: this.toPublicUrl(p.avatarPath),
+			taskStatus: statusByUser.get(String(p.userId)) ?? 'pending',
+		}));
+	}
 
 	private toPublicUrl(storedPath: string | null | undefined) {
 		return storedPath ? `/uploads/${String(storedPath).replace(/^\/+/, '')}` : null;
@@ -94,12 +158,19 @@ export class ScheduleService {
             location: parsed.location ?? null,
 			createdBy: actor.id,
         });
-        const participants = (await this.db.listScheduleParticipants(schedule.id)).map((p: any) => ({
-			scheduleId: p.scheduleId,
-			userId: p.userId,
-			username: p.username,
-			avatarUrl: this.toPublicUrl(p.avatarPath),
-		}));
+		await this.syncScheduleTaskCards({
+			scheduleId: schedule.id,
+			actorId: actor.id,
+			title: parsed.title,
+			description: parsed.description ?? null,
+			year: parsed.year,
+			month: parsed.month,
+			day: parsed.day,
+			startAt: parsed.startAt,
+			endAt: parsed.endAt,
+			participantIds,
+		});
+        const participants = await this.loadParticipantsWithTaskStatus(schedule.id);
         return { ...schedule, participants };
     }
 
@@ -114,12 +185,7 @@ export class ScheduleService {
 		return Promise.all(
 			schedules.map(async (s) => ({
 				...s,
-				participants: (await this.db.listScheduleParticipants(s.id)).map((p: any) => ({
-					scheduleId: p.scheduleId,
-					userId: p.userId,
-					username: p.username,
-					avatarUrl: this.toPublicUrl(p.avatarPath),
-				})),
+				participants: await this.loadParticipantsWithTaskStatus(s.id),
 			}))
 		);
     }
@@ -142,12 +208,7 @@ export class ScheduleService {
 		return Promise.all(
 			schedules.map(async (s) => ({
 				...s,
-				participants: (await this.db.listScheduleParticipants(s.id)).map((p: any) => ({
-					scheduleId: p.scheduleId,
-					userId: p.userId,
-					username: p.username,
-					avatarUrl: this.toPublicUrl(p.avatarPath),
-				})),
+				participants: await this.loadParticipantsWithTaskStatus(s.id),
 			}))
 		);
 	}
@@ -188,22 +249,33 @@ export class ScheduleService {
 		if (participantIds.length) {
 			await this.db.replaceScheduleParticipants({ scheduleId, participantIds });
 		}
+		const effectiveParticipantIds = participantIds.length
+			? participantIds
+			: (await this.db.listScheduleParticipants(updated.id)).map((p: any) => String(p.userId));
+		await this.syncScheduleTaskCards({
+			scheduleId: updated.id,
+			actorId: actor.id,
+			title: parsed.title,
+			description: parsed.description ?? null,
+			year: parsed.year,
+			month: parsed.month,
+			day: parsed.day,
+			startAt: parsed.startAt,
+			endAt: parsed.endAt,
+			participantIds: effectiveParticipantIds,
+		});
 
-		const participants = await this.db.listScheduleParticipants(updated.id);
+		const participants = await this.loadParticipantsWithTaskStatus(updated.id);
 		return {
 			...updated,
-			participants: (participants as any[]).map((p) => ({
-				scheduleId: p.scheduleId,
-				userId: p.userId,
-				username: p.username,
-				avatarUrl: this.toPublicUrl(p.avatarPath),
-			})),
+			participants,
 		};
 	}
 
 	async cancel(actor: { id: string; role: Role }, scheduleId: string) {
 		try {
 			await this.db.deleteSchedule(scheduleId, { id: actor.id });
+			await this.db.deleteTaskCardsBySource({ sourceType: 'schedule_at', sourceId: scheduleId });
 		} catch (e) {
 			const msg = e instanceof Error ? e.message : 'DELETE_FAILED';
 			if (msg === 'SCHEDULE_NOT_FOUND') throw new AppError(404, 'SCHEDULE_NOT_FOUND', 'SCHEDULE_NOT_FOUND');
