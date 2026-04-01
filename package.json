@@ -10,7 +10,7 @@
     "dev": "astro dev",
     "build": "astro build",
     "start": "astro preview",
-    "release": "node script/build.js"
+    "release": "bun script/build.mjs"
   },
   "peerDependencies": {
     "typescript": "^5"
