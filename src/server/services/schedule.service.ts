@@ -54,6 +54,27 @@ export class ScheduleService {
 		};
 	}
 
+	private parseHHmmToMinutes(hhmm: string): number | null {
+		const m = /^(\d{2}):(\d{2})$/.exec(String(hhmm).trim());
+		if (!m) return null;
+		const h = Number(m[1]);
+		const mm = Number(m[2]);
+		if (!Number.isFinite(h) || !Number.isFinite(mm)) return null;
+		if (h < 0 || h > 23 || mm < 0 || mm > 59) return null;
+		return h * 60 + mm;
+	}
+
+	private assertEndAfterStart(startAt: string, endAt: string) {
+		const s = this.parseHHmmToMinutes(startAt);
+		const e = this.parseHHmmToMinutes(endAt);
+		if (s == null || e == null) {
+			throw new AppError(400, 'INVALID_TIME', '开始或结束时间格式不正确');
+		}
+		if (e <= s) {
+			throw new AppError(400, 'INVALID_TIME_RANGE', '结束时间必须晚于开始时间');
+		}
+	}
+
 	private assertScheduleStartNotPast(input: {
 		year: number;
 		month: number;
@@ -186,6 +207,13 @@ export class ScheduleService {
 
 	async create(actor: { id: string; role: Role }, body: unknown) {
         const parsed = createSchema.parse(body);
+		this.assertEndAfterStart(parsed.startAt, parsed.endAt);
+		const startM = this.parseHHmmToMinutes(parsed.startAt)!;
+		const endM = this.parseHHmmToMinutes(parsed.endAt)!;
+		const durationMinutes = endM - startM;
+		if (durationMinutes < 5 || durationMinutes > 24 * 60) {
+			throw new AppError(400, 'INVALID_DURATION', '你这是正经日程吗');
+		}
 		this.assertScheduleStartNotPast({
 			year: parsed.year,
 			month: parsed.month,
@@ -218,7 +246,7 @@ export class ScheduleService {
             day: parsed.day,
             startAt: parsed.startAt,
             endAt: parsed.endAt,
-            durationMinutes: parsed.durationMinutes,
+            durationMinutes,
             location: parsed.location ?? null,
 			createdBy: actor.id,
         });
@@ -319,6 +347,14 @@ export class ScheduleService {
 			.extend({ participantIds: z.array(z.string()).default([]) })
 			.parse(body);
 
+		this.assertEndAfterStart(parsed.startAt, parsed.endAt);
+		const startM = this.parseHHmmToMinutes(parsed.startAt)!;
+		const endM = this.parseHHmmToMinutes(parsed.endAt)!;
+		const durationMinutes = endM - startM;
+		if (durationMinutes < 5 || durationMinutes > 24 * 60) {
+			throw new AppError(400, 'INVALID_DURATION', '你这是正经日程吗');
+		}
+
 		let updated;
 		try {
 			updated = await this.db.updateSchedule(
@@ -332,7 +368,7 @@ export class ScheduleService {
 				day: parsed.day,
 				startAt: parsed.startAt,
 				endAt: parsed.endAt,
-				durationMinutes: parsed.durationMinutes,
+				durationMinutes,
 			},
 			{ id: actor.id }
 			);

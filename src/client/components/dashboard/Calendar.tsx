@@ -96,8 +96,12 @@ function layoutDayBlocks(items: ScheduleDayItem[]): BlockLayout[] {
 			const e = parseHHmm(item.endAt);
 			if (s == null || e == null) return null;
 			const start = clamp(s, dayStart, dayEnd);
-			const end = clamp(e, dayStart, dayEnd);
-			const safeEnd = Math.max(end, start + 5);
+			let endRaw = clamp(e, dayStart, dayEnd);
+			if (endRaw <= start) {
+				const dur = Math.max(5, Number(item.durationMinutes) || 60);
+				endRaw = clamp(start + dur, dayStart, dayEnd);
+			}
+			const safeEnd = Math.max(endRaw, start + 5);
 			return { item, start, end: safeEnd };
 		})
 		.filter(Boolean) as Array<{ item: ScheduleDayItem; start: number; end: number }>;
@@ -222,6 +226,7 @@ export default function Calendar() {
 		const s = parseHHmm(startAt);
 		const e = parseHHmm(endAt);
 		if (s == null || e == null) return 0;
+		if (e <= s) return 0;
 		return Math.max(5, e - s);
 	}, [startAt, endAt]);
 
@@ -343,6 +348,14 @@ export default function Calendar() {
 			const role = me?.role ?? 'user';
 			const effectiveScope = role === 'user' ? 'self' : scope;
 
+			const sMin = parseHHmm(startAt);
+			const eMin = parseHHmm(endAt);
+			if (sMin == null || eMin == null || eMin <= sMin) {
+				setCreateErr('时间旅行者来了');
+				return;
+			}
+			const dm = Math.max(5, eMin - sMin);
+
 			const body = {
 				title,
 				scope: effectiveScope,
@@ -353,7 +366,7 @@ export default function Calendar() {
 				day: selectedYmd.day,
 				startAt,
 				endAt,
-				durationMinutes,
+				durationMinutes: dm,
 				location: location || null,
 			};
 
@@ -462,8 +475,15 @@ export default function Calendar() {
 		const s = parseHHmm(startAt);
 		const e = parseHHmm(endAt);
 		if (s == null || e == null) return;
-		if (e <= s) setEndAt(addMinutes(startAt, 60));
-	}, [startAt]);
+		if (e <= s) {
+			const dayEndMin = END_HOUR * 60;
+			const candidate = Math.min(s + 60, dayEndMin);
+			const safeMin = candidate <= s ? Math.min(s + 5, dayEndMin) : candidate;
+			const next = fmtHHmm(safeMin);
+			const n = parseHHmm(next);
+			if (n != null && n > s && next !== endAt) setEndAt(next);
+		}
+	}, [startAt, endAt]);
 
 	useEffect(() => {
 		if (!draftRange?.active) return;
