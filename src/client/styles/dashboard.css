@@ -403,9 +403,28 @@ html.dashboard-shell body {
 }
 
 @media (max-width: 768px) {
+	.dashboard-logo {
+		justify-content: center;
+	}
+
+	.dashboard-logout {
+		display: none;
+	}
+
+	.dashboard-user-card {
+		justify-content: center;
+		border: none;
+		border-radius: 0;
+		background: none;
+	}
+
 	.dashboard-sidebar {
-		width: 72px;
+		width: 54px;
 		padding: 14px 8px;
+	}
+
+	.dashboard-search {
+		display: none;
 	}
 
 	.dashboard-logo span,
@@ -419,7 +438,15 @@ html.dashboard-shell body {
 		padding: 12px;
 	}
 
-	.dashboard-search input {
-		width: 140px;
+	.home-ann-actions {
+		display: none !important;
+	}
+
+	.home-ann-meta {
+		font-size: 10px !important;
+	}
+
+	.dashboard-topbar-toast-slot {
+		display: none !important;
 	}
 }
