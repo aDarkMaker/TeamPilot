@@ -83,7 +83,7 @@
 			"required": true,
 			"placeholder": "请选择面试时间",
 			"icon": "ri-time-line",
-			"options": ["3月14号上午", "3月14号下午"],
+			"options": ["2月30号上午", "2月31号下午"],
 			"showWhen": { "questionId": "offline_interview", "value": "是" }
 		},
 		{
