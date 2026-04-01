@@ -5,13 +5,56 @@ import { config } from '../config';
 
 let sqlite: Database | null = null;
 
-function ensureUserColumn(db: Database, column: string, type: string): void {
-	const cols = db
-		.query(`PRAGMA table_info(users)`)
+const IDENT = /^[a-zA-Z_][a-zA-Z0-9_]*$/;
+
+function assertIdent(name: string, label: string): void {
+	if (!IDENT.test(name)) throw new Error(`Invalid ${label}: ${name}`);
+}
+
+function listTableColumnNames(db: Database, table: string): string[] {
+	assertIdent(table, 'table');
+	return db
+		.query(`PRAGMA table_info(${table})`)
 		.all()
 		.map((r: any) => String(r.name));
-	if (cols.includes(column)) return;
-	db.run(`ALTER TABLE users ADD COLUMN ${column} ${type}`);
+}
+
+export function ensureColumn(db: Database, table: string, column: string, typeSql: string): void {
+	assertIdent(table, 'table');
+	assertIdent(column, 'column');
+	if (listTableColumnNames(db, table).includes(column)) return;
+	db.run(`ALTER TABLE ${table} ADD COLUMN ${column} ${typeSql}`);
+}
+
+function getUserVersion(db: Database): number {
+	const row = db.query('PRAGMA user_version').get() as Record<string, unknown> | undefined;
+	if (!row) return 0;
+	const raw = row.user_version;
+	const n = typeof raw === 'number' ? raw : Number(raw);
+	return Number.isFinite(n) ? n : 0;
+}
+
+const EXPECTED_MIGRATION_STEPS = 1;
+
+const MIGRATION_STEPS: Array<(db: Database) => void> = [(_db) => {}];
+
+function runMigrationSteps(db: Database): void {
+	if (MIGRATION_STEPS.length !== EXPECTED_MIGRATION_STEPS) {
+		throw new Error(
+			`[sqlite] MIGRATION_STEPS.length (${MIGRATION_STEPS.length}) !== EXPECTED_MIGRATION_STEPS (${EXPECTED_MIGRATION_STEPS})`,
+		);
+	}
+	let v = getUserVersion(db);
+	while (v < MIGRATION_STEPS.length) {
+		const step = MIGRATION_STEPS[v];
+		if (step) step(db);
+		v += 1;
+		db.run(`PRAGMA user_version = ${v}`);
+	}
+}
+
+function ensureUserColumn(db: Database, column: string, type: string): void {
+	ensureColumn(db, 'users', column, type);
 }
 
 function ensureBirthdayColumn(db: Database): void {
@@ -20,21 +63,11 @@ function ensureBirthdayColumn(db: Database): void {
 }
 
 function ensureHomeAnnouncementColumn(db: Database, column: string, type: string): void {
-	const cols = db
-		.query(`PRAGMA table_info(home_announcements)`)
-		.all()
-		.map((r: any) => String(r.name));
-	if (cols.includes(column)) return;
-	db.run(`ALTER TABLE home_announcements ADD COLUMN ${column} ${type}`);
+	ensureColumn(db, 'home_announcements', column, type);
 }
 
 function ensureScheduleColumn(db: Database, column: string, type: string): void {
-	const cols = db
-		.query(`PRAGMA table_info(schedules)`)
-		.all()
-		.map((r: any) => String(r.name));
-	if (cols.includes(column)) return;
-	db.run(`ALTER TABLE schedules ADD COLUMN ${column} ${type}`);
+	ensureColumn(db, 'schedules', column, type);
 }
 
 function initSchema(db: Database): void {
@@ -264,6 +297,8 @@ function initSchema(db: Database): void {
 	db.run(`CREATE INDEX IF NOT EXISTS idx_recruitment_comments_app ON recruitment_comments(application_id, created_at)`);
 
 	ensureRecruitmentContactUniqueIndex(db);
+
+	runMigrationSteps(db);
 }
 
 /** 同一手机号唯一，配合 INSERT … ON CONFLICT(contact) 在 DB 层串行化「同号覆盖」，避免并发双插。 */

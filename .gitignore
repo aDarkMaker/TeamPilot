@@ -47,3 +47,6 @@ temp/
 
 # ZipBuild
 *.zip
+
+# Build Script
+script/build.js

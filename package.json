@@ -9,7 +9,8 @@
   "scripts": {
     "dev": "astro dev",
     "build": "astro build",
-    "start": "astro preview"
+    "start": "astro preview",
+    "release": "node script/build.js"
   },
   "peerDependencies": {
     "typescript": "^5"
