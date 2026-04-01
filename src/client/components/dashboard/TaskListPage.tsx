@@ -25,20 +25,30 @@ function parsePayload(raw: string | null): TaskPayload | null {
 	}
 }
 
+function cstFieldsToUtcIso(input: { year: number; month: number; day: number; startAt: string }): string | null {
+	const [h = Number.NaN, m = Number.NaN] = input.startAt.split(':').map(Number);
+	if (!Number.isFinite(h) || !Number.isFinite(m)) return null;
+	const utcMs = Date.UTC(input.year, input.month - 1, input.day, h - 8, m, 0);
+	return new Date(utcMs).toISOString();
+}
+
 function taskStartIso(task: TaskCard): string | null {
 	const payload = parsePayload(task.payloadJson);
-	if (payload?.startAtIso) return payload.startAtIso;
 	if (
 		typeof payload?.year === 'number' &&
 		typeof payload?.month === 'number' &&
 		typeof payload?.day === 'number' &&
 		typeof payload?.startAt === 'string'
 	) {
-		const mm = String(payload.month).padStart(2, '0');
-		const dd = String(payload.day).padStart(2, '0');
-		return `${payload.year}-${mm}-${dd}T${payload.startAt}:00`;
+		const iso = cstFieldsToUtcIso({
+			year: payload.year,
+			month: payload.month,
+			day: payload.day,
+			startAt: payload.startAt,
+		});
+		if (iso) return iso;
 	}
-	return null;
+	return payload?.startAtIso ?? null;
 }
 
 function isStarted(task: TaskCard): boolean {

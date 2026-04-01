@@ -68,7 +68,6 @@ export class ApplicationService {
 			status: 'active',
 		});
 
-		// 新加入账号需要继承历史“全体日程”的任务卡（动态全体语义）。
 		const startDate = this.getShanghaiYmd();
 		const allSchedules = await this.db.listAllSchedulesFromDate({ startDate });
 		await Promise.all(
