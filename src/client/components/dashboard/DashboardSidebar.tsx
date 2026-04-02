@@ -40,14 +40,18 @@ function isStaff(role: string | undefined) {
     return role === 'admin' || role === 'super_admin';
 }
 
+function stripTrailingSlash(path: string): string {
+	return path.replace(/\/+$/, '') || '/';
+}
+
 export default function DashboardSidebar({ initialPath }: Props) {
     const [me, setMe] = useState<MeResponse | null>(null);
-    const [pathname, setPathname] = useState(initialPath);
+    const [pathname, setPathname] = useState(() => stripTrailingSlash(initialPath));
 
     useEffect(() => {
         let cancelled = false;
 
-        const syncPath = () => setPathname(window.location.pathname);
+        const syncPath = () => setPathname(stripTrailingSlash(window.location.pathname));
 
         const load = async () => {
             try {
@@ -86,10 +90,10 @@ export default function DashboardSidebar({ initialPath }: Props) {
 		return () => window.removeEventListener('hxk:profile-updated', onUpdated);
 	}, []);
 
-    const linkClass = (href: string) =>
-        pathname === href || (href !== '/dashboard' && pathname.startsWith(href))
-            ? 'active'
-            : '';
+    const linkClass = (href: string) => {
+        const h = stripTrailingSlash(href);
+        return pathname === h || (h !== '/dashboard' && pathname.startsWith(h)) ? 'active' : '';
+    };
     
     const onLogout = async () => {
 		localStorage.removeItem('hxk_profile_background_url');

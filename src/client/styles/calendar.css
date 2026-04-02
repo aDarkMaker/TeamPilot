@@ -890,14 +890,112 @@
 
 @media (max-width: 1024px) {
 	.calendar-week-head {
-		grid-template-columns: 60px repeat(7, minmax(0, 1fr));
+		grid-template-columns: 52px repeat(7, minmax(0, 1fr));
 	}
 
 	.calendar-week-body {
-		grid-template-columns: 60px 1fr;
+		grid-template-columns: 52px 1fr;
 	}
 
 	.calendar-week-grid {
 		gap: 8px;
 	}
 }
+
+@media (max-width: 768px) {
+	.calendar-page {
+		gap: 12px;
+		min-width: 0;
+	}
+
+	.calendar-head {
+		display: grid;
+		grid-auto-flow: column;
+		gap: 10px;
+	}
+
+	.calendar-head-title {
+		font-size: 12px;
+		gap: 8px;
+		min-width: 0;
+		flex: 1 1 100%;
+	}
+
+	.calendar-head-actions {
+		flex-wrap: wrap;
+		justify-content: flex-start;
+		width: 100%;
+		gap: 8px;
+	}
+
+	.calendar-date-btn {
+		width: 30px;
+		height: 30px;
+		border-radius: 10px;
+	}
+
+	.calendar-card {
+		padding: 12px 12px 10px;
+		border-radius: 12px;
+	}
+
+	.calendar-card-head {
+		align-items: flex-start;
+		gap: 8px;
+		margin-bottom: 14px;
+	}
+
+	.calendar-row {
+		grid-template-columns: 1fr;
+	}
+
+	.calendar-week {
+		overflow-x: auto;
+		overscroll-behavior-x: contain;
+		scrollbar-width: thin;
+		padding-bottom: 6px;
+	}
+
+	.calendar-week-head,
+	.calendar-week-body {
+		min-width: 600px;
+	}
+
+	.calendar-week-grid {
+		gap: 6px;
+	}
+
+	.calendar-sheet {
+		border-radius: 12px;
+	}
+
+	.calendar-modal {
+		align-items: flex-end;
+		justify-content: stretch;
+		padding: 0;
+		padding-bottom: env(safe-area-inset-bottom);
+	}
+
+	.calendar-modal-card {
+		width: 100%;
+		max-width: none;
+		border-radius: 18px 18px 0 0;
+		max-height: min(88vh, 640px);
+		overflow-y: auto;
+		overscroll-behavior: contain;
+	}
+}
+
+@media (max-width: 480px) {
+	.calendar-week-head,
+	.calendar-week-body {
+		min-width: 520px;
+	}
+
+	.calendar-week-day {
+		padding: 6px 4px;
+		font-size: 11px;
+	}
+}
+
+/* TODO: Feat new CSS styles for calendar page */

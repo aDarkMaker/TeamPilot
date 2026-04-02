@@ -8,3 +8,44 @@
 	font-family: 'HxkFont', sans-serif;
 	user-select: none;
 }
+
+@media (max-width: 786px) {
+	.content-wrapper {
+		padding: 16px 14px 28px;
+	}
+
+	.dashboard-topbar {
+		padding: 12px 14px;
+		gap: 10px;
+		flex-wrap: wrap;
+	}
+
+	.dashboard-topbar h1 {
+		font-size: 17px;
+		line-height: 1.25;
+	}
+
+	.dashboard-topbar-tools {
+		gap: 8px;
+		flex-wrap: wrap;
+		justify-content: flex-end;
+	}
+
+	.dashboard-notify-btn {
+		padding: 7px 8px;
+	}
+}
+
+@media (max-width: 480px) {
+	.content-wrapper {
+		padding: 12px 12px 24px;
+	}
+
+	.dashboard-topbar {
+		padding: 10px 12px;
+	}
+
+	.dashboard-topbar h1 {
+		font-size: 16px;
+	}
+}

@@ -149,3 +149,52 @@
 	color: #718096;
 }
 
+@media (max-width: 768px) {
+	.task-page {
+		gap: 12px;
+	}
+
+	.task-head {
+		flex-direction: column;
+		align-items: stretch;
+		gap: 10px;
+	}
+
+	.task-tabs {
+		gap: 6px;
+		display: grid;
+		grid-auto-flow: column;
+	}
+
+	.task-tab,
+	.task-refresh-btn,
+	.task-action {
+		padding: 7px 10px;
+		font-size: 12px;
+		border-radius: 10px;
+	}
+
+	.task-card {
+		padding: 12px;
+		border-radius: 12px;
+	}
+
+	.task-card h3 {
+		font-size: 15px;
+	}
+
+	.task-card-row {
+		gap: 8px;
+	}
+
+	.task-actions {
+		width: 100%;
+		flex-wrap: wrap;
+		justify-content: flex-start;
+	}
+
+	.task-lock {
+		margin-left: 0;
+	}
+}
+

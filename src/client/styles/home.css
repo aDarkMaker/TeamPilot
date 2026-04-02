@@ -388,3 +388,30 @@
 	}
 }
 
+@media (max-width: 768px) {
+	.home-top-msg {
+		top: 72px;
+		left: calc(var(--dash-sidebar-w) + 12px);
+		right: 12px;
+		max-width: none;
+		font-size: 0.82rem;
+		padding: 0.65rem 0.85rem;
+	}
+
+	.home-card {
+		padding: 12px 12px 10px;
+		border-radius: 14px;
+	}
+
+	.home-card-head h2 {
+		font-size: 15px;
+	}
+
+	.home-dyn-cover {
+		max-height: 220px;
+	}
+
+	.home-publish-actions {
+		flex-wrap: wrap;
+	}
+}
