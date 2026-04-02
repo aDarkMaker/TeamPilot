@@ -1042,7 +1042,6 @@ export function createDb(sqlite: Database): DB {
 		},
 
 		async createOrReplaceTaskCard(input) {
-			// UPSERT KEEP UNIQUE
 			sqlite
 				.query(
 					`INSERT INTO task_cards (
@@ -1053,8 +1052,6 @@ export function createDb(sqlite: Database): DB {
 						title = excluded.title,
 						content = excluded.content,
 						payload_json = excluded.payload_json,
-						status = 'pending',
-						decided_at = NULL,
 						updated_at = datetime('now')`,
 				)
 				.run(
