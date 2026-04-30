@@ -1,6 +1,7 @@
 .settings-page {
 	width: 100%;
 	max-width: none;
+	padding-bottom: 2rem;
 }
 
 .settings-card {
@@ -352,5 +353,54 @@
 
 	.settings-field textarea {
 		min-height: 42px !important;
+	}
+}
+
+@media (max-width: 480px) {
+	.settings-card {
+		gap: 12px;
+		padding-bottom: 1rem;
+	}
+
+	.settings-section {
+		padding: 0.7rem 0.85rem;
+		border-radius: 10px;
+	}
+
+	.settings-section h2 {
+		font-size: 0.85rem;
+		margin-bottom: 0.7rem;
+	}
+
+	.settings-field {
+		margin-bottom: 0.6rem;
+	}
+
+	.settings-field label {
+		font-size: 0.75rem;
+	}
+
+	.settings-avatar-preview {
+		width: 56px;
+		height: 56px;
+	}
+
+	.settings-avatar-row {
+		gap: 0.5rem;
+	}
+
+	.settings-bg-preview {
+		height: 120px;
+		border-radius: 10px;
+	}
+
+	.settings-btn,
+	.settings-file-btn {
+		font-size: 0.8rem;
+		padding: 0.4rem 0.8rem;
+	}
+
+	.settings-actions-inline {
+		min-width: 120px;
 	}
 }

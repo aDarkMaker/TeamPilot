@@ -9,7 +9,7 @@
 	user-select: none;
 }
 
-@media (max-width: 786px) {
+@media (max-width: 768px) {
 	.content-wrapper {
 		padding: 16px 14px 28px;
 	}
@@ -46,6 +46,14 @@
 	}
 
 	.dashboard-topbar h1 {
-		font-size: 16px;
+		font-size: 15px;
+	}
+
+	.dashboard-topbar-tools {
+		gap: 6px;
+	}
+
+	.dashboard-search {
+		display: none;
 	}
 }

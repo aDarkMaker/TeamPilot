@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef, useCallback } from 'react';
 import UserAvatar from './UserAvatar';
 import { assetUrl } from '../../lib/assetUrl';
 
@@ -47,6 +47,32 @@ function stripTrailingSlash(path: string): string {
 export default function DashboardSidebar({ initialPath }: Props) {
     const [me, setMe] = useState<MeResponse | null>(null);
     const [pathname, setPathname] = useState(() => stripTrailingSlash(initialPath));
+    const [sidebarOpen, setSidebarOpen] = useState(false);
+    const sidebarRef = useRef<HTMLElement>(null);
+
+    const closeSidebar = useCallback(() => {
+        setSidebarOpen(false);
+    }, []);
+
+    const toggleSidebar = useCallback(() => {
+        setSidebarOpen((prev) => !prev);
+    }, []);
+
+    useEffect(() => {
+        const handler = () => toggleSidebar();
+        document.addEventListener('hxk:sidebar-toggle', handler);
+        return () => document.removeEventListener('hxk:sidebar-toggle', handler);
+    }, [toggleSidebar]);
+
+    useEffect(() => {
+        const onResize = () => {
+            if (window.innerWidth > 768) {
+                setSidebarOpen(false);
+            }
+        };
+        window.addEventListener('resize', onResize);
+        return () => window.removeEventListener('resize', onResize);
+    }, []);
 
     useEffect(() => {
         let cancelled = false;
@@ -111,46 +137,47 @@ export default function DashboardSidebar({ initialPath }: Props) {
     const role = me?.role ?? 'user';
 
     return (
-        <aside className="dashboard-sidebar">
-			<a className="dashboard-logo" href="/dashboard">
+        <>
+            <aside ref={sidebarRef} className={`dashboard-sidebar ${sidebarOpen ? 'is-open' : ''}`}>
+			<a className="dashboard-logo" href="/dashboard" onClick={(e) => { if (sidebarOpen) { e.preventDefault(); closeSidebar(); } }}>
 				<img src={assetUrl(iconLogo)} alt="" width={40} height={40} />
 				<span>小科·OFFICIAL</span>
 			</a>
 			<ul className="dashboard-nav">
 				<li>
-					<a className={linkClass('/dashboard')} href="/dashboard">
+					<a className={linkClass('/dashboard')} href="/dashboard" onClick={closeSidebar}>
 						<img src={assetUrl(iconDashboard)} alt="" />
 						<span>工作主页</span>
 					</a>
 				</li>
 				<li>
-					<a className={linkClass('/dashboard/list')} href="/dashboard/list">
+					<a className={linkClass('/dashboard/list')} href="/dashboard/list" onClick={closeSidebar}>
 						<img src={assetUrl(iconList)} alt="" />
 						<span>任务列表</span>
 					</a>
 				</li>
 				{isStaff(me?.role) && (
 					<li>
-						<a className={linkClass('/dashboard/users')} href="/dashboard/users">
+						<a className={linkClass('/dashboard/users')} href="/dashboard/users" onClick={closeSidebar}>
 							<img src={assetUrl(iconUser)} alt="" />
 							<span>成员管理</span>
 						</a>
 					</li>
 				)}
 				<li>
-					<a className={linkClass('/dashboard/calendar')} href="/dashboard/calendar">
+					<a className={linkClass('/dashboard/calendar')} href="/dashboard/calendar" onClick={closeSidebar}>
 						<img src={assetUrl(iconCalendar)} alt="" />
 						<span>日程安排</span>
 					</a>
 				</li>
 				<li>
-					<a className={linkClass('/dashboard/newcomers')} href="/dashboard/newcomers">
+					<a className={linkClass('/dashboard/newcomers')} href="/dashboard/newcomers" onClick={closeSidebar}>
 						<img src={assetUrl(iconUserPlus)} alt="" />
 						<span>新人详情</span>
 					</a>
 				</li>
 				<li>
-					<a className={linkClass('/dashboard/settings')} href="/dashboard/settings">
+					<a className={linkClass('/dashboard/settings')} href="/dashboard/settings" onClick={closeSidebar}>
 						<img src={assetUrl(iconSettings)} alt="" />
 						<span>个性设置</span>
 					</a>
@@ -171,5 +198,7 @@ export default function DashboardSidebar({ initialPath }: Props) {
 				</button>
 			</div>
 		</aside>
+            <div className={`dashboard-sidebar-overlay ${sidebarOpen ? 'is-visible' : ''}`} onClick={closeSidebar} />
+        </>
 	);
 }

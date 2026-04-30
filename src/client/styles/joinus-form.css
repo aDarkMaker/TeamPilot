@@ -708,3 +708,98 @@
 		flex-direction: column;
 	}
 }
+
+@media (max-width: 480px) {
+	.joinus-apply-shell {
+		padding-left: 0.75rem;
+		padding-right: 0.75rem;
+		padding-top: 1rem;
+		padding-bottom: 2rem;
+	}
+	.joinus-apply-panel .joinus-form-hero {
+		padding: 1rem 0.85rem 1rem;
+	}
+	.joinus-apply-panel__body {
+		padding: 1rem 0.85rem 1.25rem;
+	}
+	.joinus-title {
+		font-size: clamp(1.35rem, 7vw, 1.8rem);
+	}
+	.joinus-subtitle {
+		font-size: 13px;
+		letter-spacing: 0.3em;
+	}
+	.joinus-welcome {
+		font-size: 0.95rem;
+	}
+	.joinus-label {
+		font-size: 14px;
+	}
+	.joinus-field {
+		margin-bottom: 20px;
+	}
+	.joinus-form-apply input:not([type='hidden']),
+	.joinus-form-apply select,
+	.joinus-select-trigger {
+		padding: 12px 10px 12px 42px;
+		min-height: 40px;
+		font-size: 14px;
+	}
+	.joinus-select-trigger {
+		padding-left: 42px;
+	}
+	.joinus-form-apply textarea {
+		padding: 12px 14px;
+		min-height: 100px;
+		height: 100px;
+	}
+	.joinus-input-icon {
+		left: 14px;
+		font-size: 18px;
+	}
+	.joinus-form-apply .joinus-btn {
+		min-height: 44px;
+		height: 44px;
+		padding: 10px 16px;
+		font-size: 16px;
+	}
+	.joinus-file-trigger {
+		padding: 12px 14px;
+		font-size: 14px;
+	}
+	.joinus-file-icon {
+		font-size: 20px;
+	}
+	.joinus-file-item {
+		padding: 6px 10px;
+		font-size: 12px;
+	}
+	.joinus-file-preview {
+		width: 32px;
+		height: 32px;
+	}
+	.joinus-file-name {
+		font-size: 12px;
+		max-width: 100px;
+	}
+	.joinus-success-title {
+		font-size: 20px;
+	}
+	.joinus-success-subtitle {
+		font-size: 15px;
+	}
+	.joinus-modal-card {
+		padding: 24px 20px;
+	}
+	.joinus-modal-title {
+		font-size: 18px;
+	}
+	.joinus-modal-subtitle {
+		font-size: 14px;
+		margin-bottom: 20px;
+	}
+	.joinus-form-load-error {
+		padding: 10px 12px;
+		font-size: 12px;
+	}
+}

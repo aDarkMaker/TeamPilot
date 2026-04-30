@@ -569,10 +569,14 @@ export default function Calendar() {
 							})}
 						</div>
 						<div className="calendar-week-grid">
-							{dayKeys.map((d) => (
+							{dayKeys.map((d) => {
+								const dayLayouts = layoutsByDay[d.key] ?? [];
+								return (
 								<div
 									key={d.key}
 									className="calendar-sheet"
+									data-label={d.label}
+									data-has-items={dayLayouts.length > 0 ? 'true' : 'false'}
 									onPointerDown={(e) => {
 										const target = e.target as HTMLElement;
 										if (target.closest('.calendar-block')) return;
@@ -635,7 +639,8 @@ export default function Calendar() {
 										</div>
 									))}
 								</div>
-							))}
+								);
+							})}
 						</div>
 					</div>
 				</div>

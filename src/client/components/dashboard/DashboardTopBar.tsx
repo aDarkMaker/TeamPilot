@@ -10,7 +10,6 @@ type NotifyVariant = 'new' | 'mention' | 'read';
 
 type Props = {
     title: string;
-    // TODO: 通知 API
     notifyVariant?: NotifyVariant;
 };
 
@@ -23,8 +22,23 @@ const notifySrc: Record<NotifyVariant, string> = {
 export default function DashboardTopBar({ title, notifyVariant = 'read' }: Props) {
     const [q, setQ] = useState('');
 
+    const toggleSidebar = () => {
+        document.dispatchEvent(new CustomEvent('hxk:sidebar-toggle'));
+    };
+
     return (
         <header className="dashboard-topbar">
+            <button
+                type="button"
+                className="sidebar-hamburger"
+                onClick={toggleSidebar}
+                aria-label="切换侧边栏"
+                title="菜单"
+            >
+                <span className="sidebar-hamburger-line" />
+                <span className="sidebar-hamburger-line" />
+                <span className="sidebar-hamburger-line" />
+            </button>
             <h1>{title}</h1>
             <div id="dashboard-topbar-toast-slot" className="dashboard-topbar-toast-slot" aria-live="polite" />
             <div className="dashboard-topbar-tools">

@@ -514,6 +514,156 @@
 	}
 }
 
+@media (max-width: 768px) {
+	.nc-page {
+		min-height: auto;
+	}
+
+	.nc-list {
+		border-radius: 12px;
+	}
+
+	.nc-list-head {
+		padding: 10px 12px;
+		font-size: 13px;
+	}
+
+	.nc-dept-filter {
+		padding: 8px;
+	}
+
+	.nc-list-items {
+		max-height: 160px;
+		padding: 6px;
+	}
+
+	.nc-list-item {
+		padding: 10px;
+		border-radius: 10px;
+	}
+
+	.nc-list-item-name {
+		font-size: 13px;
+	}
+
+	.nc-center {
+		padding: 14px 12px 16px;
+		border-radius: 12px;
+	}
+
+	.nc-detail-head {
+		margin-bottom: 14px;
+		padding-bottom: 10px;
+	}
+
+	.nc-detail-name {
+		font-size: 18px;
+	}
+
+	.nc-section-title {
+		font-size: 14px;
+		margin-bottom: 8px;
+	}
+
+	.nc-meta-grid {
+		padding: 10px 12px;
+		gap: 6px 12px;
+	}
+
+	.nc-comments-aside {
+		max-height: 360px;
+		border-radius: 12px;
+	}
+
+	.nc-comments-head {
+		padding: 10px 12px;
+	}
+
+	.nc-comments-title {
+		font-size: 13px;
+	}
+
+	.nc-comment-card {
+		padding: 10px;
+	}
+
+	.nc-attach-frame-wrap {
+		border-radius: 10px;
+	}
+
+	.nc-attach-frame {
+		height: min(48vh, 400px);
+	}
+
+	.nc-detail-section--meta {
+		margin-bottom: 14px;
+	}
+}
+
+@media (max-width: 480px) {
+	.nc-page {
+		gap: 12px;
+	}
+
+	.nc-list-items {
+		max-height: 140px;
+	}
+
+	.nc-center {
+		padding: 12px 10px 14px;
+	}
+
+	.nc-detail-name {
+		font-size: 16px;
+	}
+
+	.nc-detail-dept {
+		font-size: 11px;
+		padding: 3px 8px;
+	}
+
+	.nc-section-title {
+		font-size: 13px;
+		padding-bottom: 6px;
+	}
+
+	.nc-meta-grid {
+		grid-template-columns: 72px minmax(0, 1fr);
+		gap: 4px 10px;
+		padding: 8px 10px;
+		font-size: 12px;
+	}
+
+	.nc-meta-grid dt {
+		font-size: 10px;
+	}
+
+	.nc-meta-grid dd {
+		font-size: 12px;
+	}
+
+	.nc-comments-aside {
+		max-height: 300px;
+	}
+
+	.nc-comments-compose {
+		padding: 10px;
+	}
+
+	.nc-comment-textarea {
+		min-height: 64px;
+	}
+
+	.nc-attach-frame {
+		height: min(40vh, 300px);
+	}
+
+	.nc-btn {
+		padding: 6px 10px;
+		font-size: 11px;
+	}
+}
+
 .nc-markdown-shell {
 	padding: 14px 16px;
 	border-radius: 12px;

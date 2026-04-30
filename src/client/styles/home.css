@@ -391,7 +391,7 @@
 @media (max-width: 768px) {
 	.home-top-msg {
 		top: 72px;
-		left: calc(var(--dash-sidebar-w) + 12px);
+		left: 12px;
 		right: 12px;
 		max-width: none;
 		font-size: 0.82rem;
@@ -413,5 +413,62 @@
 
 	.home-publish-actions {
 		flex-wrap: wrap;
+	}
+}
+
+@media (max-width: 480px) {
+	.home-top-msg {
+		top: 62px;
+		left: 8px;
+		right: 8px;
+		font-size: 0.78rem;
+		padding: 0.5rem 0.7rem;
+		border-radius: 10px;
+	}
+
+	.home-card {
+		padding: 10px 10px 8px;
+		border-radius: 12px;
+	}
+
+	.home-card-head h2 {
+		font-size: 14px;
+	}
+
+	.home-dyn-cover {
+		max-height: 180px;
+	}
+
+	.home-dyn-item {
+		padding: 10px;
+	}
+
+	.home-dyn-item--hero {
+		padding: 10px;
+	}
+
+	.home-ann-item {
+		padding: 10px;
+	}
+
+	.home-ann-head h3 {
+		font-size: 13px;
+	}
+
+	.home-birthday-send {
+		grid-template-columns: 1fr;
+	}
+
+	.home-birthday-item {
+		padding: 10px;
+	}
+
+	.home-dyn-title {
+		font-size: 15px;
+	}
+
+	.home-btn {
+		font-size: 11px;
+		padding: 7px 12px;
 	}
 }

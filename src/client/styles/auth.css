@@ -336,6 +336,39 @@ body.auth-page::before {
 	}
 }
 
+@media (max-width: 400px) {
+	.auth-container {
+		padding: 12px;
+	}
+
+	.glass-card {
+		padding: 18px 14px;
+		border-radius: 14px;
+	}
+
+	.auth-header h1 {
+		font-size: 24px;
+	}
+
+	.auth-header p {
+		font-size: 13px;
+	}
+
+	.tab-btn {
+		padding: 8px 10px;
+		font-size: 13px;
+	}
+
+	.input-group input {
+		padding: 10px;
+		font-size: 14px;
+	}
+
+	.submit-btn {
+		padding: 10px;
+	}
+}
+
 @media (prefers-reduced-motion: reduce) {
 	* {
 		animation: none !important;

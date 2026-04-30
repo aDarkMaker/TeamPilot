@@ -950,23 +950,91 @@
 	}
 
 	.calendar-week {
-		overflow-x: auto;
-		overscroll-behavior-x: contain;
-		scrollbar-width: thin;
-		padding-bottom: 6px;
+		overflow-x: visible;
+		padding-bottom: 0;
 	}
 
-	.calendar-week-head,
+	.calendar-week-head {
+		display: grid;
+		grid-template-columns: repeat(7, minmax(0, 1fr));
+		gap: 6px;
+		margin-bottom: 10px;
+	}
+
+	.calendar-week-head-left {
+		display: none;
+	}
+
+	.calendar-week-day {
+		font-size: 10px;
+		padding: 6px 4px;
+		border-radius: 8px;
+	}
+
 	.calendar-week-body {
-		min-width: 600px;
+		display: block;
+		min-width: 0;
+	}
+
+	.calendar-timeline {
+		display: none;
 	}
 
 	.calendar-week-grid {
-		gap: 6px;
+		display: flex;
+		flex-direction: column;
+		gap: 12px;
 	}
 
 	.calendar-sheet {
+		height: auto;
+		min-height: 60px;
+		background-image: none;
+		cursor: default;
+		touch-action: auto;
+		padding: 10px 12px 12px;
 		border-radius: 12px;
+		overflow: visible;
+	}
+
+	.calendar-sheet::before {
+		content: attr(data-label);
+		display: block;
+		font-size: 13px;
+		font-weight: 800;
+		color: var(--dash-accent);
+		margin: 0 0 8px;
+	}
+
+	.calendar-sheet[data-has-items="false"] {
+		display: block;
+		min-height: 40px;
+	}
+
+	.calendar-block {
+		position: relative;
+		top: auto !important;
+		left: auto !important;
+		right: auto !important;
+		bottom: auto !important;
+		height: auto !important;
+		min-height: 44px;
+		width: 100% !important;
+		margin-bottom: 8px;
+		flex-direction: column;
+		align-items: flex-start;
+		padding: 10px 12px;
+		border-radius: 10px;
+	}
+
+	.calendar-block-title {
+		font-size: 13px;
+		-webkit-line-clamp: unset;
+		line-clamp: unset;
+	}
+
+	.calendar-draft-block {
+		display: none !important;
 	}
 
 	.calendar-modal {
@@ -987,15 +1055,55 @@
 }
 
 @media (max-width: 480px) {
-	.calendar-week-head,
-	.calendar-week-body {
-		min-width: 520px;
+	.calendar-page {
+		gap: 10px;
+	}
+
+	.calendar-card {
+		padding: 10px 10px 8px;
+	}
+
+	.calendar-card-head {
+		margin-bottom: 10px;
+	}
+
+	.calendar-btn {
+		padding: 8px 10px;
+		font-size: 12px;
+	}
+
+	.calendar-week-grid {
+		gap: 10px;
+	}
+
+	.calendar-sheet::before {
+		font-size: 12px;
+		margin: 0 0 6px;
+	}
+
+	.calendar-block {
+		padding: 8px 10px;
+		margin-bottom: 6px;
+		border-radius: 8px;
+		min-height: 38px;
+	}
+
+	.calendar-block-title {
+		font-size: 12px;
+	}
+
+	.calendar-sheet {
+		border-radius: 10px;
+		padding: 8px 10px 10px;
 	}
 
 	.calendar-week-day {
-		padding: 6px 4px;
-		font-size: 11px;
+		font-size: 9px;
+		padding: 5px 3px;
+		border-radius: 7px;
+	}
+
+	.calendar-week-head {
+		gap: 4px;
 	}
 }
-
-/* TODO: Feat new CSS styles for calendar page */
