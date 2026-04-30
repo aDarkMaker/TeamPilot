@@ -16,7 +16,7 @@
     "typescript": "^5"
   },
   "dependencies": {
-    "@astrojs/react": "^5.0.1",
+    "@astrojs/react": "5.0.4",
     "@koa/multer": "^4.0.0",
     "@koa/router": "^15.4.0",
     "@types/bcrypt": "^6.0.0",
@@ -27,7 +27,7 @@
     "@types/koa-static": "^4.0.4",
     "@types/react": "18.3.12",
     "@types/react-dom": "18.3.1",
-    "astro": "^6.0.8",
+    "astro": "6.2.0",
     "bcrypt": "^6.0.0",
     "bcryptjs": "^3.0.3",
     "cspell": "^9.7.0",
