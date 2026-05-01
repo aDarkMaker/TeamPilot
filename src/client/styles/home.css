@@ -77,16 +77,17 @@
 }
 
 .home-card {
-	border-radius: 16px;
+	border-radius: 14px;
 	border: 1px solid var(--dash-glass-border, rgba(255, 255, 255, 0.45));
 	background: rgba(255, 255, 255, 0.42);
 	backdrop-filter: blur(12px);
-	padding: 14px;
+	padding: 14px 16px;
 }
 
 .home-card-head h2 {
 	margin: 0;
 	font-size: 16px;
+	font-weight: 800;
 }
 
 .home-card-head {
@@ -94,6 +95,19 @@
 	align-items: center;
 	justify-content: space-between;
 	gap: 10px;
+	margin-bottom: 12px;
+}
+
+.home-badge {
+	display: inline-flex;
+	align-items: center;
+	padding: 2px 8px;
+	border-radius: 999px;
+	font-size: 11px;
+	font-weight: 700;
+	color: var(--dash-muted);
+	background: rgba(255, 255, 255, 0.55);
+	border: 1px solid rgba(255, 255, 255, 0.65);
 }
 
 .home-plus-btn {
@@ -152,7 +166,7 @@
 
 .home-btn {
 	justify-self: start;
-	padding: 8px 14px;
+	padding: 7px 14px;
 	border-radius: 10px;
 	border: 1px solid rgba(49, 130, 206, 0.25);
 	background: rgba(49, 130, 206, 0.92);
@@ -190,11 +204,13 @@
 
 .home-ann-item,
 .home-dyn-item {
+	display: grid;
+	gap: 6px;
 	margin-top: 8px;
 	border-radius: 12px;
 	border: 1px solid rgba(255, 255, 255, 0.6);
 	background: rgba(255, 255, 255, 0.36);
-	padding: 12px;
+	padding: 12px 14px;
 }
 
 /* 兼容可能的拼写：home-dym-item */
@@ -212,6 +228,7 @@
 .home-ann-head h3 {
 	margin: 0;
 	font-size: 15px;
+	font-weight: 800;
 	line-height: 1.35;
 }
 
@@ -222,12 +239,12 @@
 }
 
 .home-chip-btn {
-	padding: 6px 10px;
+	padding: 5px 10px;
 	border-radius: 999px;
 	border: 1px solid rgba(49, 130, 206, 0.3);
 	background: rgba(49, 130, 206, 0.12);
 	color: #2b6cb0;
-	font-size: 12px;
+	font-size: 11px;
 	font-weight: 700;
 	cursor: pointer;
 }
@@ -239,8 +256,8 @@
 
 .home-ann-meta,
 .home-dyn-meta {
-	margin-top: 4px;
-	font-size: 12px;
+	font-size: 11px;
+	font-weight: 600;
 	color: var(--dash-muted);
 }
 
@@ -305,13 +322,13 @@
 }
 
 .home-birthday-item {
-	border-radius: 12px;
-	border: 1px solid rgba(255, 255, 255, 0.62);
-	background: rgba(255, 255, 255, 0.38);
-	padding: 12px;
 	display: grid;
 	gap: 10px;
 	margin-top: 8px;
+	border-radius: 12px;
+	border: 1px solid rgba(255, 255, 255, 0.62);
+	background: rgba(255, 255, 255, 0.38);
+	padding: 12px 14px;
 }
 
 .home-birthday-user {
@@ -321,15 +338,15 @@
 }
 
 .home-birthday-avatar {
-	width: 32px;
-	height: 32px;
+	width: 36px;
+	height: 36px;
 	border-radius: 999px;
 	overflow: hidden;
 	background: rgba(49, 130, 206, 0.16);
 	display: inline-flex;
 	align-items: center;
 	justify-content: center;
-	font-size: 12px;
+	font-size: 13px;
 	font-weight: 700;
 	color: #2b6cb0;
 }
@@ -343,28 +360,32 @@
 
 .home-birthday-name {
 	font-size: 14px;
-	font-weight: 700;
+	font-weight: 800;
 	color: var(--dash-text);
 }
 
 .home-birthday-wishes {
 	display: grid;
-	gap: 6px;
+	gap: 4px;
 	max-height: 140px;
 	overflow: auto;
+	padding: 8px 10px;
+	border-radius: 10px;
+	background: rgba(255, 255, 255, 0.4);
+	border: 1px solid rgba(255, 255, 255, 0.6);
 }
 
 .home-birthday-wish-line {
-	font-size: 13px;
+	font-size: 12px;
+	font-weight: 600;
 	line-height: 1.5;
 	color: var(--dash-text);
 	display: flex;
 	gap: 6px;
-	margin: 2px;
 }
 
 .home-birthday-wish-author {
-	font-weight: 700;
+	font-weight: 800;
 	color: #2b6cb0;
 }
 
@@ -399,16 +420,29 @@
 	}
 
 	.home-card {
-		padding: 12px 12px 10px;
-		border-radius: 14px;
+		padding: 12px 14px 10px;
+		border-radius: 12px;
 	}
 
 	.home-card-head h2 {
 		font-size: 15px;
 	}
 
+	.home-card-head {
+		margin-bottom: 10px;
+	}
+
 	.home-dyn-cover {
 		max-height: 220px;
+	}
+
+	.home-dyn-item,
+	.home-ann-item {
+		padding: 10px 12px;
+	}
+
+	.home-birthday-item {
+		padding: 10px 12px;
 	}
 
 	.home-publish-actions {
@@ -427,12 +461,16 @@
 	}
 
 	.home-card {
-		padding: 10px 10px 8px;
-		border-radius: 12px;
+		padding: 10px 12px 8px;
+		border-radius: 10px;
 	}
 
 	.home-card-head h2 {
-		font-size: 14px;
+		font-size: 13px;
+	}
+
+	.home-card-head {
+		margin-bottom: 8px;
 	}
 
 	.home-dyn-cover {

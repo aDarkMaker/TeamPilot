@@ -22,9 +22,10 @@
 .task-action {
 	border: 1px solid rgba(255, 255, 255, 0.66);
 	background: rgba(255, 255, 255, 0.52);
-	border-radius: 11px;
-	padding: 8px 12px;
-	font-size: 13px;
+	border-radius: 10px;
+	padding: 7px 12px;
+	font-size: 12px;
+	font-weight: 700;
 	color: #2d3748;
 	cursor: pointer;
 	transition: background 0.16s ease, border-color 0.16s ease;
@@ -64,13 +65,13 @@
 }
 
 .task-card {
-	padding: 14px;
+	display: grid;
+	gap: 8px;
+	padding: 14px 16px;
 	border-radius: 14px;
 	background: rgba(255, 255, 255, 0.56);
 	border: 1px solid rgba(255, 255, 255, 0.64);
 	box-shadow: 0 10px 22px rgba(15, 23, 42, 0.06);
-	display: grid;
-	gap: 8px;
 }
 
 .task-card.is-done {
@@ -90,26 +91,30 @@
 .task-card h3 {
 	margin: 0;
 	font-size: 16px;
+	font-weight: 800;
 	line-height: 1.35;
 	color: #1a202c;
 }
 
 .task-meta {
-	font-size: 12px;
+	font-size: 11px;
+	font-weight: 600;
 	color: #718096;
 }
 
 .task-content {
 	font-size: 13px;
-	line-height: 1.6;
+	font-weight: 500;
+	line-height: 1.65;
 	color: #2d3748;
 	white-space: pre-wrap;
 }
 
 .task-status {
-	font-size: 12px;
+	font-size: 11px;
+	font-weight: 700;
 	border-radius: 999px;
-	padding: 4px 9px;
+	padding: 3px 8px;
 	border: 1px solid rgba(0, 0, 0, 0.06);
 }
 
@@ -175,7 +180,7 @@
 	}
 
 	.task-card {
-		padding: 12px;
+		padding: 12px 14px;
 		border-radius: 12px;
 	}
 

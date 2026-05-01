@@ -38,8 +38,8 @@
 }
 
 .users-admin-card {
-	padding: 16px 16px 14px;
-	border-radius: 16px;
+	padding: 16px;
+	border-radius: 14px;
 	background: rgba(255, 255, 255, 0.45);
 	border: 1px solid rgba(255, 255, 255, 0.55);
 	backdrop-filter: blur(12px);
@@ -56,11 +56,12 @@
 .users-admin-card h2 {
 	margin: 0;
 	font-size: 16px;
-	font-weight: 700;
+	font-weight: 800;
 }
 
 .users-admin-card-sub {
-	font-size: 12px;
+	font-size: 11px;
+	font-weight: 600;
 	color: var(--dash-muted);
 }
 
@@ -76,7 +77,7 @@
 }
 
 .users-admin-user-card {
-	padding: 14px;
+	padding: 14px 16px;
 	border-radius: 14px;
 	background: rgba(255, 255, 255, 0.35);
 	border: 1px solid rgba(255, 255, 255, 0.5);
@@ -94,7 +95,7 @@
 }
 
 .users-admin-user-name {
-	font-weight: 700;
+	font-weight: 800;
 	font-size: 15px;
 	color: var(--dash-text);
 	margin-bottom: 6px;
@@ -110,9 +111,9 @@
 .users-admin-tag {
 	display: inline-flex;
 	align-items: center;
-	padding: 3px 8px;
+	padding: 3px 9px;
 	border-radius: 999px;
-	font-size: 12px;
+	font-size: 11px;
 	font-weight: 700;
 	letter-spacing: 0.01em;
 	border: 1px solid rgba(0, 0, 0, 0.06);
@@ -161,11 +162,12 @@
 
 .users-admin-muted {
 	color: var(--dash-muted);
-	font-size: 12px;
+	font-size: 11px;
+	font-weight: 600;
 }
 
 .users-admin-strong {
-	font-weight: 700;
+	font-weight: 800;
 }
 
 .users-admin-actions {
@@ -180,9 +182,9 @@
 	background: rgba(255, 255, 255, 0.65);
 	color: #2d3748;
 	border-radius: 10px;
-	padding: 8px 10px;
-	font-size: 13px;
-	font-weight: 700;
+	padding: 7px 11px;
+	font-size: 12px;
+	font-weight: 800;
 	cursor: pointer;
 	transition:
 		transform 0.18s var(--dash-nav-spring),
@@ -303,7 +305,7 @@
 	}
 
 	.users-admin-card {
-		padding: 12px 12px 10px;
+		padding: 12px;
 		border-radius: 12px;
 	}
 
@@ -314,97 +316,44 @@
 		margin-bottom: 10px;
 	}
 
+	.users-admin-card h2 {
+		font-size: 15px;
+	}
+
 	.users-admin-grid {
 		grid-template-columns: 1fr;
 		gap: 10px;
 	}
 
 	.users-admin-user-card {
-		padding: 12px;
+		padding: 12px 14px;
 		border-radius: 12px;
 	}
 
-	.users-admin-user-top {
-		flex-wrap: wrap;
-		gap: 10px;
-		align-items: center;
+	.users-admin-user-name {
+		font-size: 14px;
 	}
 
-	.users-admin-actions {
-		justify-content: flex-start;
+	.users-admin-tag {
+		font-size: 10px;
+		padding: 2px 7px;
 	}
 
-	.users-admin-user-foot {
-		flex-wrap: wrap;
-		gap: 10px 14px;
-	}
-
-	.users-admin-table-wrap {
-		overflow: visible;
-		border: none;
-		background: none;
-	}
-
-	.users-admin-table {
-		min-width: 0;
-	}
-
-	.users-admin-table thead {
-		display: none;
-	}
-
-	.users-admin-table tbody,
-	.users-admin-table tr,
-	.users-admin-table td {
-		display: block;
-		width: 100%;
-		box-sizing: border-box;
-	}
-
-	.users-admin-table tr {
-		padding: 12px;
-		border-radius: 12px;
-		background: rgba(255, 255, 255, 0.35);
-		border: 1px solid rgba(255, 255, 255, 0.5);
-		margin-bottom: 10px;
-	}
-
-	.users-admin-table td {
-		border-bottom: none;
-		padding: 4px 0;
-		text-align: left;
-	}
-
-	.users-admin-table td:first-child {
-		font-size: 15px;
-		font-weight: 700;
-		margin-bottom: 4px;
-	}
-
-	.users-admin-table td:nth-child(2) {
-		font-size: 13px;
-		color: #4a5568;
-		margin-bottom: 6px;
-	}
-
-	.users-admin-table td:nth-child(3) {
+	.users-admin-btn {
+		padding: 6px 9px;
 		font-size: 11px;
-		color: var(--dash-muted);
-		margin-bottom: 8px;
-	}
-
-	.users-admin-table td:last-child .users-admin-actions {
-		width: 100%;
+		border-radius: 9px;
 	}
 }
 
 @media (max-width: 480px) {
 	.users-admin {
 		gap: 10px;
+		padding-bottom: 1.5rem;
 	}
 
 	.users-admin-card {
-		padding: 10px 10px 8px;
+		padding: 10px 12px;
 		border-radius: 10px;
 	}
 
@@ -413,28 +362,22 @@
 	}
 
 	.users-admin-user-card {
-		padding: 10px;
+		padding: 10px 12px;
 		border-radius: 10px;
 	}
 
 	.users-admin-user-name {
-		font-size: 14px;
+		font-size: 13px;
 	}
 
 	.users-admin-tag {
-		font-size: 11px;
+		font-size: 10px;
 		padding: 2px 6px;
 	}
 
 	.users-admin-btn {
-		padding: 6px 8px;
-		font-size: 12px;
+		padding: 5px 8px;
+		font-size: 11px;
 		border-radius: 8px;
-	}
-
-	.users-admin-table tr {
-		padding: 10px;
-		border-radius: 10px;
-		margin-bottom: 8px;
 	}
 }
