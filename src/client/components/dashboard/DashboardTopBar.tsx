@@ -1,10 +1,10 @@
 import { useState } from 'react';
 
 import { assetUrl } from '../../lib/assetUrl';
-import iconSearch from '../../assets/img/icon/navbar/search.png';
-import iconNotifyNew from '../../assets/img/icon/navbar/message/massage-new.png';
-import iconNotifyAbout from '../../assets/img/icon/navbar/message/massage-aboutyou.png';
-import iconNotifyNull from '../../assets/img/icon/navbar/message/massage-null.png';
+import iconSearch from '../../assets/img/icon/navbar/search.webp';
+import iconNotifyNew from '../../assets/img/icon/navbar/message/massage-new.webp';
+import iconNotifyAbout from '../../assets/img/icon/navbar/message/massage-aboutyou.webp';
+import iconNotifyNull from '../../assets/img/icon/navbar/message/massage-null.webp';
 
 type NotifyVariant = 'new' | 'mention' | 'read';
 
@@ -43,7 +43,7 @@ export default function DashboardTopBar({ title, notifyVariant = 'read' }: Props
             <div id="dashboard-topbar-toast-slot" className="dashboard-topbar-toast-slot" aria-live="polite" />
             <div className="dashboard-topbar-tools">
                 <div className="dashboard-search">
-                    <img src={assetUrl(iconSearch)} alt="" />
+                    <img src={assetUrl(iconSearch)} alt="" loading="lazy" decoding="async" width={20} height={20} />
                     <input
                         type="search"
                         placeholder="搜索…"
@@ -53,7 +53,7 @@ export default function DashboardTopBar({ title, notifyVariant = 'read' }: Props
                     />
                 </div>
                 <button type="button" className="dashboard-notify-btn" title="通知" aria-label="通知">
-                    <img src={notifySrc[notifyVariant]} alt="" />
+                    <img src={notifySrc[notifyVariant]} alt="" loading="lazy" decoding="async" width={20} height={20} />
                 </button>
             </div>
         </header>

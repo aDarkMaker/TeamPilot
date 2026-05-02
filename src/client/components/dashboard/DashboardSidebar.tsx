@@ -1,15 +1,16 @@
 import { useEffect, useState, useRef, useCallback } from 'react';
 import UserAvatar from './UserAvatar';
 import { assetUrl } from '../../lib/assetUrl';
+import OptimizedImage from '../OptimizedImage';
 
-import iconLogo from '../../assets/img/icon/icon-hxk.png';
-import iconDashboard from '../../assets/img/icon/navbar/dashboard.png';
-import iconList from '../../assets/img/icon/navbar/list.png';
-import iconUser from '../../assets/img/icon/navbar/user.png';
-import iconCalendar from '../../assets/img/icon/navbar/calendar.png';
-import iconUserPlus from '../../assets/img/icon/navbar/user-plus.png';
-import iconLogout from '../../assets/img/icon/navbar/logout.png';
-import iconSettings from '../../assets/img/icon/navbar/settings.png';
+import iconLogo from '../../assets/img/icon/icon-hxk.webp';
+import iconDashboard from '../../assets/img/icon/navbar/dashboard.webp';
+import iconList from '../../assets/img/icon/navbar/list.webp';
+import iconUser from '../../assets/img/icon/navbar/user.webp';
+import iconCalendar from '../../assets/img/icon/navbar/calendar.webp';
+import iconUserPlus from '../../assets/img/icon/navbar/user-plus.webp';
+import iconLogout from '../../assets/img/icon/navbar/logout.webp';
+import iconSettings from '../../assets/img/icon/navbar/settings.webp';
 
 type MeResponse = {
 	id: string;
@@ -140,45 +141,45 @@ export default function DashboardSidebar({ initialPath }: Props) {
         <>
             <aside ref={sidebarRef} className={`dashboard-sidebar ${sidebarOpen ? 'is-open' : ''}`}>
 			<a className="dashboard-logo" href="/dashboard" onClick={(e) => { if (sidebarOpen) { e.preventDefault(); closeSidebar(); } }}>
-				<img src={assetUrl(iconLogo)} alt="" width={40} height={40} />
+				<OptimizedImage src={assetUrl(iconLogo)} alt="" width={40} height={40} critical />
 				<span>小科·OFFICIAL</span>
 			</a>
 			<ul className="dashboard-nav">
 				<li>
 					<a className={linkClass('/dashboard')} href="/dashboard" onClick={closeSidebar}>
-						<img src={assetUrl(iconDashboard)} alt="" />
+						<OptimizedImage src={assetUrl(iconDashboard)} alt="" width={24} height={24} />
 						<span>工作主页</span>
 					</a>
 				</li>
 				<li>
 					<a className={linkClass('/dashboard/list')} href="/dashboard/list" onClick={closeSidebar}>
-						<img src={assetUrl(iconList)} alt="" />
+						<OptimizedImage src={assetUrl(iconList)} alt="" width={24} height={24} />
 						<span>任务列表</span>
 					</a>
 				</li>
 				{isStaff(me?.role) && (
 					<li>
 						<a className={linkClass('/dashboard/users')} href="/dashboard/users" onClick={closeSidebar}>
-							<img src={assetUrl(iconUser)} alt="" />
+							<OptimizedImage src={assetUrl(iconUser)} alt="" width={24} height={24} />
 							<span>成员管理</span>
 						</a>
 					</li>
 				)}
 				<li>
 					<a className={linkClass('/dashboard/calendar')} href="/dashboard/calendar" onClick={closeSidebar}>
-						<img src={assetUrl(iconCalendar)} alt="" />
+						<OptimizedImage src={assetUrl(iconCalendar)} alt="" width={24} height={24} />
 						<span>日程安排</span>
 					</a>
 				</li>
 				<li>
 					<a className={linkClass('/dashboard/newcomers')} href="/dashboard/newcomers" onClick={closeSidebar}>
-						<img src={assetUrl(iconUserPlus)} alt="" />
+						<OptimizedImage src={assetUrl(iconUserPlus)} alt="" width={24} height={24} />
 						<span>新人详情</span>
 					</a>
 				</li>
 				<li>
 					<a className={linkClass('/dashboard/settings')} href="/dashboard/settings" onClick={closeSidebar}>
-						<img src={assetUrl(iconSettings)} alt="" />
+						<OptimizedImage src={assetUrl(iconSettings)} alt="" width={24} height={24} />
 						<span>个性设置</span>
 					</a>
 				</li>
@@ -194,7 +195,7 @@ export default function DashboardSidebar({ initialPath }: Props) {
 					<div className="role">{roleLabel[role] ?? role}</div>
 				</div>
 				<button type="button" className="dashboard-logout" onClick={onLogout} title="登出">
-					<img src={assetUrl(iconLogout)} alt="登出" />
+					<OptimizedImage src={assetUrl(iconLogout)} alt="登出" width={24} height={24} />
 				</button>
 			</div>
 		</aside>

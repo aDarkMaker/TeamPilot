@@ -415,15 +415,15 @@ html.dashboard-shell body {
 	flex: 1;
 	min-height: 0;
 	padding: 24px 28px 40px;
-	max-width: 1600px;
 	width: 100%;
+	max-width: none;
 	box-sizing: border-box;
 	overflow-y: auto;
 	overflow-x: hidden;
 	overscroll-behavior-y: auto;
 	-webkit-overflow-scrolling: touch;
-	scrollbar-width: none; /* Firefox */
-	-ms-overflow-style: none; /* IE/Edge legacy */
+	scrollbar-width: none;
+	-ms-overflow-style: none;
 }
 
 .content-wrapper::-webkit-scrollbar {

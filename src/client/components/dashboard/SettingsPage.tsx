@@ -9,7 +9,7 @@ import {
 } from "react";
 
 import UserAvatar from "./UserAvatar";
-import bgDefault from "../../assets/img/image/bg-dashboard.png";
+import bgDefault from "../../assets/img/image/bg-dashboard.webp";
 import { assetUrl } from "../../lib/assetUrl";
 import { DashboardToast, useDashboardToast } from "./DashboardToast";
 
@@ -214,14 +214,16 @@ export default function SettingsPage() {
             }
             setMsg({ type: 'ok', text: '头像修改好哩！' });
             if (json.data) {
-				setAvatarUrl(json.data.avatarUrl ?? null);
-				setBgUrl(json.data.profileBackgroundUrl ?? null);
+				const avatarBust = json.data.avatarUrl ? `${json.data.avatarUrl}?t=${Date.now()}` : null;
+				const bgBust = json.data.profileBackgroundUrl ?? null;
+				setAvatarUrl(avatarBust);
+				setBgUrl(bgBust);
 				dispatchProfileUpdated({
 					nickname: json.data.nickname,
 					signature: json.data.signature,
 					qq: json.data.qq,
-					avatarUrl: json.data.avatarUrl ?? null,
-					profileBackgroundUrl: json.data.profileBackgroundUrl ?? null,
+					avatarUrl: avatarBust,
+					profileBackgroundUrl: bgBust,
 				});
 			}
         } catch {
@@ -248,16 +250,18 @@ export default function SettingsPage() {
                 setMsg({ type: 'err', text: errText(json, '背景图片上传失败了！') });
                 return;
             }
-            setMsg({ type: 'ok', text: '背景图片上传好啦！' });
+			setMsg({ type: 'ok', text: '背景图片上传好啦！' });
 			if (json.data) {
-				setBgUrl(json.data.profileBackgroundUrl ?? null);
-				setAvatarUrl(json.data.avatarUrl ?? null);
+				const bgBust = json.data.profileBackgroundUrl ? `${json.data.profileBackgroundUrl}?t=${Date.now()}` : null;
+				const avatarBust = json.data.avatarUrl ?? null;
+				setBgUrl(bgBust);
+				setAvatarUrl(avatarBust);
 				dispatchProfileUpdated({
 					nickname: json.data.nickname,
 					signature: json.data.signature,
 					qq: json.data.qq,
-					avatarUrl: json.data.avatarUrl ?? null,
-					profileBackgroundUrl: json.data.profileBackgroundUrl ?? null,
+					avatarUrl: avatarBust,
+					profileBackgroundUrl: bgBust,
 				});
 			}
         } catch {

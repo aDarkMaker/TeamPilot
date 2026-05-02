@@ -2,7 +2,8 @@
 import '../styles/auth.css';
 import '../styles/global.css';
 import { assetUrl } from '../lib/assetUrl';
-import favicon from '../assets/img/icon/icon-hxk.png';
+import favicon from '../assets/img/icon/icon-hxk.webp';
+import fontHxk from '../assets/fonts/fonts.ttf';
 import AuthTabs from '../components/auth/AuthTabs';
 ---
 
@@ -10,7 +11,8 @@ import AuthTabs from '../components/auth/AuthTabs';
     <head>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <link rel="icon" type="image/png" href={assetUrl(favicon)} />
+        <link rel="icon" type="image/webp" href={assetUrl(favicon)} />
+        <link rel="preload" href={assetUrl(fontHxk)} as="font" type="font/truetype" crossorigin />
     </head>
     <body class="auth-page">
         <main class="auth-container">

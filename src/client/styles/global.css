@@ -4,8 +4,29 @@
 	font-display: swap;
 }
 
-* {
+html {
 	font-family: 'HxkFont', sans-serif;
+}
+
+body,
+button,
+input,
+textarea,
+select {
+	font-family: inherit;
+}
+
+.dashboard-sidebar,
+.dashboard-nav,
+.dashboard-topbar h1,
+.home-ann-item,
+.home-dyn-item,
+.task-card,
+.calendar-block,
+.nc-list-item,
+.nc-comment-card,
+.users-admin-user-card,
+.settings-section {
 	user-select: none;
 }
 

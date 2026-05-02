@@ -66,6 +66,14 @@ export class HomeService {
         private cfg: AppConfig
     ) {}
 
+    private toWebpUrl(storedPath: string | null | undefined): string | null {
+        if (!storedPath) return null;
+        const normalized = String(storedPath).replace(/^\/+/, '');
+        const dot = normalized.lastIndexOf('.');
+        const base = dot >= 0 ? normalized.slice(0, dot) : normalized;
+        return `/uploads/${base}.webp`;
+    }
+
     private toDayYmd(): { ymd: string; month: number; day: number } {
         const now = new Date();
         const parts = new Intl.DateTimeFormat('zh-CN', {
@@ -89,7 +97,7 @@ export class HomeService {
             id: u.id,
             username: u.username,
             nickname: u.nickname,
-            avatarUrl: u.avatarPath ? `/uploads/${u.avatarPath.replace(/^\/+/, '')}` : null,
+            avatarUrl: this.toWebpUrl(u.avatarPath),
         }));
         return { ymd, users: data };
     }
@@ -108,7 +116,7 @@ export class HomeService {
                     id: r.authorId,
                     username: r.authorUsername,
                     nickname: r.authorNickname,
-                    avatarUrl: r.authorAvatarPath ? `/uploads/${r.authorAvatarPath.replace(/^\/+/, '')}` : null,
+                    avatarUrl: this.toWebpUrl(r.authorAvatarPath),
                 },
             })),
         };
@@ -140,7 +148,7 @@ export class HomeService {
                     id: created.authorId,
                     username: created.authorUsername,
                     nickname: created.authorNickname,
-                    avatarUrl: created.authorAvatarPath ? `/uploads/${created.authorAvatarPath.replace(/^\/+/, '')}` : null,
+                    avatarUrl: this.toWebpUrl(created.authorAvatarPath),
                 },
             };
         } catch (e) {

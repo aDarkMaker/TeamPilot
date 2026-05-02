@@ -5,6 +5,7 @@ import type { DB } from '../db';
 import { AppError } from '../types/api';
 import type { UserProfilePublic } from '../types/user';
 import { verifyPassword, hashPassword } from '../auth/password';
+import sharp from 'sharp';
 
 const patchSchema = z.object({
     nickname: z.string().min(1).max(32).optional().nullable(),
@@ -34,7 +35,10 @@ const UPLOAD_ROOT = join(process.cwd(), 'data', 'uploads');
 
 function toPublicUrl(storedPath: string | null): string | null {
     if (!storedPath) return null;
-    return `/uploads/${storedPath.replace(/^\/+/, '')}`;
+    const normalized = storedPath.replace(/^\/+/, '');
+    const dot = normalized.lastIndexOf('.');
+    const base = dot >= 0 ? normalized.slice(0, dot) : normalized;
+    return `/uploads/${base}.webp`;
 }
 
 function isValidMonthDay(month: number, day: number): boolean {
@@ -120,11 +124,16 @@ export class ProfileService {
         if (!ext) throw new AppError(400, 'INVALID_MIME', '不支持的图片格式');
         if (buffer.length > MAX_BYTES) throw new AppError(400, 'FILE_TOO_LARGE', '图片太大了');
 
+        const compressed = await sharp(buffer)
+            .resize(256, 256, { fit: 'cover', position: 'centre' })
+            .webp({ quality: 80 })
+            .toBuffer();
+
         const dir = join(UPLOAD_ROOT, 'avatars');
         mkdirSync(dir, { recursive: true });
-        const relative = `avatars/${userId}.${ext}`;
+        const relative = `avatars/${userId}.webp`;
         const abs = join(UPLOAD_ROOT, relative);
-        writeFileSync(abs, buffer);
+        writeFileSync(abs, compressed);
 
         await this.db.updateUserProfile(userId, { avatarPath: relative });
         const user = await this.db.findUserById(userId);
@@ -137,11 +146,16 @@ export class ProfileService {
 		if (!ext) throw new AppError(400, 'INVALID_MIME', '不支持的图片格式');
 		if (buffer.length > MAX_BYTES) throw new AppError(400, 'FILE_TOO_LARGE', '文件过大');
 
+		const compressed = await sharp(buffer)
+			.resize(1920, undefined, { fit: 'inside', withoutEnlargement: true })
+			.webp({ quality: 75 })
+			.toBuffer();
+
 		const dir = join(UPLOAD_ROOT, 'backgrounds');
 		mkdirSync(dir, { recursive: true });
-		const relative = `backgrounds/${userId}.${ext}`;
+		const relative = `backgrounds/${userId}.webp`;
 		const abs = join(UPLOAD_ROOT, relative);
-		writeFileSync(abs, buffer);
+		writeFileSync(abs, compressed);
 
 		await this.db.updateUserProfile(userId, { profileBgPath: relative });
 		const user = await this.db.findUserById(userId);

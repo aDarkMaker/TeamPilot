@@ -67,7 +67,7 @@ function AttachmentPreview({ attachment }: { attachment: RecruitmentAttachment }
 	if (kind === 'pdf') {
 		return (
 			<div className="nc-attach-frame-wrap">
-				<iframe title={fileName} className="nc-attach-frame" src={url} />
+				<iframe title={fileName} className="nc-attach-frame" src={url} loading="lazy" />
 				<a className="nc-attach-open" href={url} target="_blank" rel="noreferrer">
 					新窗口打开
 				</a>
@@ -78,7 +78,7 @@ function AttachmentPreview({ attachment }: { attachment: RecruitmentAttachment }
 	if (kind === 'image') {
 		return (
 			<div className="nc-attach-image-wrap">
-				<img className="nc-attach-image" src={url} alt={fileName} />
+				<img className="nc-attach-image" src={url} alt={fileName} loading="lazy" decoding="async" />
 				<a className="nc-attach-open" href={url} target="_blank" rel="noreferrer">
 					原图
 				</a>

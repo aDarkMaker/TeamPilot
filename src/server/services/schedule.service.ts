@@ -175,7 +175,11 @@ export class ScheduleService {
 	}
 
 	private toPublicUrl(storedPath: string | null | undefined) {
-		return storedPath ? `/uploads/${String(storedPath).replace(/^\/+/, '')}` : null;
+		if (!storedPath) return null;
+		const normalized = String(storedPath).replace(/^\/+/, '');
+		const dot = normalized.lastIndexOf('.');
+		const base = dot >= 0 ? normalized.slice(0, dot) : normalized;
+		return `/uploads/${base}.webp`;
 	}
 
 	private normalizeKey(s: string) {

@@ -906,7 +906,7 @@ export default function Calendar() {
 										<div key={p.userId} className={`calendar-person ${p.taskStatus === 'leave' ? 'is-leave' : ''}`}>
 											<span className="calendar-person-avatar">
 												{p.avatarUrl ? (
-													<img className="calendar-person-img" src={p.avatarUrl} alt="" decoding="async" loading="eager" />
+													<img className="calendar-person-img" src={p.avatarUrl} alt="" decoding="async" loading="lazy" width={28} height={28} />
 												) : null}
 												<span className="calendar-person-fallback">{p.username.slice(0, 1)}</span>
 											</span>

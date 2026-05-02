@@ -6,7 +6,8 @@ import '../styles/users-admin.css';
 import '../styles/calendar.css';
 import '../styles/global.css';
 import { assetUrl } from '../lib/assetUrl';
-import favicon from '../assets/img/icon/icon-hxk.png';
+import favicon from '../assets/img/icon/icon-hxk.webp';
+import fontHxk from '../assets/fonts/fonts.ttf';
 import DashboardSidebar from '../components/dashboard/DashboardSidebar';
 import DashboardTopBar from '../components/dashboard/DashboardTopBar';
 import DashboardBackground from '../components/dashboard/DashboardBackground';
@@ -27,6 +28,9 @@ const { title = '工作主页', notifyVariant = 'read' }: Props = Astro.props;
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" type="image/png" href={assetUrl(favicon)} />
+        <link rel="preload" href={assetUrl(fontHxk)} as="font" type="font/truetype" crossorigin />
+        <link rel="preconnect" href="https://upos-sz-mirrorcos.bilivideo.com" />
+        <link rel="preconnect" href="https://i0.hdslb.com" />
         <title>{title} · HXK</title>
     </head>
     <body>

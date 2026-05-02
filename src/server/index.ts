@@ -29,6 +29,7 @@ import { join } from 'node:path';
 import { mkdirSync } from 'node:fs';
 import { ProfileService } from './services/profile.service';
 import { ProfileController } from './controller/profile.controller';
+import { webpFallback } from './middleware/webpFallback';
 import type { Socket } from 'node:net';
 
 function isBenignClientError(err: unknown): boolean {
@@ -87,6 +88,7 @@ async function main() {
 
 	const uploadRoot = join(process.cwd(), 'data', 'uploads');
 	mkdirSync(uploadRoot, { recursive: true });
+	app.use(webpFallback);
 	app.use(mount('/uploads', serve(uploadRoot)));
 	
 	const joinusRoot = join(process.cwd(), 'data', 'joinus');

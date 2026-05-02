@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { MarkdownBlock } from './newcomers/MarkdownBlock';
 import { DashboardToast, useDashboardToast } from './DashboardToast';
 import { assetUrl } from '../../lib/assetUrl';
-import circlePlus from '../../assets/img/icon/circle-plus.png';
+import circlePlus from '../../assets/img/icon/circle-plus.webp';
 import { formatCstDateTime } from '../../lib/timeCst';
 import {
 	createAnnouncement,
@@ -216,7 +216,7 @@ export default function HomePage() {
 							title="发布公告"
 							onClick={() => setPublishOpen((v) => !v)}
 						>
-							<img src={assetUrl(circlePlus)} alt="" />
+							<img src={assetUrl(circlePlus)} alt="" loading="lazy" decoding="async" width={24} height={24} />
 						</button>
 					) : null}
 				</div>
@@ -300,7 +300,7 @@ export default function HomePage() {
 								<article key={u.id} className="home-birthday-item">
 									<div className="home-birthday-user">
 										<div className="home-birthday-avatar">
-											{u.avatarUrl ? <img src={u.avatarUrl} alt="" loading="lazy" /> : <span>{(u.nickname ?? u.username).slice(0, 1)}</span>}
+											{u.avatarUrl ? <img src={u.avatarUrl} alt="" loading="lazy" decoding="async" width={36} height={36} /> : <span>{(u.nickname ?? u.username).slice(0, 1)}</span>}
 										</div>
 										<div className="home-birthday-name">{u.nickname ?? u.username}</div>
 									</div>
@@ -356,7 +356,7 @@ export default function HomePage() {
 									</h3>
 									<p className="home-dyn-text">{d.text}</p>
 									{d.mediaType === 'image' && d.mediaUrl ? (
-										<img className="home-dyn-cover" src={d.mediaUrl} alt={d.title} loading="lazy" />
+										<img className="home-dyn-cover" src={d.mediaUrl} alt={d.title} loading="lazy" decoding="async" />
 									) : null}
 									{d.mediaType === 'video' && d.videoEmbedUrl ? (
 										<iframe

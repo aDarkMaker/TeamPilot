@@ -7,6 +7,9 @@ export default defineConfig({
     srcDir: './src/client',
     integrations: [react()],
     devToolbar: { enabled: false },
+    build: {
+        assets: '_assets',
+    },
     vite: {
         server: {
             proxy: {
@@ -23,6 +26,17 @@ export default defineConfig({
                     changeOrigin: true,
                 },
             }
-        }
+        },
+        build: {
+            rollupOptions: {
+                output: {
+                    manualChunks: {
+                        react: ['react', 'react-dom'],
+                        markdown: ['react-markdown', 'remark-gfm'],
+                    },
+                },
+            },
+            cssMinify: 'lightningcss',
+        },
     }
 });
