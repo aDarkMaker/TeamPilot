@@ -4,7 +4,8 @@
   "devDependencies": {
     "@types/bun": "latest",
     "@types/koa": "^3.0.2",
-    "@types/koa__router": "^12.0.5"
+    "@types/koa__router": "^12.0.5",
+    "lightningcss": "^1.32.0"
   },
   "scripts": {
     "dev": "astro dev",

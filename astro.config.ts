@@ -28,14 +28,6 @@ export default defineConfig({
             }
         },
         build: {
-            rollupOptions: {
-                output: {
-                    manualChunks: {
-                        react: ['react', 'react-dom'],
-                        markdown: ['react-markdown', 'remark-gfm'],
-                    },
-                },
-            },
             cssMinify: 'lightningcss',
         },
     }
