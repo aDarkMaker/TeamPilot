@@ -86,7 +86,6 @@ export default function UserAdminPage() {
 				const p = await api<AppRow[]>('/api/application/pending');
 				if (disposed) return;
 				pendingApplicationsStore.setItems(p);
-				broadcastApplicationsUpdated();
 			} catch (e) {
 				if (disposed) return;
 				setErr(e instanceof Error ? e.message : 'UNKNOWN_ERROR');

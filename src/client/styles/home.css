@@ -455,6 +455,7 @@
 		top: 62px;
 		left: 8px;
 		right: 8px;
+		max-width: none;
 		font-size: 0.78rem;
 		padding: 0.5rem 0.7rem;
 		border-radius: 10px;
@@ -508,5 +509,15 @@
 	.home-btn {
 		font-size: 11px;
 		padding: 7px 12px;
+	}
+
+	.home-dyn-text {
+		font-size: 13px;
+		line-height: 1.55;
+	}
+
+	.home-dyn-meta,
+	.home-ann-meta {
+		font-size: 10px;
 	}
 }

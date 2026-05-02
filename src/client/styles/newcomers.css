@@ -489,7 +489,7 @@
 
 @media (max-width: 1280px) {
 	.nc-page {
-		grid-template-columns: minmax(220px, 260px) minmax(0, 1fr);
+		grid-template-columns: minmax(200px, 240px) minmax(0, 1fr);
 		grid-template-rows: auto auto;
 	}
 
@@ -517,6 +517,7 @@
 @media (max-width: 768px) {
 	.nc-page {
 		min-height: auto;
+		gap: 14px;
 	}
 
 	.nc-list {
@@ -533,7 +534,7 @@
 	}
 
 	.nc-list-items {
-		max-height: 160px;
+		max-height: 180px;
 		padding: 6px;
 	}
 
@@ -558,6 +559,10 @@
 
 	.nc-detail-name {
 		font-size: 18px;
+	}
+
+	.nc-detail-title-row {
+		gap: 8px;
 	}
 
 	.nc-section-title {

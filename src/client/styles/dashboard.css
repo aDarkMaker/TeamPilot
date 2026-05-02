@@ -309,6 +309,8 @@ html.dashboard-shell body {
 	position: sticky;
 	top: 0;
 	z-index: 10;
+	min-width: 0;
+	overflow: hidden;
 }
 
 .dashboard-topbar h1 {
@@ -538,6 +540,13 @@ html.dashboard-shell body {
 		padding: 12px;
 	}
 
+	.dashboard-topbar h1 {
+		min-width: 0;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+
 	.home-ann-actions {
 		display: none !important;
 	}
@@ -548,6 +557,10 @@ html.dashboard-shell body {
 
 	.dashboard-topbar-toast-slot {
 		display: none !important;
+	}
+
+	.dashboard-topbar-tools {
+		flex-shrink: 0;
 	}
 }
 

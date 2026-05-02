@@ -297,6 +297,22 @@
 	word-break: break-word;
 }
 
+@media (max-width: 768px) {
+	.users-admin-table-wrap {
+		-webkit-overflow-scrolling: touch;
+	}
+
+	.users-admin-table th,
+	.users-admin-table td {
+		padding: 10px 8px;
+		font-size: 12px;
+	}
+
+	.users-admin-table th {
+		font-size: 11px;
+	}
+}
+
 /* TODO: Fixed */
 @media (max-width: 768px) {
 	.users-admin {
