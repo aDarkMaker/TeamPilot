@@ -1,0 +1,11 @@
+{
+    "typescript.preferences.includePackageJsonAutoImports": "auto",
+    "typescript.tsserver.experimental.enableProjectDiagnostics": false,
+    "typescript.validate.enable": true,
+    "javascript.validate.enable": true,
+    "files.associations": {
+        "*.astro": "astro"
+    },
+    "typescript.tsserver.maxTsServerMemory": 4096,
+    "typescript.disableAutomaticTypeAcquisition": true
+}
