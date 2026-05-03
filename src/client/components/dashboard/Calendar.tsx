@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react';
 
 import { dayKey, scheduleStore, broadcastScheduleUpdated, type Role, type ScheduleDayItem } from '../../lib/scheduleStore';
+import { useSearchHighlight } from '../../lib/useSearchHighlight';
 import { DashboardToast, useDashboardToast } from './DashboardToast';
 
 type MentionUser = {
@@ -140,6 +141,7 @@ function layoutDayBlocks(items: ScheduleDayItem[]): BlockLayout[] {
 }
 
 export default function Calendar() {
+	const { highlightText } = useSearchHighlight();
 	const descRef = useRef<HTMLTextAreaElement | null>(null);
 	const memberInputRef = useRef<HTMLInputElement | null>(null);
 	const avatarLoadedRef = useRef<Map<string, string>>(new Map());
@@ -635,7 +637,7 @@ export default function Calendar() {
 												if (e.key === 'Enter' || e.key === ' ') setDetail(b.item);
 											}}
 										>
-											<div className="calendar-block-title">{b.item.title}</div>
+											<div className="calendar-block-title">{highlightText(b.item.title)}</div>
 										</div>
 									))}
 								</div>
@@ -892,12 +894,12 @@ export default function Calendar() {
 							</div>
 						</div>
 						<div className="calendar-detail">
-							<div className="calendar-detail-title">{detail.title}</div>
+							<div className="calendar-detail-title">{highlightText(detail.title)}</div>
 							<div className="calendar-detail-line">
 								<span className="pill">
 									{detail.startAt} ～ {detail.endAt}
 								</span>
-								{detail.location ? <span className="pill">{detail.location}</span> : null}
+								{detail.location ? <span className="pill">{highlightText(detail.location)}</span> : null}
 								<span className="pill">{detail.durationMinutes} 分钟</span>
 							</div>
 							{detail.participants?.length ? (
@@ -916,7 +918,9 @@ export default function Calendar() {
 									))}
 								</div>
 							) : null}
-							{detail.description ? <div className="calendar-detail-desc">{detail.description}</div> : null}
+							{detail.description ? (
+								<div className="calendar-detail-desc">{highlightText(detail.description)}</div>
+							) : null}
 						</div>
 					</div>
 				</div>

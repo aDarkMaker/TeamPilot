@@ -22,7 +22,7 @@ const { title, description, skipHref, skipLabel } = Astro.props;
 		<meta charset="UTF-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 		<link rel="icon" type="image/webp" href={assetUrl(favicon)} />
-		<link rel="preload" href={assetUrl(fontJoinUs)} as="font" type="font/truetype" crossorigin />
+		<link rel="preload" href={assetUrl(fontJoinUs)} as="font" type="font/ttf" crossorigin />
 		<link rel="preconnect" href="https://cdn.jsdelivr.net" />
 		{description && <meta name="description" content={description} />}
 		<title>{title}</title>

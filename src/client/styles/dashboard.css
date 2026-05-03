@@ -310,7 +310,7 @@ html.dashboard-shell body {
 	top: 0;
 	z-index: 10;
 	min-width: 0;
-	overflow: hidden;
+	overflow: visible;
 }
 
 .dashboard-topbar h1 {
@@ -366,6 +366,7 @@ html.dashboard-shell body {
 
 .dashboard-search {
 	position: relative;
+	z-index: 5;
 }
 
 .dashboard-search img {
@@ -523,6 +524,15 @@ html.dashboard-shell body {
 
 	.sidebar-hamburger {
 		display: flex;
+		width: 32px;
+		height: 32px;
+		padding: 6px 5px;
+		border-radius: 9px;
+		gap: 3px;
+	}
+
+	.sidebar-hamburger-line {
+		width: 16px;
 	}
 
 	.dashboard-search {
@@ -559,9 +569,6 @@ html.dashboard-shell body {
 		display: none !important;
 	}
 
-	.dashboard-topbar-tools {
-		flex-shrink: 0;
-	}
 }
 
 @media (max-width: 480px) {

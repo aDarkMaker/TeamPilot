@@ -6,6 +6,7 @@ import { DEPARTMENT_LABELS } from '../../../lib/recruitment/departmentLabels';
 import type { MeBrief } from '../../../lib/recruitment/recruitmentClient';
 import type { NewcomerApplicationView } from '../../../types/recruitmentUi';
 import { formatCstDateTime } from '../../../lib/timeCst';
+import { useSearchHighlight } from '../../../lib/useSearchHighlight';
 
 type Props = {
 	application: NewcomerApplicationView;
@@ -28,6 +29,7 @@ export function NewcomerDetail({
 	deleteBusy,
 	onApplicationDelete,
 }: Props) {
+	const { highlightText } = useSearchHighlight();
 	const dept = DEPARTMENT_LABELS[application.department];
 	const { introClean, offlineTime, onlineTime } = extractInterviewTimes(application.introMarkdown);
 	const offlinePicked = application.wantsOfflineInterview ? (offlineTime ?? null) : null;
@@ -37,7 +39,7 @@ export function NewcomerDetail({
 		<div className="nc-detail">
 			<header className="nc-detail-head">
 				<div className="nc-detail-title-row">
-					<h2 className="nc-detail-name">{application.fullName}</h2>
+					<h2 className="nc-detail-name">{highlightText(application.fullName)}</h2>
 					<span className="nc-detail-dept">{dept}</span>
 					{me?.role === 'super_admin' ? (
 						<button
@@ -61,17 +63,17 @@ export function NewcomerDetail({
 				<h3 className="nc-section-title">基本信息</h3>
 				<dl className="nc-meta-grid">
 					<dt>手机</dt>
-					<dd>{application.contact}</dd>
+					<dd>{highlightText(application.contact)}</dd>
 					<dt>QQ</dt>
-					<dd>{application.qq}</dd>
+					<dd>{highlightText(application.qq)}</dd>
 					<dt>在校生</dt>
 					<dd>{application.isStudent ? '是' : '否'}</dd>
 					{application.isStudent ? (
 						<>
 							<dt>学院</dt>
-							<dd>{application.schoolCollege ?? '—'}</dd>
+							<dd>{highlightText(application.schoolCollege ?? '—')}</dd>
 							<dt>年级</dt>
-							<dd>{application.grade ?? '—'}</dd>
+							<dd>{highlightText(application.grade ?? '—')}</dd>
 						</>
 					) : null}
 					<dt>线下面试</dt>

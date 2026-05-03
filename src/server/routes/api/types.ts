@@ -7,6 +7,7 @@ import type { RecruitmentController } from '../../controller/recruitment.control
 import type { JoinusSubmitController } from '../../controller/joinusSubmit.controller';
 import type { HomeController } from '../../controller/home.controller';
 import type { TaskController } from '../../controller/task.controller';
+import type { SearchController } from '../../controller/search.controller';
 
 export interface ApiRouteDeps {
 	authController: AuthController;
@@ -18,4 +19,5 @@ export interface ApiRouteDeps {
 	joinusSubmitController: JoinusSubmitController;
 	homeController: HomeController;
 	taskController: TaskController;
+	searchController: SearchController;
 }

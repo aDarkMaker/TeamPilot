@@ -23,6 +23,8 @@ import { TaskService } from './services/task.service';
 import { TaskController } from './controller/task.controller';
 import { HomeService } from './services/home.service';
 import { HomeController } from './controller/home.controller';
+import { SearchService } from './services/search.service';
+import { SearchController } from './controller/search.controller';
 import serve from 'koa-static';
 import mount from 'koa-mount';
 import { join } from 'node:path';
@@ -78,11 +80,14 @@ async function main() {
 	const taskService = new TaskService(db);
 	const taskController = new TaskController(taskService);
 
+	const searchService = new SearchService(db);
+	const searchController = new SearchController(searchService);
+
 	const app = new Koa();
 	app.proxy = true; // X-forwarded-for 你家不要了
 	applyGlobalMiddleware(app);
 
-	const apiRouter = composeApiRouter({ applicationController, adminController, authController, profileController, scheduleController, recruitmentController, joinusSubmitController, homeController, taskController });
+	const apiRouter = composeApiRouter({ applicationController, adminController, authController, profileController, scheduleController, recruitmentController, joinusSubmitController, homeController, taskController, searchController });
 	app.use(apiRouter.routes());
 	app.use(apiRouter.allowedMethods());
 

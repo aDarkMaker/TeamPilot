@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState, useSyncExternalStore } from 'react';
+import { useSearchHighlight } from '../../../lib/useSearchHighlight';
 
 import { CommentsPanel } from './CommentsPanel';
 import { DepartmentSelect } from './DepartmentSelect';
@@ -22,6 +23,7 @@ import { recruitmentApplicationsStore } from '../../../lib/recruitment/recruitme
 
 export default function NewcomersPage() {
 	const [me, setMe] = useState<MeBrief | null>(null);
+	const { highlightText } = useSearchHighlight();
 	const appsState = useSyncExternalStore(
 		recruitmentApplicationsStore.subscribe,
 		recruitmentApplicationsStore.getSnapshot,
@@ -314,7 +316,7 @@ export default function NewcomersPage() {
 								className={`nc-list-item ${app.id === listSelectedId ? 'is-active' : ''}`}
 								onClick={() => setSelectedId(app.id)}
 							>
-								<span className="nc-list-item-name">{app.fullName}</span>
+								<span className="nc-list-item-name">{highlightText(app.fullName) as React.ReactNode}</span>
 								<span className="nc-list-item-meta">{app.attachments.length} 个附件</span>
 							</button>
 						</li>

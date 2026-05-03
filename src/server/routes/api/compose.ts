@@ -11,6 +11,7 @@ import { buildJoinUsSubmitRoutes } from '../joinusSubmit.routes';
 import { buildRecruitmentEventsRoutes } from '../recruitment.events.routes';
 import { buildHomeRoutes } from '../home.routes';
 import { buildTaskRoutes } from '../task.routes';
+import { buildSearchRoutes } from '../search.routes';
 
 function mountChildRouter(parent: Router, child: Router): void {
 	parent.use(child.routes());
@@ -32,5 +33,6 @@ export function composeApiRouter(deps: ApiRouteDeps): Router {
 	mountChildRouter(api, buildJoinUsSubmitRoutes(deps.joinusSubmitController));
 	mountChildRouter(api, buildHomeRoutes(deps.homeController));
 	mountChildRouter(api, buildTaskRoutes(deps.taskController));
+	mountChildRouter(api, buildSearchRoutes(deps.searchController));
 	return api;
 }

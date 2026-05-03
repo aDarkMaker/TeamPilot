@@ -1,5 +1,7 @@
 import { useEffect } from 'react';
 
+import { fetchUsersMeDeduped } from '../../lib/api/fetchUsersMeDeduped';
+
 type UpdatePayload = {
 	profileBackgroundUrl?: string | null;
 };
@@ -27,10 +29,10 @@ export default function DashboardBackground() {
 		let cancelled = false;
 		const load = async () => {
 			try {
-				const res = await fetch('/api/users/me', { credentials: 'include' });
-				const json = await res.json();
+				const { res, json: raw } = await fetchUsersMeDeduped();
 				if (cancelled) return;
-				if (res.ok && json?.ok && json?.data) {
+				const json = raw as { ok?: boolean; data?: { profileBackgroundUrl?: string | null } };
+				if (res.ok && json.ok && json.data) {
 					apply(json.data.profileBackgroundUrl);
 				}
 			} catch {

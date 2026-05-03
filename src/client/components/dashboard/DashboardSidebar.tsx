@@ -11,6 +11,7 @@ import iconCalendar from '../../assets/img/icon/navbar/calendar.webp';
 import iconUserPlus from '../../assets/img/icon/navbar/user-plus.webp';
 import iconLogout from '../../assets/img/icon/navbar/logout.webp';
 import iconSettings from '../../assets/img/icon/navbar/settings.webp';
+import { fetchUsersMeDeduped } from '../../lib/api/fetchUsersMeDeduped';
 
 type MeResponse = {
 	id: string;
@@ -82,8 +83,8 @@ export default function DashboardSidebar({ initialPath }: Props) {
 
         const load = async () => {
             try {
-                const res = await fetch('/api/users/me', { credentials: 'include' });
-                const json = (await res.json()) as MeApiJson;
+                const { res, json: raw } = await fetchUsersMeDeduped();
+                const json = raw as MeApiJson;
                 if (cancelled) return;
 				if (res.ok && json?.ok && json.data) setMe(json.data);
 				else if (res.status === 401) setMe(null);

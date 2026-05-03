@@ -7,6 +7,7 @@ import {
 } from '../../lib/pendingApplicationsStore';
 import { DashboardToast, useDashboardToast } from './DashboardToast';
 import { formatCstDateTime } from '../../lib/timeCst';
+import { useSearchHighlight } from '../../lib/useSearchHighlight';
 
 type Role = 'user' | 'admin' | 'super_admin';
 type Status = 'active' | 'disabled';
@@ -46,6 +47,7 @@ export default function UserAdminPage() {
 	const [confirmRemoveOpen, setConfirmRemoveOpen] = useState(false);
 	const [confirmRemoveTarget, setConfirmRemoveTarget] = useState<{ id: string; username: string } | null>(null);
 	const toast = useDashboardToast();
+	const { highlightText } = useSearchHighlight();
 
 	const pendingState = useSyncExternalStore(
 		pendingApplicationsStore.subscribe,
@@ -324,8 +326,8 @@ export default function UserAdminPage() {
 							<tbody>
 								{pending.map((a) => (
 									<tr key={a.id}>
-										<td className="users-admin-strong">{a.username}</td>
-										<td className="users-admin-reason">{a.reason}</td>
+										<td className="users-admin-strong">{highlightText(a.username)}</td>
+										<td className="users-admin-reason">{highlightText(a.reason)}</td>
 										<td className="users-admin-muted">{fmt(a.createdAt)}</td>
 										<td>
 											<div className="users-admin-actions">
@@ -364,7 +366,7 @@ export default function UserAdminPage() {
 						<div key={u.id} className="users-admin-user-card">
 							<div className="users-admin-user-top">
 								<div className="users-admin-user-meta">
-									<div className="users-admin-user-name">{u.username}</div>
+									<div className="users-admin-user-name">{highlightText(u.username)}</div>
 									<div className="users-admin-tags">
 										<span className={`users-admin-tag ${roleClass[u.role]}`}>{roleLabel[u.role]}</span>
 										<span className={`users-admin-tag ${u.status === 'active' ? 'status-active' : 'status-disabled'}`}>

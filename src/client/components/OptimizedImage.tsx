@@ -5,11 +5,17 @@ type OptimizedImageProps = ImgHTMLAttributes<HTMLImageElement> & {
 	intrinsic?: boolean;
 };
 
+type FetchPriority = 'high' | 'low' | 'auto';
+
 export default function OptimizedImage({ critical, intrinsic, ...props }: OptimizedImageProps) {
 	const attrs: ImgHTMLAttributes<HTMLImageElement> = { ...props };
 
+	const inherited = (attrs as { fetchPriority?: FetchPriority }).fetchPriority;
+	delete (attrs as { fetchPriority?: unknown }).fetchPriority;
+
+	const fetchpriority: FetchPriority | undefined = critical ? 'high' : inherited;
+
 	if (critical) {
-		attrs.fetchPriority = 'high';
 		attrs.loading = 'eager';
 	} else if (!attrs.loading) {
 		attrs.loading = 'lazy';
@@ -28,5 +34,10 @@ export default function OptimizedImage({ critical, intrinsic, ...props }: Optimi
 		};
 	}
 
-	return <img {...attrs} />;
+	return (
+		<img
+			{...attrs}
+			{...(fetchpriority ? ({ fetchpriority } as ImgHTMLAttributes<HTMLImageElement>) : {})}
+		/>
+	);
 }

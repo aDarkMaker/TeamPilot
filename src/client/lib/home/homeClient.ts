@@ -1,3 +1,5 @@
+import { fetchUsersMeDeduped } from '../api/fetchUsersMeDeduped';
+
 export type MeRole = 'user' | 'admin' | 'super_admin';
 
 export type Announcement = {
@@ -55,8 +57,8 @@ function errText(json: ApiSuccess<unknown> | ApiFailure, fallback: string) {
 }
 
 export async function fetchMeRole(): Promise<MeRole | null> {
-	const res = await fetch('/api/users/me', { credentials: 'include' });
-	const json = await parseJson<{ role: MeRole }>(res);
+	const { res, json: raw } = await fetchUsersMeDeduped();
+	const json = raw as ApiSuccess<{ role: MeRole }> | ApiFailure;
 	if (!res.ok || !json.ok || !json.data) return null;
 	return json.data.role;
 }

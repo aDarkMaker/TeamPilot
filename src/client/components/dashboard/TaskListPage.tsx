@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { DashboardToast, useDashboardToast } from './DashboardToast';
 import { decideTask, fetchMyTasks, type TaskCard, type TaskStatus } from '../../lib/tasks/taskClient';
 import { formatCstDateTime } from '../../lib/timeCst';
+import { useSearchHighlight } from '../../lib/useSearchHighlight';
 
 type TaskPayload = {
 	startAtIso?: string;
@@ -74,6 +75,7 @@ function statusBadge(task: TaskCard, started: boolean): { label: string; classNa
 
 export default function TaskListPage() {
 	const toast = useDashboardToast();
+	const { highlightText } = useSearchHighlight();
 	const [items, setItems] = useState<TaskCard[]>([]);
 	const [loading, setLoading] = useState(true);
 	const [busyId, setBusyId] = useState<string | null>(null);
@@ -155,14 +157,14 @@ export default function TaskListPage() {
 					return (
 						<article key={task.id} className={`task-card ${done ? 'is-done' : ''}`}>
 							<div className="task-card-row">
-								<h3>{task.title}</h3>
+								<h3>{highlightText(task.title)}</h3>
 								<span className={`task-status ${badge.className}`}>{badge.label}</span>
 							</div>
 							<div className="task-meta">
 								创建时间：{fmtTime(task.createdAt)}
 								{startIso ? ` · 开始时间：${fmtTime(startIso)}` : ''}
 							</div>
-							{task.content ? <div className="task-content">{task.content}</div> : null}
+							{task.content ? <div className="task-content">{highlightText(task.content)}</div> : null}
 
 							<div className="task-actions">
 								<button
