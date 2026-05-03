@@ -7,6 +7,8 @@
 	--dash-glass: rgba(255, 255, 255, 0.55);
 	--dash-glass-border: rgba(255, 255, 255, 0.45);
 	--dash-sidebar-w: 220px;
+	--dash-content-pad-x: 28px;
+	--dash-modal-sidebar-gap: 24px;
 	--dash-nav-ease: cubic-bezier(0.22, 1, 0.36, 1);
 	--dash-nav-spring: cubic-bezier(0.34, 1.2, 0.64, 1);
 }
@@ -417,7 +419,7 @@ html.dashboard-shell body {
 .content-wrapper {
 	flex: 1;
 	min-height: 0;
-	padding: 24px 28px 40px;
+	padding: 24px var(--dash-content-pad-x) 40px;
 	width: 100%;
 	max-width: none;
 	box-sizing: border-box;

@@ -819,6 +819,23 @@
 	box-shadow: 0 30px 80px rgba(0, 0, 0, 0.18);
 }
 
+@media (min-width: 769px) and (max-width: 1199px) {
+	.calendar-modal {
+		inset: 0;
+		padding: 18px var(--dash-content-pad-x) 18px
+			calc(var(--dash-sidebar-w) + var(--dash-content-pad-x) + var(--dash-modal-sidebar-gap));
+	}
+
+	.time-picker {
+		left: 0;
+		right: 0;
+		top: 84px;
+		bottom: 0;
+		padding: 14px var(--dash-content-pad-x) 14px
+			calc(var(--dash-sidebar-w) + var(--dash-content-pad-x) + var(--dash-modal-sidebar-gap));
+	}
+}
+
 .calendar-modal-head {
 	display: flex;
 	align-items: center;
@@ -1043,6 +1060,9 @@
 	}
 
 	.calendar-modal {
+		inset: 0;
+		left: 0;
+		right: 0;
 		align-items: flex-end;
 		justify-content: stretch;
 		padding: 0;
@@ -1056,6 +1076,12 @@
 		max-height: min(88vh, 640px);
 		overflow-y: auto;
 		overscroll-behavior: contain;
+	}
+
+	.time-picker {
+		left: 0;
+		right: 0;
+		padding: 14px;
 	}
 }
 
