@@ -68,7 +68,7 @@ export async function fetchAnnouncements(limit = 3): Promise<Announcement[]> {
 		credentials: 'include',
 	});
 	const json = await parseJson<Announcement[]>(res);
-	if (!res.ok || !json.ok) throw new Error(errText(json, 'LOAD_ANNOUNCEMENTS_FAILED'));
+	if (!res.ok || !json.ok) throw new Error(errText(json, '公告加载失败了'));
 	return json.data ?? [];
 }
 
@@ -80,7 +80,7 @@ export async function createAnnouncement(input: { title: string; contentMarkdown
 		body: JSON.stringify(input),
 	});
 	const json = await parseJson<Announcement>(res);
-	if (!res.ok || !json.ok || !json.data) throw new Error(errText(json, 'CREATE_ANNOUNCEMENT_FAILED'));
+	if (!res.ok || !json.ok || !json.data) throw new Error(errText(json, '发布公告失败了'));
 	return json.data;
 }
 
@@ -92,7 +92,7 @@ export async function setAnnouncementPinned(id: string, isPinned: boolean): Prom
 		body: JSON.stringify({ isPinned }),
 	});
 	const json = await parseJson<{ id: string; isPinned: boolean }>(res);
-	if (!res.ok || !json.ok) throw new Error(errText(json, 'PIN_ANNOUNCEMENT_FAILED'));
+	if (!res.ok || !json.ok) throw new Error(errText(json, '置顶操作失败了'));
 }
 
 export async function deleteAnnouncement(id: string): Promise<void> {
@@ -101,7 +101,7 @@ export async function deleteAnnouncement(id: string): Promise<void> {
 		credentials: 'include',
 	});
 	const json = await parseJson<{ id: string }>(res);
-	if (!res.ok || !json.ok) throw new Error(errText(json, 'DELETE_ANNOUNCEMENT_FAILED'));
+	if (!res.ok || !json.ok) throw new Error(errText(json, '删除公告失败了'));
 }
 
 export async function fetchBiliDynamics(): Promise<BiliDynamic[]> {
@@ -109,14 +109,14 @@ export async function fetchBiliDynamics(): Promise<BiliDynamic[]> {
 		credentials: 'include',
 	});
 	const json = await parseJson<{ uid: string; items: BiliDynamic[]; fetchedAt: number }>(res);
-	if (!res.ok || !json.ok || !json.data) throw new Error(errText(json, 'LOAD_BILI_DYNAMICS_FAILED'));
+	if (!res.ok || !json.ok || !json.data) throw new Error(errText(json, '动态加载失败了'));
 	return json.data.items ?? [];
 }
 
 export async function fetchTodayBirthdays(): Promise<TodayBirthdaysPayload> {
 	const res = await fetch('/api/home/birthdays/today', { credentials: 'include' });
 	const json = await parseJson<TodayBirthdaysPayload>(res);
-	if (!res.ok || !json.ok || !json.data) throw new Error(errText(json, 'LOAD_TODAY_BIRTHDAYS_FAILED'));
+	if (!res.ok || !json.ok || !json.data) throw new Error(errText(json, '今日寿星加载失败了'));
 	return json.data;
 }
 
@@ -124,7 +124,7 @@ export async function fetchBirthdayWishes(recipientUserId: string) {
 	const q = new URLSearchParams({ recipientUserId });
 	const res = await fetch(`/api/home/birthdays/wishes?${q}`, { credentials: 'include' });
 	const json = await parseJson<{ recipientUserId: string; wishDate: string; items: BirthdayWish[] }>(res);
-	if (!res.ok || !json.ok || !json.data) throw new Error(errText(json, 'LOAD_BIRTHDAY_WISHES_FAILED'));
+	if (!res.ok || !json.ok || !json.data) throw new Error(errText(json, '祝福列表加载失败了'));
 	return json.data;
 }
 
@@ -136,6 +136,6 @@ export async function postBirthdayWish(input: { recipientUserId: string; message
 		body: JSON.stringify(input),
 	});
 	const json = await parseJson<BirthdayWish>(res);
-	if (!res.ok || !json.ok || !json.data) throw new Error(errText(json, 'POST_BIRTHDAY_WISH_FAILED'));
+	if (!res.ok || !json.ok || !json.data) throw new Error(errText(json, '发送祝福失败了'));
 	return json.data;
 }

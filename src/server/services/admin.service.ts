@@ -13,39 +13,39 @@ export class AdminService {
 
 	async appointAdmin(targetUserId: string) {
 		const user = await this.db.findUserById(targetUserId);
-		if (!user) throw new AppError(404, 'USER_NOT_FOUND', 'USER_NOT_FOUND');
+		if (!user) throw new AppError(404, 'USER_NOT_FOUND', '查无此人啦');
 		if (user.role === 'super_admin') {
-			throw new AppError(409, 'INVALID_TARGET', 'CANNOT_CHANGE_SUPER_ADMIN_ROLE');
+			throw new AppError(409, 'INVALID_TARGET', '大老板的身份动不得～');
 		}
 		await this.db.updateUserRole(targetUserId, 'admin');
 	}
 
 	async revokeAdmin(targetUserId: string) {
 		const user = await this.db.findUserById(targetUserId);
-		if (!user) throw new AppError(404, 'USER_NOT_FOUND', 'USER_NOT_FOUND');
+		if (!user) throw new AppError(404, 'USER_NOT_FOUND', '查无此人啦');
 		if (user.role === 'super_admin') {
-			throw new AppError(409, 'INVALID_TARGET', 'CANNOT_CHANGE_SUPER_ADMIN_ROLE');
+			throw new AppError(409, 'INVALID_TARGET', '大老板的身份动不得～');
 		}
 		if (user.role !== 'admin') {
-			throw new AppError(409, 'INVALID_TARGET', 'USER_IS_NOT_AN_ADMIN');
+			throw new AppError(409, 'INVALID_TARGET', '这位还不是管理员呢');
 		}
 		await this.db.updateUserRole(targetUserId, 'user');
 	}
 
 	async disableUser(targetUserId: string, actorRole: Role) {
 		const user = await this.db.findUserById(targetUserId);
-		if (!user) throw new AppError(404, 'USER_NOT_FOUND', 'USER_NOT_FOUND');
+		if (!user) throw new AppError(404, 'USER_NOT_FOUND', '查无此人啦');
 
 		if (user.status === 'disabled') {
-			throw new AppError(409, 'INVALID_TARGET', 'USER_ALREADY_DISABLED');
+			throw new AppError(409, 'INVALID_TARGET', '已经进小黑屋了');
 		}
 
 		if (user.role === 'super_admin') {
-			throw new AppError(409, 'INVALID_TARGET', 'CANNOT_DISABLE_SUPER_ADMIN');
+			throw new AppError(409, 'INVALID_TARGET', '大老板可不能关小黑屋');
 		}
 
 		if (actorRole === 'admin' && user.role !== 'user') {
-			throw new AppError(409, 'INVALID_TARGET', 'ADMIN_CANNOT_DISABLE_ADMIN');
+			throw new AppError(409, 'INVALID_TARGET', '管理员之间不能互关小黑屋');
 		}
 
 		await this.db.updateUserStatus(targetUserId, 'disabled');
@@ -53,18 +53,18 @@ export class AdminService {
 
 	async enableUser(targetUserId: string, actorRole: Role) {
 		const user = await this.db.findUserById(targetUserId);
-		if (!user) throw new AppError(404, 'USER_NOT_FOUND', 'USER_NOT_FOUND');
+		if (!user) throw new AppError(404, 'USER_NOT_FOUND', '查无此人啦');
 
 		if (user.status !== 'disabled') {
-			throw new AppError(409, 'INVALID_TARGET', 'USER_NOT_DISABLED');
+			throw new AppError(409, 'INVALID_TARGET', '人还好好的，禁用什么呀');
 		}
 
 		if (user.role === 'super_admin') {
-			throw new AppError(409, 'INVALID_TARGET', 'CANNOT_CHANGE_SUPER_ADMIN_STATUS');
+			throw new AppError(409, 'INVALID_TARGET', '大老板的状态不能这么乱改');
 		}
 
 		if (actorRole === 'admin' && user.role !== 'user') {
-			throw new AppError(409, 'INVALID_TARGET', 'ADMIN_CANNOT_ENABLE_ADMIN');
+			throw new AppError(409, 'INVALID_TARGET', '管理员之间不能互捞啦');
 		}
 
 		await this.db.updateUserStatus(targetUserId, 'active');
@@ -72,26 +72,26 @@ export class AdminService {
 
 	async deleteUserPermanently(targetUserId: string, actorUserId: string, actorRole: Role) {
 		const user = await this.db.findUserById(targetUserId);
-		if (!user) throw new AppError(404, 'USER_NOT_FOUND', 'USER_NOT_FOUND');
+		if (!user) throw new AppError(404, 'USER_NOT_FOUND', '查无此人啦');
 
 		if (user.id === actorUserId) {
-			throw new AppError(409, 'INVALID_TARGET', 'CANNOT_DELETE_SELF');
+			throw new AppError(409, 'INVALID_TARGET', '不能把自己删了呀');
 		}
 
 		if (isJoinUsPublicUsername(user.username)) {
-			throw new AppError(409, 'INVALID_TARGET', 'CANNOT_DELETE_JOINUS_PUBLIC');
+			throw new AppError(409, 'INVALID_TARGET', '公开招募账号不能删');
 		}
 
 		if (user.status !== 'disabled') {
-			throw new AppError(409, 'INVALID_TARGET', 'USER_MUST_BE_DISABLED_TO_DELETE');
+			throw new AppError(409, 'INVALID_TARGET', '先关小黑屋再说再见吧');
 		}
 
 		if (user.role === 'super_admin') {
-			throw new AppError(409, 'INVALID_TARGET', 'CANNOT_DELETE_SUPER_ADMIN');
+			throw new AppError(409, 'INVALID_TARGET', '大老板删不掉的');
 		}
 
 		if (actorRole === 'admin' && user.role !== 'user') {
-			throw new AppError(409, 'INVALID_TARGET', 'ADMIN_CANNOT_DELETE_ADMIN');
+			throw new AppError(409, 'INVALID_TARGET', '管理员之间不能互删');
 		}
 
 		await this.db.deleteUser(targetUserId);

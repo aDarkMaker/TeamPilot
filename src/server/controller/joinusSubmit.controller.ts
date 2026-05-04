@@ -78,8 +78,11 @@ export class JoinusSubmitController {
             await this.service.submitAnonymous(fields, uploads);
         } catch (e) {
             if (e instanceof AppError) throw e;
-            const msg = e instanceof Error ? e.message : 'SUBMIT_FAILED';
-            throw new AppError(400, 'SUBMIT_FAILED', msg);
+            const raw = e instanceof Error ? e.message : '';
+            const userMsg = /READ_FILE|NO_FILE_PATH/i.test(raw)
+                ? '附件没传好，重新选一下试试～'
+                : '提交出了点小状况，稍后再试';
+            throw new AppError(400, 'SUBMIT_FAILED', userMsg);
         }
 
         ctx.body = { ok: true };

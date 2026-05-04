@@ -5,6 +5,7 @@ import type { DB } from '../db';
 import { AppError } from '../types/api';
 import type { UserProfilePublic } from '../types/user';
 import { verifyPassword, hashPassword } from '../auth/password';
+import { passwordPlainSchema } from '../auth/passwordPolicy';
 import sharp from 'sharp';
 
 const patchSchema = z.object({
@@ -20,8 +21,8 @@ const patchSchema = z.object({
 });
 
 const passwordSchema = z.object({
-    oldPassword: z.string().min(1),
-    newPassword: z.string().min(8).max(128),
+	oldPassword: z.string().min(1),
+	newPassword: passwordPlainSchema,
 });
 
 const ALLOWED_MIME = new Map<string, string>([
@@ -68,7 +69,7 @@ export class ProfileService {
 
     async getMe(userId: string): Promise<UserProfilePublic> {
         const user = await this.db.findUserById(userId);
-        if (!user) throw new AppError(404, 'USER_NOT_FOUND', 'USER_NOT_FOUND');
+        if (!user) throw new AppError(404, 'USER_NOT_FOUND', '查无此人啦');
         return toPublicProfile(user);
     }
 
@@ -102,17 +103,17 @@ export class ProfileService {
         
         await this.db.updateUserProfile(userId, patch);
         const user = await this.db.findUserById(userId);
-        if (!user) throw new AppError(404, 'USER_NOT_FOUND', 'USER_NOT_FOUND');
+        if (!user) throw new AppError(404, 'USER_NOT_FOUND', '查无此人啦');
         return toPublicProfile(user);
     }
 
     async changePassword(userId: string, body: unknown): Promise<void> {
         const { oldPassword,newPassword } = passwordSchema.parse(body);
         if (oldPassword === newPassword) {
-            throw new AppError(400, 'INVALID_PASSWORD', 'SAME_PASSWORD');
+            throw new AppError(400, 'INVALID_PASSWORD', '新密码换个花样嘛');
         }
         const user = await this.db.findUserById(userId);
-        if (!user) throw new AppError(404, 'USER_NOT_FOUND', 'USER_NOT_FOUND');
+        if (!user) throw new AppError(404, 'USER_NOT_FOUND', '查无此人啦');
         const ok = await verifyPassword(oldPassword, user.passwordHash);
         if (!ok) throw new AppError(401, 'INVALID_CREDENTIALS', '当务之急是找回而非修改');
         const newPasswordHash = await hashPassword(newPassword);
@@ -137,7 +138,7 @@ export class ProfileService {
 
         await this.db.updateUserProfile(userId, { avatarPath: relative });
         const user = await this.db.findUserById(userId);
-        if (!user) throw new AppError(404, 'USER_NOT_FOUND', 'USER_NOT_FOUND');
+        if (!user) throw new AppError(404, 'USER_NOT_FOUND', '查无此人啦');
         return toPublicProfile(user);
     }
 
@@ -159,21 +160,21 @@ export class ProfileService {
 
 		await this.db.updateUserProfile(userId, { profileBgPath: relative });
 		const user = await this.db.findUserById(userId);
-		if (!user) throw new AppError(404, 'USER_NOT_FOUND', 'USER_NOT_FOUND');
+		if (!user) throw new AppError(404, 'USER_NOT_FOUND', '查无此人啦');
 		return toPublicProfile(user);
 	}
 
 	async clearAvatar(userId: string): Promise<UserProfilePublic> {
 		await this.db.updateUserProfile(userId, { avatarPath: null });
 		const user = await this.db.findUserById(userId);
-		if (!user) throw new AppError(404, 'USER_NOT_FOUND', 'USER_NOT_FOUND');
+		if (!user) throw new AppError(404, 'USER_NOT_FOUND', '查无此人啦');
 		return toPublicProfile(user);
 	}
 
 	async clearProfileBackground(userId: string): Promise<UserProfilePublic> {
 		await this.db.updateUserProfile(userId, { profileBgPath: null });
 		const user = await this.db.findUserById(userId);
-		if (!user) throw new AppError(404, 'USER_NOT_FOUND', 'USER_NOT_FOUND');
+		if (!user) throw new AppError(404, 'USER_NOT_FOUND', '查无此人啦');
 		return toPublicProfile(user);
 	}
 }

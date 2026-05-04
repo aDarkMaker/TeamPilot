@@ -2,10 +2,11 @@ import { z } from 'zod';
 import type { DB } from '../db';
 import { AppError } from '../types/api';
 import { hashPassword } from '../auth/password';
+import { passwordPlainSchema } from '../auth/passwordPolicy';
 
 const submitSchema = z.object({
 	username: z.string().min(2).max(4),
-	password: z.string().min(8).max(128),
+	password: passwordPlainSchema,
 	reason: z.string().min(2).max(500),
 });
 
@@ -38,7 +39,7 @@ export class ApplicationService {
 
 		const existingUser = await this.db.findUserByUsername(parsed.username);
 		if (existingUser) {
-			throw new AppError(409, 'USERNAME_EXISTS', 'USERNAME_ALREADY_EXISTS');
+			throw new AppError(409, 'USERNAME_EXISTS', '这名字已经有人占了');
 		}
 
 		const passwordHash = await hashPassword(parsed.password);
@@ -56,9 +57,9 @@ export class ApplicationService {
 
 	async approve(applicationId: string, reviewerId: string) {
 		const app = await this.db.findApplicationById(applicationId);
-		if (!app) throw new AppError(404, 'APPLICATION_NOT_FOUND', 'APPLICATION_NOT_FOUND');
+		if (!app) throw new AppError(404, 'APPLICATION_NOT_FOUND', '申请单不见啦');
 		if (app.status !== 'pending') {
-			throw new AppError(409, 'APPLICATION_ALREADY_REVIEWED', 'APPLICATION_ALREADY_REVIEWED');
+			throw new AppError(409, 'APPLICATION_ALREADY_REVIEWED', '这条申请已经审过了');
 		}
 
 		const user = await this.db.createUser({
@@ -100,9 +101,9 @@ export class ApplicationService {
 
 	async reject(applicationId: string, reviewerId: string) {
 		const app = await this.db.findApplicationById(applicationId);
-		if (!app) throw new AppError(404, 'APPLICATION_NOT_FOUND', 'APPLICATION_NOT_FOUND');
+		if (!app) throw new AppError(404, 'APPLICATION_NOT_FOUND', '申请单不见啦');
 		if (app.status !== 'pending') {
-			throw new AppError(409, 'APPLICATION_ALREADY_REVIEWED', 'APPLICATION_ALREADY_REVIEWED');
+			throw new AppError(409, 'APPLICATION_ALREADY_REVIEWED', '这条申请已经审过了');
 		}
 
 		await this.db.setApplicationReview({

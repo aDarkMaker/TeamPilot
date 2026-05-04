@@ -22,6 +22,7 @@ export class AuthController {
 			ok: true,
 			data: {
 				user: result.user,
+				passwordWasResetToDefault: result.passwordWasResetToDefault,
 			},
 		};
 	};

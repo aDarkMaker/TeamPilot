@@ -35,7 +35,10 @@ const SERVER_PENDING_SNAPSHOT: {
 async function api<T>(input: RequestInfo, init?: RequestInit): Promise<T> {
 	const res = await fetch(input, { credentials: 'include', ...init });
 	const json = await res.json().catch(() => ({}));
-	if (!res.ok || !json?.ok) throw new Error(json?.message || json?.code || 'REQUEST_FAILED');
+	if (!res.ok || !json?.ok) {
+		const m = typeof json?.message === 'string' && json.message ? json.message : '请求失败了，稍后再试';
+		throw new Error(m);
+	}
 	return json.data as T;
 }
 
@@ -90,7 +93,7 @@ export default function UserAdminPage() {
 				pendingApplicationsStore.setItems(p);
 			} catch (e) {
 				if (disposed) return;
-				setErr(e instanceof Error ? e.message : 'UNKNOWN_ERROR');
+				setErr(e instanceof Error ? e.message : '出了点未知状况');
 			}
 		};
 
@@ -103,7 +106,7 @@ export default function UserAdminPage() {
 				setUsers(u);
 				pendingApplicationsStore.setItems(p);
 			} catch (e) {
-				setErr(e instanceof Error ? e.message : 'UNKNOWN_ERROR');
+				setErr(e instanceof Error ? e.message : '出了点未知状况');
 			}
 		})();
 
@@ -151,7 +154,7 @@ export default function UserAdminPage() {
 			const u = await api<UserRow[]>('/api/users');
 			setUsers(u);
 		} catch (e) {
-			setErr(e instanceof Error ? e.message : 'UNKNOWN_ERROR');
+			setErr(e instanceof Error ? e.message : '出了点未知状况');
 		} finally {
 			setBusyId(null);
 		}
@@ -164,7 +167,7 @@ export default function UserAdminPage() {
 			pendingApplicationsStore.removeById(appId);
 			broadcastApplicationsUpdated();
 		} catch (e) {
-			setErr(e instanceof Error ? e.message : 'UNKNOWN_ERROR');
+			setErr(e instanceof Error ? e.message : '出了点未知状况');
 		} finally {
 			setBusyId(null);
 		}
@@ -177,7 +180,7 @@ export default function UserAdminPage() {
 			setUsers((prev) => prev.map((u) => (u.id === userId ? { ...u, status: 'disabled' } : u)));
 			toast.show({ text: '已禁用该账号', type: 'ok', durationMs: 3000 });
 		} catch (e) {
-			setErr(e instanceof Error ? e.message : 'UNKNOWN_ERROR');
+			setErr(e instanceof Error ? e.message : '出了点未知状况');
 		} finally {
 			setBusyId(null);
 		}
@@ -190,7 +193,7 @@ export default function UserAdminPage() {
 			setUsers((prev) => prev.map((u) => (u.id === userId ? { ...u, status: 'active' } : u)));
 			toast.show({ text: '已恢复该账号', type: 'ok', durationMs: 3000 });
 		} catch (e) {
-			setErr(e instanceof Error ? e.message : 'UNKNOWN_ERROR');
+			setErr(e instanceof Error ? e.message : '出了点未知状况');
 		} finally {
 			setBusyId(null);
 		}
@@ -218,7 +221,7 @@ export default function UserAdminPage() {
 			setConfirmRemoveOpen(false);
 			setConfirmRemoveTarget(null);
 		} catch (e) {
-			setErr(e instanceof Error ? e.message : 'UNKNOWN_ERROR');
+			setErr(e instanceof Error ? e.message : '出了点未知状况');
 		} finally {
 			setBusyId(null);
 		}
@@ -230,7 +233,7 @@ export default function UserAdminPage() {
 			await api(`/api/users/${userId}/appoint-admin`, { method: 'POST' });
 			setUsers((prev) => prev.map((u) => (u.id === userId ? { ...u, role: 'admin' } : u)));
 		} catch (e) {
-			setErr(e instanceof Error ? e.message : 'UNKNOWN_ERROR');
+			setErr(e instanceof Error ? e.message : '出了点未知状况');
 		} finally {
 			setBusyId(null);
 		}
@@ -242,7 +245,7 @@ export default function UserAdminPage() {
 			await api(`/api/users/${userId}/revoke-admin`, { method: 'POST' });
 			setUsers((prev) => prev.map((u) => (u.id === userId ? { ...u, role: 'user' } : u)));
 		} catch (e) {
-			setErr(e instanceof Error ? e.message : 'UNKNOWN_ERROR');
+			setErr(e instanceof Error ? e.message : '出了点未知状况');
 		} finally {
 			setBusyId(null);
 		}

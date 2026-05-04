@@ -308,7 +308,7 @@ export class ScheduleService {
 		const { start } = weekSchema.parse(query);
 		const startDate = start;
 		const startObj = new Date(`${startDate}T00:00:00`);
-		if (Number.isNaN(startObj.getTime())) throw new AppError(400, 'INVALID_DATE', 'INVALID_DATE');
+		if (Number.isNaN(startObj.getTime())) throw new AppError(400, 'INVALID_DATE', '这个日期不太对劲');
 		const endObj = new Date(startObj);
 		endObj.setDate(endObj.getDate() + 6);
 		const endDate = `${endObj.getFullYear()}-${String(endObj.getMonth() + 1).padStart(2, '0')}-${String(endObj.getDate()).padStart(2, '0')}`;
@@ -378,8 +378,8 @@ export class ScheduleService {
 			);
 		} catch (e) {
 			const msg = e instanceof Error ? e.message : 'UPDATE_FAILED';
-			if (msg === 'SCHEDULE_NOT_FOUND') throw new AppError(404, 'SCHEDULE_NOT_FOUND', 'SCHEDULE_NOT_FOUND');
-			if (msg === 'FORBIDDEN') throw new AppError(403, 'FORBIDDEN', 'FORBIDDEN');
+			if (msg === 'SCHEDULE_NOT_FOUND') throw new AppError(404, 'SCHEDULE_NOT_FOUND', '日程不见啦');
+			if (msg === 'FORBIDDEN') throw new AppError(403, 'FORBIDDEN', '这里没有你的权限哦');
 			throw e;
 		}
 
@@ -418,8 +418,8 @@ export class ScheduleService {
 			await this.db.deleteTaskCardsBySource({ sourceType: 'schedule_at', sourceId: scheduleId });
 		} catch (e) {
 			const msg = e instanceof Error ? e.message : 'DELETE_FAILED';
-			if (msg === 'SCHEDULE_NOT_FOUND') throw new AppError(404, 'SCHEDULE_NOT_FOUND', 'SCHEDULE_NOT_FOUND');
-			if (msg === 'FORBIDDEN') throw new AppError(403, 'FORBIDDEN', 'FORBIDDEN');
+			if (msg === 'SCHEDULE_NOT_FOUND') throw new AppError(404, 'SCHEDULE_NOT_FOUND', '日程不见啦');
+			if (msg === 'FORBIDDEN') throw new AppError(403, 'FORBIDDEN', '这里没有你的权限哦');
 			throw e;
 		}
 	}

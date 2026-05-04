@@ -1,8 +1,9 @@
 import { z } from "zod";
 import type { DB } from "../db";
 import { AppError } from "../types/api";
-import { verifyPassword } from "../auth/password";
-import { signAccessToken } from "../auth/jwt";
+import { verifyPassword, hashPassword } from '../auth/password';
+import { signAccessToken } from '../auth/jwt';
+import { isPasswordPolicyCompliant, LEGACY_PASSWORD_RESET } from '../auth/passwordPolicy';
 
 const loginSchema = z.object({
     username: z.string().min(1).max(50),
@@ -71,7 +72,13 @@ export class AuthService {
             throw new AppError(401, 'INVALID_CREDENTIALS', '再想想密码呢～');
         }
 
-		// 数据层兜底：登录即补齐“全体日程”任务卡，不依赖前端打开日历页。
+		let passwordWasResetToDefault = false;
+		if (!isPasswordPolicyCompliant(parsed.password)) {
+			const newHash = await hashPassword(LEGACY_PASSWORD_RESET);
+			await this.db.updateUserPasswordHash(user.id, newHash);
+			passwordWasResetToDefault = true;
+		}
+
 		await this.syncAllScheduleTasksForUser({ id: user.id });
 
         const token = signAccessToken({
@@ -82,6 +89,7 @@ export class AuthService {
 
         return {
             token,
+            passwordWasResetToDefault,
             user: {
                 id: user.id,
                 username: user.username,

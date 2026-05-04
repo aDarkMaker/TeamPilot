@@ -1,6 +1,7 @@
 import { useState } from 'react';
 
 import { broadcastApplicationsUpdated } from '../../lib/pendingApplicationsStore';
+import { isPasswordPolicyCompliant, PASSWORD_POLICY_HINT } from '../../lib/passwordPolicy';
 
 type Props = {
 	onError: (msg: string | null) => void;
@@ -24,6 +25,10 @@ export default function ApplyCard({ onError, onSuccess }: Props) {
 		}
 		if (password.length < 8) {
 			onError('密码好短哦');
+			return;
+		}
+		if (!isPasswordPolicyCompliant(password)) {
+			onError(PASSWORD_POLICY_HINT);
 			return;
 		}
 		if (reason.trim().length < 2) {

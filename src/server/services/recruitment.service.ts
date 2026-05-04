@@ -77,13 +77,13 @@ const listQuerySchema = z.object({
 
 function throwMap(e: string): never {
     const m: Record<string, { status: number, code: string, message: string }> = {
-		APPLICATION_NOT_FOUND: { status: 404, code: 'NOT_FOUND', message: 'APPLICATION_NOT_FOUND' },
-		COMMENT_NOT_FOUND: { status: 404, code: 'NOT_FOUND', message: 'COMMENT_NOT_FOUND' },
-		FORBIDDEN: { status: 403, code: 'FORBIDDEN', message: 'FORBIDDEN' },
-		ALREADY_APPLIED: { status: 409, code: 'CONFLICT', message: 'RECRUITMENT_ALREADY_APPLIED' },
-		TAG_NOT_FOUND: { status: 404, code: 'NOT_FOUND', message: 'TAG_NOT_FOUND' },
+		APPLICATION_NOT_FOUND: { status: 404, code: 'NOT_FOUND', message: '申请单不见啦' },
+		COMMENT_NOT_FOUND: { status: 404, code: 'NOT_FOUND', message: '评论不见啦' },
+		FORBIDDEN: { status: 403, code: 'FORBIDDEN', message: '这里没有你的权限哦' },
+		ALREADY_APPLIED: { status: 409, code: 'CONFLICT', message: '你已经投过简历啦' },
+		TAG_NOT_FOUND: { status: 404, code: 'NOT_FOUND', message: '标签不见啦' },
     };
-    const x = m[e] ?? { status: 500, code: 'INTERNAL', message: e };
+    const x = m[e] ?? { status: 500, code: 'INTERNAL', message: '出了点岔子' };
     throw new AppError(x.status, x.code, x.message);
 }
 

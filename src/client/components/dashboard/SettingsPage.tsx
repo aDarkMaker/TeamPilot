@@ -11,6 +11,7 @@ import {
 import UserAvatar from "./UserAvatar";
 import bgDefault from "../../assets/img/image/bg-dashboard.webp";
 import { assetUrl } from "../../lib/assetUrl";
+import { isPasswordPolicyCompliant, PASSWORD_POLICY_HINT } from "../../lib/passwordPolicy";
 import { DashboardToast, useDashboardToast } from "./DashboardToast";
 
 type Me = {
@@ -193,7 +194,7 @@ export default function SettingsPage() {
 				});
             }
         } catch {
-            setMsg({ type: 'err', text: 'Network Error' });
+            setMsg({ type: 'err', text: '网络开小差了，等会再试～' });
         } finally {
             setSaving(false);
         }
@@ -336,6 +337,10 @@ export default function SettingsPage() {
 	};
 
     const changePassword = async () => {
+		if (!oldPw.trim() || !newPw.trim()) {
+			setMsg({ type: 'err', text: '请填写当前密码和新密码' });
+			return;
+		}
         if (newPw !== newPw2) {
             setMsg({ type: 'err', text: '两次输入的密码不一致！' });
             return;
@@ -344,6 +349,14 @@ export default function SettingsPage() {
             setMsg({ type: 'err', text: '一样的密码还要改吗？'});
             return;
         }
+		if (newPw.length < 8) {
+			setMsg({ type: 'err', text: '新密码至少 8 位' });
+			return;
+		}
+		if (!isPasswordPolicyCompliant(newPw)) {
+			setMsg({ type: 'err', text: PASSWORD_POLICY_HINT });
+			return;
+		}
         setSaving(true);
         setMsg(null);
         try {

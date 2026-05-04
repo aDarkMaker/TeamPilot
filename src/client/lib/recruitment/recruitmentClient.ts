@@ -34,7 +34,7 @@ export async function fetchMe(): Promise<MeBrief | null> {
 export async function fetchApplications(): Promise<NewcomerApplicationView[]> {
 	const res = await fetch('/api/recruitment/applications', { credentials: 'include' });
 	const json = await parseJson<RecruitmentApplicationDto[]>(res);
-	if (!res.ok || !json.ok) throw new Error(json.message || 'LOAD_APPLICATIONS_FAILED');
+	if (!res.ok || !json.ok) throw new Error(json.message || '申请列表加载失败了');
 	return (json.data ?? []).map(mapRecruitmentApplicationDtoToView);
 }
 
@@ -43,7 +43,7 @@ export async function fetchComments(applicationId: string): Promise<RecruitmentC
 		credentials: 'include',
 	});
 	const json = await parseJson<RecruitmentCommentDto[]>(res);
-	if (!res.ok || !json.ok) throw new Error(json.message || 'LOAD_COMMENTS_FAILED');
+	if (!res.ok || !json.ok) throw new Error(json.message || '评论加载失败了');
 	return json.data ?? [];
 }
 
@@ -55,7 +55,7 @@ export async function postComment(applicationId: string, bodyMarkdown: string): 
 		body: JSON.stringify({ bodyMarkdown }),
 	});
 	const json = await parseJson<RecruitmentCommentDto>(res);
-	if (!res.ok || !json.ok) throw new Error(json.message || 'POST_COMMENT_FAILED');
+	if (!res.ok || !json.ok) throw new Error(json.message || '发表评论失败了');
 	return json.data as RecruitmentCommentDto;
 }
 
@@ -67,7 +67,7 @@ export async function patchComment(commentId: string, bodyMarkdown: string): Pro
 		body: JSON.stringify({ bodyMarkdown }),
 	});
 	const json = await parseJson<RecruitmentCommentDto>(res);
-	if (!res.ok || !json.ok) throw new Error(json.message || 'PATCH_COMMENT_FAILED');
+	if (!res.ok || !json.ok) throw new Error(json.message || '保存评论失败了');
 	return json.data as RecruitmentCommentDto;
 }
 
@@ -77,7 +77,7 @@ export async function deleteComment(commentId: string): Promise<void> {
 		credentials: 'include',
 	});
 	const json = await parseJson<unknown>(res);
-	if (!res.ok || !json.ok) throw new Error(json.message || 'DELETE_COMMENT_FAILED');
+	if (!res.ok || !json.ok) throw new Error(json.message || '删除评论失败了');
 }
 
 export async function toggleCommentLike(commentId: string): Promise<{ liked: boolean; likeCount: number }> {
@@ -86,7 +86,7 @@ export async function toggleCommentLike(commentId: string): Promise<{ liked: boo
 		credentials: 'include',
 	});
 	const json = await parseJson<{ liked: boolean; likeCount: number }>(res);
-	if (!res.ok || !json.ok) throw new Error(json.message || 'LIKE_FAILED');
+	if (!res.ok || !json.ok) throw new Error(json.message || '点赞操作失败了');
 	return json.data as { liked: boolean; likeCount: number };
 }
 
@@ -98,7 +98,7 @@ export async function postTag(applicationId: string, tag: string): Promise<strin
 		body: JSON.stringify({ tag }),
 	});
 	const json = await parseJson<string[]>(res);
-	if (!res.ok || !json.ok) throw new Error(json.message || 'POST_TAG_FAILED');
+	if (!res.ok || !json.ok) throw new Error(json.message || '添加标签失败了');
 	return json.data ?? [];
 }
 
@@ -109,7 +109,7 @@ export async function deleteTag(applicationId: string, tag: string): Promise<voi
 		credentials: 'include',
 	});
 	const json = await parseJson<unknown>(res);
-	if (!res.ok || !json.ok) throw new Error(json.message || 'DELETE_TAG_FAILED');
+	if (!res.ok || !json.ok) throw new Error(json.message || '删除标签失败了');
 }
 
 export async function deleteApplication(applicationId: string): Promise<void> {
@@ -118,7 +118,7 @@ export async function deleteApplication(applicationId: string): Promise<void> {
 		credentials: 'include',
 	});
 	const json = await parseJson<unknown>(res);
-	if (!res.ok || !json.ok) throw new Error(json.message || 'DELETE_APPLICATION_FAILED');
+	if (!res.ok || !json.ok) throw new Error(json.message || '删除申请失败了');
 }
 
 export function isStaffRole(role: string | undefined): boolean {

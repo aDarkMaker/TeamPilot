@@ -39,7 +39,7 @@ export async function fetchMyTasks(input?: { status?: TaskStatus; limit?: number
 
 	const res = await fetch(`/api/tasks${q.toString() ? `?${q}` : ''}`, { credentials: 'include' });
 	const json = await parseJson<TaskCard[]>(res);
-	if (!res.ok || !json.ok) throw new Error(errText(json, 'LOAD_TASKS_FAILED'));
+	if (!res.ok || !json.ok) throw new Error(errText(json, '任务列表加载失败了'));
 	return json.data ?? [];
 }
 
@@ -51,13 +51,13 @@ export async function decideTask(taskId: string, status: 'accepted' | 'leave'): 
 		body: JSON.stringify({ status }),
 	});
 	const json = await parseJson<TaskCard>(res);
-	if (!res.ok || !json.ok || !json.data) throw new Error(errText(json, 'DECIDE_TASK_FAILED'));
+	if (!res.ok || !json.ok || !json.data) throw new Error(errText(json, '更新任务状态失败了'));
 	return json.data;
 }
 
 export async function fetchMyPendingTaskCount(): Promise<number> {
 	const res = await fetch('/api/tasks/pending-count', { credentials: 'include' });
 	const json = await parseJson<{ pending: number }>(res);
-	if (!res.ok || !json.ok || !json.data) throw new Error(errText(json, 'LOAD_TASK_PENDING_COUNT_FAILED'));
+	if (!res.ok || !json.ok || !json.data) throw new Error(errText(json, '待办数量加载失败了'));
 	return Number(json.data.pending ?? 0);
 }

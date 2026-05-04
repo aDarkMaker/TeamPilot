@@ -97,8 +97,8 @@ export class TaskService {
             });
         } catch (e) {
             const msg = e instanceof Error ? e.message : 'DECIDE_FAILED';
-            if (msg === 'TASK_NOT_FOUND') throw new AppError(404, 'TASK_NOT_FOUND', 'TASK_NOT_FOUND');
-            if (msg === 'FORBIDDEN') throw new AppError(403, 'FORBIDDEN', 'FORBIDDEN');
+            if (msg === 'TASK_NOT_FOUND') throw new AppError(404, 'TASK_NOT_FOUND', '任务不见啦');
+            if (msg === 'FORBIDDEN') throw new AppError(403, 'FORBIDDEN', '这里没有你的权限哦');
             throw e;
         }
     }

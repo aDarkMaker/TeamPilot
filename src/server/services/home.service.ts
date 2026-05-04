@@ -154,7 +154,7 @@ export class HomeService {
         } catch (e) {
             const msg = e instanceof Error ? e.message : '';
             if (msg.includes('UNIQUE') || msg.includes('idx_birthday_wishes_unique')) {
-                throw new AppError(409, 'ALREADY_WISHED', '祝福弥足珍贵，一次就够啦')
+                throw new AppError(409, 'ALREADY_WISHED', '祝福弥足珍贵，一次就够啦');
             }
             throw e;
         }
@@ -203,7 +203,7 @@ export class HomeService {
                 ...(cookie ? { cookie } : {}),
             },
         });
-        if (!res.ok) throw new AppError(502, 'BILI_UPSTREAM_ERROR', `BILI_HTTP_${res.status}`);
+        if (!res.ok) throw new AppError(502, 'BILI_UPSTREAM_ERROR', `哔哩接口抽风中（HTTP ${res.status}）`);
 
         const json = (await res.json()) as any;
         const items = (json?.data?.items ?? [])

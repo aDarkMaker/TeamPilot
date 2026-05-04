@@ -266,7 +266,7 @@ export default function Calendar() {
 	async function api<T>(url: string, init?: RequestInit): Promise<T> {
 		const resp = await fetch(url, { credentials: 'include', ...init });
 		const json = await resp.json().catch(() => ({}));
-		if (!resp.ok || !json?.ok) throw new Error(json?.message || 'REQUEST_FAILED');
+		if (!resp.ok || !json?.ok) throw new Error(json?.message || '请求失败了，稍后再试');
 		return json.data as T;
 	}
 

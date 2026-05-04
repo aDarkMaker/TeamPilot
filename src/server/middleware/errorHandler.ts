@@ -32,7 +32,7 @@ export const errorHandler: Middleware = async (ctx, next) => {
 			ctx.body = {
 				ok: false,
 				code: 'VALIDATION_ERROR',
-				message: err.issues.map((i) => i.message).join('; ') || 'INVALID_REQUEST_BODY',
+				message: err.issues.map((i) => i.message).join('；') || '提交的数据有点问题',
 			};
 			return;
 		}
@@ -41,7 +41,7 @@ export const errorHandler: Middleware = async (ctx, next) => {
 		ctx.body = {
 			ok: false,
 			code: 'INTERNAL_ERROR',
-			message: err instanceof Error ? err.message : 'INTERNAL_SERVER_ERROR',
+			message: '服务器开小差了，稍后再试',
 		};
 	}
 };

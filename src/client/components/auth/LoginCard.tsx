@@ -17,7 +17,7 @@ export default function LoginCard({ onError, onSuccess, onLoggedIn }: Props) {
 		onSuccess(null);
 
 		if (!username.trim() || !password.trim()) {
-			onError('WHO ARE YOU');
+			onError('你谁呀，用户名密码填一下～');
 			return;
 		}
 
@@ -33,14 +33,20 @@ export default function LoginCard({ onError, onSuccess, onLoggedIn }: Props) {
 			const data = await resp.json().catch(() => null);
 
 			if (!resp.ok || !data?.ok) {
-				const message = data?.message || data?.code || 'LOGIN FAILED';
+				const message = data?.message || data?.code || '登录失败了，再试试？';
 				throw new Error(message);
 			}
 
-			onSuccess('WELCOME BACK!');
+			if (data?.data?.passwordWasResetToDefault) {
+				onSuccess(
+					'当前密码不符合安全规范，已重置为默认密码 HXK135790，请尽快在设置中修改。',
+				);
+			} else {
+				onSuccess('欢迎回来！');
+			}
 			onLoggedIn?.();
 		} catch (err) {
-			onError(err instanceof Error ? err.message : 'LOGIN FAILED');
+			onError(err instanceof Error ? err.message : '登录失败了，再试试？');
 		} finally {
 			setLoading(false);
 		}
