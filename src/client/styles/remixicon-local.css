@@ -14,3 +14,18 @@
 }
 
 .ri-arrow-left-line:before { content: "\ea60"; }
+.ri-arrow-right-line:before { content: "\ea6c"; }
+.ri-arrow-down-s-line:before { content: "\ea4e"; }
+.ri-user-smile-line:before { content: "\f274"; }
+.ri-smartphone-line:before { content: "\f15a"; }
+.ri-qq-line:before { content: "\f03b"; }
+.ri-team-line:before { content: "\f1ee"; }
+.ri-school-line:before { content: "\f35a"; }
+.ri-building-line:before { content: "\eb0f"; }
+.ri-calendar-line:before { content: "\eb27"; }
+.ri-group-line:before { content: "\ede3"; }
+.ri-time-line:before { content: "\f20f"; }
+.ri-video-line:before { content: "\f282"; }
+.ri-upload-cloud-line:before { content: "\f24e"; }
+.ri-close-line:before { content: "\eb99"; }
+.ri-edit-line:before { content: "\ec86"; }
