@@ -35,33 +35,39 @@ const FAQ_ITEMS = [
 
 export default function JoinUsPage() {
 	useEffect(() => {
-		const el = document.documentElement;
 		const root = document.querySelector(".joinus-root");
-		const kicker = root?.querySelector(".joinus-hero__kicker");
 		const header = root?.querySelector(".joinus-header");
-		const hero = root?.querySelector(".joinus-hero");
-		if (!kicker) return;
+		const docEl = document.documentElement;
+		if (!root || !header) return;
 
 		const update = () => {
-			const r = (kicker as HTMLElement).getBoundingClientRect();
-			const pad = Math.ceil(r.top + window.scrollY);
-			el.style.setProperty("--joinus-scroll-padding", `${pad}px`);
+			const hr = (header as HTMLElement | null)?.getBoundingClientRect();
+			const h = Math.ceil(hr?.height ?? 0);
+			docEl.style.setProperty("--joinus-header-h", `${h}px`);
 		};
 
 		update();
 		const ro = new ResizeObserver(update);
-		ro.observe(kicker as Element);
-		if (header) ro.observe(header as Element);
-		if (hero) ro.observe(hero as Element);
+		ro.observe(header as Element);
 		window.addEventListener("resize", update);
 		const t = window.setTimeout(update, 0);
-		document.fonts?.ready?.then(update);
+		void document.fonts?.ready?.then(update);
+
+		const onBrandClick = (e: Event) => {
+			if (window.location.pathname !== "/joinus") return;
+			e.preventDefault();
+			window.scrollTo({ top: 0, behavior: "smooth" });
+		};
+		const brandEl = root.querySelector(".joinus-brand");
+		brandEl?.addEventListener("click", onBrandClick);
 
 		return () => {
 			window.clearTimeout(t);
 			ro.disconnect();
 			window.removeEventListener("resize", update);
-			el.style.removeProperty("--joinus-scroll-padding");
+			(root as HTMLElement).style.removeProperty("--joinus-header-h");
+			docEl.style.removeProperty("--joinus-header-h");
+			brandEl?.removeEventListener("click", onBrandClick);
 		};
 	}, []);
 
@@ -88,9 +94,9 @@ export default function JoinUsPage() {
 						</div>
 					</div>
 				</section>
-				<section className="joinus-section" aria-labelledby="dept-title">
+				<section id="dept-title" className="joinus-section" aria-labelledby="dept-title-heading">
 					<div className="joinus-section__head">
-						<h2 id="dept-title" className="joinus-section__title">
+						<h2 id="dept-title-heading" className="joinus-section__title">
 							组别一览
 						</h2>
 						<p className="joinus-section__desc">
@@ -107,9 +113,9 @@ export default function JoinUsPage() {
 						))}
 					</div>
 				</section>
-				<section className="joinus-section" aria-labelledby="process-title">
+				<section id="process-title" className="joinus-section" aria-labelledby="process-title-heading">
 					<div className="joinus-section__head">
-						<h2 id="process-title" className="joinus-section__title">
+						<h2 id="process-title-heading" className="joinus-section__title">
 							报名流程
 						</h2>
 						<p className="joinus-section__desc">先确定意向组别，再提交报名表就可以啦！</p>
@@ -142,9 +148,9 @@ export default function JoinUsPage() {
 						</article>
 					</div>
 				</section>
-				<section className="joinus-section" aria-labelledby="faq-title">
+				<section id="faq-title" className="joinus-section" aria-labelledby="faq-title-heading">
 					<div className="joinus-section__head">
-						<h2 id="faq-title" className="joinus-section__title">
+						<h2 id="faq-title-heading" className="joinus-section__title">
 							猜你想搜
 						</h2>
 						<p className="joinus-section__desc">我为你的求知欲感到喜悦！</p>

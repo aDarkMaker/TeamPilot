@@ -5,6 +5,7 @@ import '../styles/joinus.css';
 import '../styles/joinus-transitions.css';
 import { assetUrl } from '../lib/assetUrl';
 import favicon from '../assets/img/icon/icon-hxk.webp';
+import joinusIcon from '../assets/img/icon/joinus/joinus.webp';
 import fontJoinUs from '../assets/fonts/joinusTitle.ttf';
 
 interface Props {
@@ -34,13 +35,24 @@ const { title, description, skipHref, skipLabel } = Astro.props;
 			<a class="joinus-skip" href={skipHref}>{skipLabel}</a>
 			<header class="joinus-header">
 				<div class="joinus-header__inner">
-					<a class="joinus-brand" href="/joinus" transition:persist="joinus-brand">华小科招新</a>
+					<a class="joinus-brand" href="/joinus" transition:persist="joinus-brand">
+						<img
+							class="joinus-brand-icon"
+							src={assetUrl(joinusIcon)}
+							width="36"
+							height="36"
+							alt=""
+							aria-hidden="true"
+							decoding="async"
+						/>
+						华小科招新
+					</a>
 					<div class="joinus-header-actions">
 						<slot name="header-actions" />
 					</div>
 				</div>
 			</header>
-			<div class="joinus-page-transition" transition:animate="fade">
+			<div class="joinus-page-transition" transition:animate="none">
 				<slot />
 			</div>
 		</div>
