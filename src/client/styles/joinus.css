@@ -1,6 +1,7 @@
 @font-face {
 	font-family: 'JoinUsTitle';
-	src: url('../assets/fonts/joinusTitle.ttf') format('truetype');
+	src: url('../assets/fonts/joinusTitle.woff2') format('woff2'),
+	     url('../assets/fonts/joinusTitle.ttf') format('truetype');
 	font-display: swap;
 }
 

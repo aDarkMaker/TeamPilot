@@ -3,10 +3,13 @@ import { ClientRouter } from 'astro:transitions';
 import '../styles/global.css';
 import '../styles/joinus.css';
 import '../styles/joinus-transitions.css';
+import '../styles/remixicon-local.css';
 import { assetUrl } from '../lib/assetUrl';
 import favicon from '../assets/img/icon/icon-hxk.webp';
 import joinusIcon from '../assets/img/icon/joinus/joinus.webp';
-import fontJoinUs from '../assets/fonts/joinusTitle.ttf';
+import hxkFontWoff2 from '../assets/fonts/fonts.woff2';
+import joinusFontWoff2 from '../assets/fonts/joinusTitle.woff2';
+import remixiconWoff2 from '../assets/fonts/remixicon.woff2';
 
 interface Props {
 	title: string;
@@ -23,12 +26,12 @@ const { title, description, skipHref, skipLabel } = Astro.props;
 		<meta charset="UTF-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 		<link rel="icon" type="image/webp" href={assetUrl(favicon)} />
-		<link rel="preload" href={assetUrl(fontJoinUs)} as="font" type="font/ttf" crossorigin />
-		<link rel="preconnect" href="https://cdn.jsdelivr.net" />
+		<link rel="preload" href={assetUrl(hxkFontWoff2)} as="font" type="font/woff2" crossorigin />
+		<link rel="preload" href={assetUrl(joinusFontWoff2)} as="font" type="font/woff2" crossorigin />
+		<link rel="preload" href={assetUrl(remixiconWoff2)} as="font" type="font/woff2" crossorigin />
 		{description && <meta name="description" content={description} />}
 		<title>{title}</title>
 		<ClientRouter />
-		<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/remixicon@4.6.0/fonts/remixicon.css" media="print" onload="this.media='all'" />
 	</head>
 	<body class="joinus-body">
 		<div class="joinus-root">
@@ -43,7 +46,8 @@ const { title, description, skipHref, skipLabel } = Astro.props;
 							height="36"
 							alt=""
 							aria-hidden="true"
-							decoding="async"
+							fetchpriority="high"
+							loading="eager"
 						/>
 						华小科招新
 					</a>

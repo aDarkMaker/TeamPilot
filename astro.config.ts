@@ -29,6 +29,7 @@ export default defineConfig({
         },
         build: {
             cssMinify: 'lightningcss',
+            assetsInlineLimit: 0,
         },
     }
 });

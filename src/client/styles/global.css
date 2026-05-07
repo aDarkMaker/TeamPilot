@@ -1,6 +1,7 @@
 @font-face {
 	font-family: 'HxkFont';
-	src: url('../assets/fonts/fonts.ttf') format('truetype');
+	src: url('../assets/fonts/fonts.woff2') format('woff2'),
+	     url('../assets/fonts/fonts.ttf') format('truetype');
 	font-display: swap;
 }
 

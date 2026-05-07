@@ -19,7 +19,8 @@
 		"nums",
 		"procs",
 		"setex",
-		"topbar"
+		"topbar",
+		"wawoff"
 	],
 	"ignorePaths": [
 		".gitignore",

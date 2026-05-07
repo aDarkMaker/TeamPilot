@@ -1,0 +1,16 @@
+@font-face {
+	font-family: 'remixicon';
+	src: url('../assets/fonts/remixicon.woff2') format('woff2');
+	font-display: swap;
+	font-weight: normal;
+	font-style: normal;
+}
+
+[class^="ri-"], [class*=" ri-"] {
+	font-family: 'remixicon' !important;
+	font-style: normal;
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+}
+
+.ri-arrow-left-line:before { content: "\ea60"; }
