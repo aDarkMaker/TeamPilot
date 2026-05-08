@@ -83,6 +83,8 @@ docker ps -a --format '{{.Names}}' | grep hxktoolbox | xargs -r docker rm -f
 ${dbBlock}
 docker-compose build --no-cache
 docker-compose up -d
+docker image prune -af
+docker builder prune -af
 echo "部署完成."
 `;
 }
