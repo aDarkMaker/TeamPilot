@@ -50,3 +50,6 @@ temp/
 
 # Build Script
 script/build.js
+
+# Nginx
+deploy/nginx.conf
