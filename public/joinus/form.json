@@ -126,7 +126,7 @@
 	],
 	"submit": {
 		"label": "立即提交",
-		"url": "https://huaxiaoke.work/api/joinus/submit",
+		"url": "/api/joinus/submit",
 		"successMessage": "报名成功",
 		"successTitle": "真是个明智的选择",
 		"successSubtitle": "期待我们的相遇",
