@@ -12,6 +12,7 @@ import { buildRecruitmentEventsRoutes } from '../recruitment.events.routes';
 import { buildHomeRoutes } from '../home.routes';
 import { buildTaskRoutes } from '../task.routes';
 import { buildSearchRoutes } from '../search.routes';
+import { buildBilibiliRoutes } from '../bilibili.routes';
 
 function mountChildRouter(parent: Router, child: Router): void {
 	parent.use(child.routes());
@@ -34,5 +35,6 @@ export function composeApiRouter(deps: ApiRouteDeps): Router {
 	mountChildRouter(api, buildHomeRoutes(deps.homeController));
 	mountChildRouter(api, buildTaskRoutes(deps.taskController));
 	mountChildRouter(api, buildSearchRoutes(deps.searchController));
+	mountChildRouter(api, buildBilibiliRoutes(deps.bilibiliController));
 	return api;
 }

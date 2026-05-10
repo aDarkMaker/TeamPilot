@@ -8,6 +8,9 @@ export interface AppConfig {
 		biliUid: string;
 		biliCookie: string;
 	};
+	bili: {
+		loginTargetUsername: string;
+	};
 	jwtSecret: string;
 	jwtExpiresIn: SignOptions['expiresIn'];
 	superAdmin: {
@@ -29,6 +32,9 @@ export const config: AppConfig = {
 	home: {
 		biliUid: process.env.HOME_BILI_UID?.trim() || '672455305',
 		biliCookie: process.env.HOME_BILI_COOKIE?.trim() || '',
+	},
+	bili: {
+		loginTargetUsername: process.env.BILI_LOGIN_TARGET_USERNAME?.trim() || '',
 	},
 	jwtSecret: required('JWT_SECRET'),
 	jwtExpiresIn: (process.env.JWT_EXPIRES_IN?.trim() || '2h') as SignOptions['expiresIn'],

@@ -12,6 +12,8 @@ export function buildHomeRoutes(controller: HomeController): Router {
 
 	router.get('/bili-dynamics', requireLogin, controller.listBiliDynamics);
 
+	router.get('/bili-proxy-image', controller.proxyBiliImage);
+
 	router.get('/birthdays/today', requireLogin, controller.listTodayBirthdays);
 
 	router.get('/birthdays/wishes', requireLogin, controller.listBirthdayWishes);

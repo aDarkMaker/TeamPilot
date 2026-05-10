@@ -42,6 +42,7 @@ export default function HomePage() {
 	const [busy, setBusy] = useState(false);
 	const [error, setError] = useState<{ text: string; seq: number } | null>(null);
 	const toast = useDashboardToast();
+	const [activeVideoId, setActiveVideoId] = useState<string | null>(null);
 
 	const [title, setTitle] = useState('');
 	const [contentMarkdown, setContentMarkdown] = useState('');
@@ -50,26 +51,32 @@ export default function HomePage() {
 	const canPublish = role === 'admin' || role === 'super_admin';
 
 	const loadHomeData = async () => {
-		const [r, anns, dyns, birthdays] = await Promise.all([
+		const results = await Promise.allSettled([
 			fetchMeRole(),
 			fetchAnnouncements(3),
 			fetchBiliDynamics(),
 			fetchTodayBirthdays(),
 		]);
-		setRole(r);
-		setAnnouncements(anns);
-		setDynamics(dyns);
-		setBirthdayUsers(birthdays.users);
-		if (birthdays.users.length > 0) {
-			const wishEntries = await Promise.all(
-				birthdays.users.map(async (u) => {
-					const rows = await fetchBirthdayWishes(u.id);
-					return [u.id, rows.items] as const;
-				}),
-			);
-			setWishMap(Object.fromEntries(wishEntries));
-		} else {
-			setWishMap({});
+		if (results[0].status === 'fulfilled') setRole(results[0].value);
+		if (results[1].status === 'fulfilled') setAnnouncements(results[1].value);
+		if (results[2].status === 'fulfilled') setDynamics(results[2].value);
+		if (results[3].status === 'fulfilled') {
+			setBirthdayUsers(results[3].value.users);
+			if (results[3].value.users.length > 0) {
+				const wishEntries = await Promise.all(
+					results[3].value.users.map(async (u) => {
+						try {
+							const rows = await fetchBirthdayWishes(u.id);
+							return [u.id, rows.items] as const;
+						} catch {
+							return [u.id, []] as const;
+						}
+					}),
+				);
+				setWishMap(Object.fromEntries(wishEntries));
+			} else {
+				setWishMap({});
+			}
 		}
 	};
 
@@ -79,25 +86,41 @@ export default function HomePage() {
 			setLoading(true);
 			setError(null);
 			try {
-				const [r, anns, dyns, birthdays] = await Promise.all([
+				const [r, anns, dyns, birthdays] = await Promise.allSettled([
 					fetchMeRole(),
 					fetchAnnouncements(3),
 					fetchBiliDynamics(),
 					fetchTodayBirthdays(),
 				]);
 				if (cancelled) return;
-				setRole(r);
-				setAnnouncements(anns);
-				setDynamics(dyns);
-				setBirthdayUsers(birthdays.users);
-				if (birthdays.users.length > 0) {
-					const wishEntries = await Promise.all(
-						birthdays.users.map(async (u) => {
-							const rows = await fetchBirthdayWishes(u.id);
-							return [u.id, rows.items] as const;
-						}),
-					);
-					setWishMap(Object.fromEntries(wishEntries));
+
+				if (r.status === 'fulfilled') setRole(r.value);
+				if (anns.status === 'fulfilled') setAnnouncements(anns.value);
+				if (dyns.status === 'fulfilled') setDynamics(dyns.value);
+				if (birthdays.status === 'fulfilled') {
+					setBirthdayUsers(birthdays.value.users);
+					if (birthdays.value.users.length > 0) {
+						const wishEntries = await Promise.all(
+							birthdays.value.users.map(async (u) => {
+								try {
+									const rows = await fetchBirthdayWishes(u.id);
+									return [u.id, rows.items] as const;
+								} catch {
+									return [u.id, []] as const;
+								}
+							}),
+						);
+						setWishMap(Object.fromEntries(wishEntries));
+					}
+				}
+
+				const failures: string[] = [];
+				if (anns.status === 'rejected') failures.push('公告');
+				if (dyns.status === 'rejected') failures.push('B站动态');
+				if (birthdays.status === 'rejected') failures.push('生日');
+
+				if (failures.length > 0) {
+					setError({ text: `${failures.join('、')}加载失败，稍后再试`, seq: Date.now() });
 				}
 			} catch (e) {
 				if (!cancelled) {
@@ -183,7 +206,7 @@ export default function HomePage() {
 		}
 	};
 
-	const fatalError = error && announcements.length === 0 && dynamics.length === 0 && birthdayUsers.length === 0;
+	const fatalError = error && announcements.length === 0 && birthdayUsers.length === 0;
 
 	useEffect(() => {
 		if (!error) return;
@@ -359,13 +382,26 @@ export default function HomePage() {
 										<img className="home-dyn-cover" src={d.mediaUrl} alt={d.title} loading="lazy" decoding="async" />
 									) : null}
 									{d.mediaType === 'video' && d.videoEmbedUrl ? (
-										<iframe
-											className="home-dyn-video"
-											src={d.videoEmbedUrl}
-											title={d.title}
-											allowFullScreen
-											loading="lazy"
-										/>
+										activeVideoId === d.id ? (
+											<iframe
+												className="home-dyn-video"
+												src={d.videoEmbedUrl}
+												title={d.title}
+												allowFullScreen
+											/>
+										) : (
+											<button
+												type="button"
+												className="home-dyn-play-btn"
+												onClick={() => setActiveVideoId(d.id)}
+												aria-label="播放视频"
+											>
+												{d.mediaUrl ? (
+													<img className="home-dyn-cover" src={d.mediaUrl} alt={d.title} loading="lazy" decoding="async" />
+												) : null}
+												<span className="home-dyn-play-icon">&#9654;</span>
+											</button>
+										)
 									) : null}
 								</article>
 							))

@@ -25,6 +25,8 @@ import { HomeService } from './services/home.service';
 import { HomeController } from './controller/home.controller';
 import { SearchService } from './services/search.service';
 import { SearchController } from './controller/search.controller';
+import { BilibiliService } from './services/bilibili.service';
+import { BilibiliController } from './controller/bilibili.controller';
 import serve from 'koa-static';
 import mount from 'koa-mount';
 import { join } from 'node:path';
@@ -74,7 +76,8 @@ async function main() {
 	const joinusSubmitService = new JoinUsSubmitService(db);
 	const joinusSubmitController = new JoinusSubmitController(joinusSubmitService);
 
-	const homeService = new HomeService(db, cache, config);
+	const bilibiliService = new BilibiliService(sqlite, config);
+	const homeService = new HomeService(db, cache, config, bilibiliService);
 	const homeController = new HomeController(homeService);
 
 	const taskService = new TaskService(db);
@@ -83,11 +86,13 @@ async function main() {
 	const searchService = new SearchService(db);
 	const searchController = new SearchController(searchService);
 
+	const bilibiliController = new BilibiliController(bilibiliService);
+
 	const app = new Koa();
 	app.proxy = true; // X-forwarded-for 你家不要了
 	applyGlobalMiddleware(app);
 
-	const apiRouter = composeApiRouter({ applicationController, adminController, authController, profileController, scheduleController, recruitmentController, joinusSubmitController, homeController, taskController, searchController });
+	const apiRouter = composeApiRouter({ applicationController, adminController, authController, profileController, scheduleController, recruitmentController, joinusSubmitController, homeController, taskController, searchController, bilibiliController });
 	app.use(apiRouter.routes());
 	app.use(apiRouter.allowedMethods());
 

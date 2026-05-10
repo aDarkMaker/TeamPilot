@@ -34,9 +34,26 @@ function getUserVersion(db: Database): number {
 	return Number.isFinite(n) ? n : 0;
 }
 
-const EXPECTED_MIGRATION_STEPS = 1;
+const EXPECTED_MIGRATION_STEPS = 4;
 
-const MIGRATION_STEPS: Array<(db: Database) => void> = [(_db) => {}];
+const MIGRATION_STEPS: Array<(db: Database) => void> = [
+	(_db) => {},
+	(db) => {
+		if (!listTableColumnNames(db, 'users').includes('bilibili_refresh_token')) {
+			db.run(`ALTER TABLE users ADD COLUMN bilibili_refresh_token TEXT`);
+		}
+	},
+	(db) => {
+		if (!listTableColumnNames(db, 'users').includes('bili_uid')) {
+			db.run(`ALTER TABLE users ADD COLUMN bili_uid TEXT`);
+		}
+	},
+	(db) => {
+		if (!listTableColumnNames(db, 'users').includes('bili_cookie')) {
+			db.run(`ALTER TABLE users ADD COLUMN bili_cookie TEXT`);
+		}
+	},
+];
 
 function runMigrationSteps(db: Database): void {
 	if (MIGRATION_STEPS.length !== EXPECTED_MIGRATION_STEPS) {
@@ -299,6 +316,88 @@ function initSchema(db: Database): void {
 	ensureRecruitmentContactUniqueIndex(db);
 
 	runMigrationSteps(db);
+
+	cleanupExpiredData(db);
+}
+
+function cleanupExpiredData(db: Database): void {
+	const cutoff = new Date();
+	cutoff.setDate(cutoff.getDate() - 14);
+	const cutoffY = cutoff.getFullYear();
+	const cutoffM = cutoff.getMonth() + 1;
+	const cutoffD = cutoff.getDate();
+
+	try {
+		let scheduleCount = 0;
+		let scheduleTaskCount = 0;
+		let processedTaskCount = 0;
+		let wishCount = 0;
+
+		db.transaction(() => {
+			const expiredSchedules = db
+				.query(
+					`SELECT id FROM schedules WHERE year < ?1 OR (year = ?1 AND month < ?2) OR (year = ?1 AND month = ?2 AND day < ?3)`,
+				)
+				.all(cutoffY, cutoffM, cutoffD) as { id: number }[];
+
+			scheduleCount = expiredSchedules.length;
+			for (const s of expiredSchedules) {
+				const r = db.run(`DELETE FROM task_cards WHERE source_type = 'schedule_at' AND source_id = ?`, [String(s.id)]);
+				scheduleTaskCount += (r as any).changes;
+				db.run(`DELETE FROM schedule_participants WHERE schedule_id = ?`, [s.id]);
+				db.run(`DELETE FROM schedules WHERE id = ?`, [s.id]);
+			}
+
+			const doneTasks = db
+				.query(`SELECT id, payload_json FROM task_cards WHERE status IN ('accepted', 'leave')`)
+				.all() as { id: number; payload_json: string | null }[];
+
+			for (const t of doneTasks) {
+				if (!t.payload_json) continue;
+				try {
+					const p = JSON.parse(t.payload_json);
+					if (
+						p.year && p.month && p.day &&
+						(p.year < cutoffY ||
+							(p.year === cutoffY && p.month < cutoffM) ||
+							(p.year === cutoffY && p.month === cutoffM && p.day < cutoffD))
+					) {
+						const r = db.run(`DELETE FROM task_cards WHERE id = ?`, [t.id]);
+						processedTaskCount += (r as any).changes;
+					}
+				} catch {
+					// ignore unparseable payload
+				}
+			}
+
+			const allWishes = db.query(`SELECT id, wish_date FROM birthday_wishes`).all() as { id: number; wish_date: string }[];
+
+			for (const w of allWishes) {
+				const parts = w.wish_date.split('-');
+				if (parts.length !== 3) continue;
+				const wy = Number(parts[0]);
+				const wm = Number(parts[1]);
+				const wd = Number(parts[2]);
+				if (!Number.isFinite(wy) || !Number.isFinite(wm) || !Number.isFinite(wd)) continue;
+				if (
+					wy < cutoffY ||
+					(wy === cutoffY && wm < cutoffM) ||
+					(wy === cutoffY && wm === cutoffM && wd < cutoffD)
+				) {
+					const r = db.run(`DELETE FROM birthday_wishes WHERE id = ?`, [w.id]);
+					wishCount += (r as any).changes;
+				}
+			}
+		})();
+
+		if (scheduleCount > 0 || scheduleTaskCount > 0 || processedTaskCount > 0 || wishCount > 0) {
+			console.log(
+				`[sqlite] cleanup: ${scheduleCount} schedules + ${scheduleTaskCount} tasks, ${processedTaskCount} done tasks, ${wishCount} wishes`,
+			);
+		}
+	} catch (e) {
+		console.warn('[sqlite] cleanup failed:', e);
+	}
 }
 
 /** 同一手机号唯一，配合 INSERT … ON CONFLICT(contact) 在 DB 层串行化「同号覆盖」，避免并发双插。 */

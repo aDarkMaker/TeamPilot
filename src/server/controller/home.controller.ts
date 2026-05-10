@@ -40,4 +40,17 @@ export class HomeController {
 		const data = await this.service.createWish(ctx.state.user!, ctx.request.body);
 		ctx.body = { ok: true, data };
 	};
+
+	proxyBiliImage = async (ctx: Context) => {
+		const url = typeof ctx.query.url === 'string' ? ctx.query.url : '';
+		if (!url) {
+			ctx.status = 400;
+			ctx.body = { ok: false, error: '缺少 url 参数' };
+			return;
+		}
+		const { buffer, contentType } = await this.service.proxyBiliImage(url);
+		ctx.type = contentType;
+		ctx.set('Cache-Control', 'public, max-age=86400');
+		ctx.body = buffer;
+	};
 }

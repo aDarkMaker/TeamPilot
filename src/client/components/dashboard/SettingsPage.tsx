@@ -2,6 +2,7 @@ import {
 	useCallback,
 	useEffect,
 	useId,
+	useRef,
 	useState,
 	type InputHTMLAttributes,
 	type TextareaHTMLAttributes,
@@ -118,6 +119,15 @@ export default function SettingsPage() {
 		window.dispatchEvent(new CustomEvent('hxk:profile-updated', { detail }));
 	};
 
+	const [biliBound, setBiliBound] = useState(false);
+	const [biliAllowed, setBiliAllowed] = useState(false);
+	const [biliAvatar, setBiliAvatar] = useState<string | null>(null);
+	const [biliNickname, setBiliNickname] = useState<string | null>(null);
+	const [biliQrcodeUrl, setBiliQrcodeUrl] = useState<string | null>(null);
+	const [biliQrcodeKey, setBiliQrcodeKey] = useState<string | null>(null);
+	const [biliPolling, setBiliPolling] = useState(false);
+	const biliPollRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
     const loadMe = useCallback(async () => {
         setMsg(null);
         try {
@@ -146,6 +156,59 @@ export default function SettingsPage() {
     useEffect(() => {
         void loadMe();
     }, [loadMe]);
+
+    const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+	const originalRef = useRef<{ nickname: string; signature: string; qq: string }>({ nickname: '', signature: '', qq: '' });
+
+	useEffect(() => {
+		if (loading) return;
+		if (originalRef.current.nickname === '' && originalRef.current.signature === '' && originalRef.current.qq === '' && (nickname || signature || qq)) {
+			originalRef.current = { nickname, signature, qq };
+			return;
+		}
+		if (nickname === originalRef.current.nickname && signature === originalRef.current.signature && qq === originalRef.current.qq) return;
+
+		if (debounceRef.current) clearTimeout(debounceRef.current);
+		debounceRef.current = setTimeout(async () => {
+			const prev = originalRef.current;
+			if (nickname === prev.nickname && signature === prev.signature && qq === prev.qq) return;
+			try {
+				const body: { nickname: string | null; signature: string | null; qq: string | null; birthdayMonth: number | null; birthdayDay: number | null } = {
+					nickname: nickname.trim() ? nickname.trim() : null,
+					signature: signature.trim() ? signature.trim() : null,
+					qq: qq.trim() ? qq.trim() : null,
+					birthdayMonth: birthdayMonth === '' ? null : birthdayMonth,
+					birthdayDay: birthdayDay === '' ? null : birthdayDay,
+				};
+				const res = await fetch('/api/users/me', {
+					method: 'PATCH',
+					credentials: 'include',
+					headers: { 'Content-Type': 'application/json' },
+					body: JSON.stringify(body),
+				});
+				const json = await res.json();
+				if (res.ok && json?.ok) {
+					originalRef.current = { nickname, signature, qq };
+					toast.show({ text: '已自动保存', type: 'ok', durationMs: 2000 });
+					if (json.data) {
+						dispatchProfileUpdated({
+							nickname: json.data.nickname,
+							signature: json.data.signature,
+							qq: json.data.qq,
+							avatarUrl: json.data.avatarUrl ?? null,
+							profileBackgroundUrl: json.data.profileBackgroundUrl ?? null,
+						});
+					}
+				}
+			} catch {
+				toast.show({ text: '自动保存失败', type: 'err', durationMs: 2000 });
+			}
+		}, 800);
+
+		return () => {
+			if (debounceRef.current) clearTimeout(debounceRef.current);
+		};
+	}, [nickname, signature, qq, loading]);
 
 	useEffect(() => {
 		if (!msg) return;
@@ -182,6 +245,7 @@ export default function SettingsPage() {
                 return;
             }
             setMsg({ type: 'ok', text: '保存好哩！' });
+			originalRef.current = { nickname, signature, qq };
             if (json.data) {
                 setAvatarUrl(json.data.avatarUrl ?? null);
                 setBgUrl(json.data.profileBackgroundUrl ?? null);
@@ -387,6 +451,114 @@ export default function SettingsPage() {
 	const pickerOptions = birthdayPicker.field === 'month' ? monthOptions : dayOptions;
 	const pickerValue = birthdayPicker.field === 'month' ? birthdayMonth : birthdayDay;
 
+	const startBiliBind = async () => {
+		try {
+			const res = await fetch('/api/bilibili/qrcode', { credentials: 'include' });
+			const json = await res.json();
+			if (!res.ok || !json?.ok) {
+				toast.show({ text: `生成失败: ${json?.error ?? '未知错误'}`, type: 'err' });
+				return;
+			}
+			setBiliQrcodeUrl(json.data.qrDataUrl);
+			setBiliQrcodeKey(json.data.qrcodeKey);
+			setBiliPolling(true);
+		} catch {
+			toast.show({ text: '网络错误，请稍后再试', type: 'err' });
+		}
+	};
+
+	const cancelBiliBind = () => {
+		setBiliPolling(false);
+		setBiliQrcodeUrl(null);
+		setBiliQrcodeKey(null);
+		if (biliPollRef.current) {
+			clearInterval(biliPollRef.current);
+			biliPollRef.current = null;
+		}
+	};
+
+	useEffect(() => {
+		if (!biliPolling || !biliQrcodeKey) return;
+
+		let stopped = false;
+		const poll = async () => {
+			if (stopped) return;
+			try {
+				const res = await fetch(`/api/bilibili/qrcode/status?qrcode_key=${encodeURIComponent(biliQrcodeKey)}`, {
+					credentials: 'include',
+				});
+				const json = await res.json();
+				if (!res.ok || !json?.ok) return;
+				const code = json.data?.code;
+			if (code === 0 && json.data?.refreshToken) {
+				const bindRes = await fetch('/api/bilibili/bind', {
+					method: 'POST',
+					headers: { 'Content-Type': 'application/json' },
+					credentials: 'include',
+					body: JSON.stringify({
+						refresh_token: json.data.refreshToken,
+						bili_uid: json.data.biliUid ?? '',
+						cookies: json.data.cookies ?? '',
+					}),
+				});
+					const bindJson = await bindRes.json();
+					if (bindRes.ok && bindJson?.ok) {
+						toast.show({ text: 'B站账号绑定成功！', type: 'ok' });
+						setBiliBound(true);
+						loadBiliInfo().finally(() => cancelBiliBind());
+					} else {
+						toast.show({ text: '绑定未成功，请重试', type: 'err' });
+						cancelBiliBind();
+					}
+				} else if (code === 86038) {
+					toast.show({ text: '二维码已过期，请重新扫码', type: 'err' });
+					cancelBiliBind();
+				}
+			} catch {
+				// 静默轮询失败
+			}
+		};
+
+		biliPollRef.current = setInterval(poll, 2500);
+		poll();
+
+		return () => {
+			stopped = true;
+		};
+	}, [biliPolling, biliQrcodeKey]);
+
+	const loadBiliInfo = async () => {
+		try {
+			const res = await fetch('/api/bilibili/me', { credentials: 'include' });
+			const json = await res.json();
+			if (res.ok && json?.ok) {
+				setBiliAvatar(json.data.avatar);
+				setBiliNickname(json.data.nickname);
+				setBiliBound(true);
+			}
+		} catch {
+			// ignore
+		}
+	};
+
+	useEffect(() => {
+		void (async () => {
+			try {
+				const res = await fetch('/api/bilibili/status', { credentials: 'include' });
+				const json = await res.json();
+				if (res.ok && json?.ok && json.data.allowed) {
+					setBiliAllowed(true);
+					if (json.data.bound) {
+						setBiliBound(true);
+						setBiliAvatar(json.data.avatar);
+						setBiliNickname(json.data.nickname);
+					}
+				}
+			} catch {
+			}
+		})();
+	}, []);
+
     if (loading) {
         return <p className="settings-page">加载中……</p>;
     }
@@ -401,17 +573,17 @@ export default function SettingsPage() {
 
 						<div className="settings-field">
 							<label htmlFor="set-nick">昵称：</label>
-							<SettingsInput id="set-nick" value={nickname} onChange={(e) => setNickname(e.target.value)} />
+							<SettingsInput id="set-nick" value={nickname} onChange={(e) => setNickname(e.target.value)} autoComplete="nickname" />
 						</div>
 
 						<div className="settings-field">
 							<label htmlFor="set-sig">个性签名：</label>
-							<SettingsTextarea id="set-sig" value={signature} onChange={(e) => setSignature(e.target.value)} maxLength={200} />
+							<SettingsTextarea id="set-sig" value={signature} onChange={(e) => setSignature(e.target.value)} maxLength={200} autoComplete="off" />
 						</div>
 
 						<div className="settings-field">
 							<label htmlFor="set-qq">QQ：</label>
-							<SettingsInput id="set-qq" value={qq} onChange={(e) => setQq(e.target.value)}/>
+							<SettingsInput id="set-qq" value={qq} onChange={(e) => setQq(e.target.value)} autoComplete="off" />
 						</div>
 
 						<div className="settings-actions">
@@ -473,6 +645,29 @@ export default function SettingsPage() {
 							</div>
 						</div>
 					</section>
+
+					{biliAllowed ? (
+						<section className="settings-section">
+							<h2>B站账号</h2>
+							{biliBound && biliAvatar ? (
+								<div className="settings-bili-bound">
+									<img className="settings-bili-avatar" src={biliAvatar} alt="" />
+									<div className="settings-bili-info">
+										<div className="settings-bili-nickname">{biliNickname ?? 'B站用户'}</div>
+										<div className="settings-bili-status">已绑定</div>
+									</div>
+								</div>
+							) : biliQrcodeUrl ? (
+								<div className="settings-bili-qrcode-wrap">
+									<img className="settings-bili-qrcode" src={biliQrcodeUrl} alt="扫码登录" />
+									<div className="settings-bili-qrcode-hint">请使用B站客户端扫码登录</div>
+									<SettingsButton variant="secondary" onClick={cancelBiliBind}>取消</SettingsButton>
+								</div>
+							) : (
+								<SettingsButton variant="secondary" onClick={() => void startBiliBind()}>绑定B站账号</SettingsButton>
+							)}
+						</section>
+					) : null}
 
 					<section className="settings-section">
 						<h2>修改密码</h2>

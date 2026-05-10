@@ -2,6 +2,12 @@ import { z } from "zod";
 import type { DB, Cache } from "../db";
 import { AppError } from "../types/api";
 import type { AppConfig } from "../config";
+import sharp from 'sharp';
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { join } from 'node:path';
+import { createHash } from 'node:crypto';
+import type { BilibiliService } from './bilibili.service';
+import { isTrustedBiliCdnUrl, toBiliProxyImagePath } from '../lib/biliCdnImage';
 
 const createAnnouncementSchema = z.object({
     title: z.string().trim().min(1).max(80),
@@ -43,7 +49,8 @@ function normalizeBiliItem(item: any): BiliDynamic {
     const bvid = typeof archive?.bvid === 'string' ? archive.bvid : null;
 
     const mediaType: BiliDynamic['mediaType'] = bvid ? 'video' : picUrl ? 'image' : coverUrl ? 'image' : 'none';
-    const mediaUrl = mediaType === 'image' ? (picUrl ?? coverUrl ?? null) : coverUrl ?? null;
+    const rawUrl = mediaType === 'image' ? (picUrl ?? coverUrl ?? null) : coverUrl ?? null;
+    const mediaUrl = rawUrl ? toBiliProxyImagePath(rawUrl) : null;
     const videoEmbedUrl = bvid ? `https://player.bilibili.com/player.html?bvid=${encodeURIComponent(bvid)}&high_quality=1` : null;
     
     return {
@@ -63,7 +70,8 @@ export class HomeService {
     constructor(
         private db: DB,
         private cache: Cache,
-        private cfg: AppConfig
+        private cfg: AppConfig,
+        private bili: BilibiliService,
     ) {}
 
     private toWebpUrl(storedPath: string | null | undefined): string | null {
@@ -88,6 +96,42 @@ export class HomeService {
         const m = get('month');
         const d = get('day');
         return { ymd: `${y}-${m}-${d}`, month: Number(m), day: Number(d) };
+    }
+
+    async proxyBiliImage(encodedUrl: string): Promise<{ buffer: Buffer; contentType: string }> {
+        const rawUrl = decodeURIComponent(encodedUrl);
+        if (!isTrustedBiliCdnUrl(rawUrl)) {
+            throw new AppError(400, 'BILI_IMAGE_BAD_URL', '不支持的图片地址');
+        }
+        const hash = createHash('sha256').update(rawUrl).digest('hex').slice(0, 16);
+        const cacheDir = join(process.cwd(), 'data', 'bili-cache');
+        mkdirSync(cacheDir, { recursive: true });
+        const cachePath = join(cacheDir, `${hash}.webp`);
+
+        if (existsSync(cachePath)) {
+            return { buffer: readFileSync(cachePath), contentType: 'image/webp' };
+        }
+
+        const res = await fetch(rawUrl, {
+            headers: {
+                'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+                referer: 'https://www.bilibili.com/',
+            },
+            signal: AbortSignal.timeout(10000),
+        });
+
+        if (!res.ok) throw new AppError(502, 'BILI_IMAGE_FAILED', '图片加载失败');
+
+        const arrayBuf = await res.arrayBuffer();
+        const input = Buffer.from(arrayBuf);
+
+        const webp = await sharp(input)
+            .resize({ width: 640, withoutEnlargement: true })
+            .webp({ quality: 80 })
+            .toBuffer();
+
+        writeFileSync(cachePath, webp);
+        return { buffer: webp, contentType: 'image/webp' };
     }
 
     async listTodayBirthdays() {
@@ -185,34 +229,54 @@ export class HomeService {
     async listBiliDynamics() {
         const uid = this.cfg.home.biliUid;
         const cacheKey = `home:bili:${uid}`;
-        const cached = await this.cache.get(cacheKey);
+
+        let cached: string | null = null;
+        try {
+            cached = await this.cache.get(cacheKey);
+        } catch {
+        }
         if (cached) {
             try {
                 return JSON.parse(cached);
             } catch {
-                // ignore bad cache
             }
         }
 
         const api = `https://api.bilibili.com/x/polymer/web-dynamic/v1/feed/space?host_mid=${encodeURIComponent(uid)}`;
-        const cookie = this.cfg.home.biliCookie.trim();
-        const res = await fetch(api, {
-            headers: {
-                'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-                accept: 'application/json',
-                ...(cookie ? { cookie } : {}),
-            },
-        });
-        if (!res.ok) throw new AppError(502, 'BILI_UPSTREAM_ERROR', `哔哩接口抽风中（HTTP ${res.status}）`);
+        const cookie = (await this.bili.getDynamicCookie()) || this.cfg.home.biliCookie.trim();
+        const headers: Record<string, string> = {
+            'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+            accept: 'application/json',
+        };
+        if (cookie) headers.cookie = cookie;
 
-        const json = (await res.json()) as any;
-        const items = (json?.data?.items ?? [])
-            .map(normalizeBiliItem)
-            .filter((x: BiliDynamic) => x.id && x.text)
-            .slice(0, 1);
+        const doFetch = async (signal?: AbortSignal) => {
+            const res = await fetch(api, { headers, signal });
+            if (!res.ok) throw new AppError(502, 'BILI_UPSTREAM_ERROR', `哔哩接口抽风中（HTTP ${res.status}）`);
+            const json = (await res.json()) as any;
+            const items = (json?.data?.items ?? [])
+                .map(normalizeBiliItem)
+                .filter((x: BiliDynamic) => x.id && x.text)
+                .slice(0, 1);
+            return { uid, items, fetchedAt: Date.now() };
+        };
 
-        const payload = { uid, items, fetchedAt: Date.now() };
-        await this.cache.setex(cacheKey, 120, JSON.stringify(payload));
-        return payload;
+        const ctrl = AbortSignal.timeout(8000);
+        try {
+            const payload = await doFetch(ctrl);
+            try { await this.cache.setex(cacheKey, 120, JSON.stringify(payload)); } catch { }
+            return payload;
+        } catch (e) {
+            if (e instanceof AppError) throw e;
+            const retryCtrl = AbortSignal.timeout(8000);
+            try {
+                const payload = await doFetch(retryCtrl);
+                try { await this.cache.setex(cacheKey, 120, JSON.stringify(payload)); } catch { }
+                return payload;
+            } catch (e2) {
+                if (e2 instanceof AppError) throw e2;
+                throw new AppError(502, 'BILI_UPSTREAM_ERROR', '哔哩接口抽风中，稍后再试');
+            }
+        }
     }
 }

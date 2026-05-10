@@ -8,6 +8,7 @@ import type { JoinusSubmitController } from '../../controller/joinusSubmit.contr
 import type { HomeController } from '../../controller/home.controller';
 import type { TaskController } from '../../controller/task.controller';
 import type { SearchController } from '../../controller/search.controller';
+import type { BilibiliController } from '../../controller/bilibili.controller';
 
 export interface ApiRouteDeps {
 	authController: AuthController;
@@ -20,4 +21,5 @@ export interface ApiRouteDeps {
 	homeController: HomeController;
 	taskController: TaskController;
 	searchController: SearchController;
+	bilibiliController: BilibiliController;
 }

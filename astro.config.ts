@@ -2,15 +2,20 @@ import { defineConfig } from 'astro/config';
 import react from '@astrojs/react';
 
 const backendOrigin = process.env.BACKEND_ORIGIN ?? 'http://localhost:3000';
+const siteUrl = process.env.PUBLIC_SITE_URL || undefined;
 
 export default defineConfig({
     srcDir: './src/client',
+    site: siteUrl,
     integrations: [react()],
     devToolbar: { enabled: false },
     build: {
         assets: '_assets',
     },
     vite: {
+        optimizeDeps: {
+            include: ['react-markdown', 'remark-gfm'],
+        },
         server: {
             proxy: {
                 '/api/': {

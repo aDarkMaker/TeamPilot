@@ -203,3 +203,20 @@
 	}
 }
 
+@media (max-width: 480px) {
+	.task-page {
+		gap: 8px;
+	}
+
+	.task-card {
+		padding: 10px;
+	}
+
+	.task-tab,
+	.task-refresh-btn,
+	.task-action {
+		font-size: 11px;
+		padding: 6px 8px;
+	}
+}
+

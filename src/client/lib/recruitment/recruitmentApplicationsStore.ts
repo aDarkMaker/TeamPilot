@@ -51,6 +51,9 @@ function startSseOnce() {
 		sse.addEventListener('applications_updated', () => {
 			void refreshInternal();
 		});
+		sse.addEventListener('error', () => {
+			// 静默处理 — 开发环境后端未启时不会污染控制台
+		});
 	} catch {
 		// ignore: SSE not supported / blocked
 	}

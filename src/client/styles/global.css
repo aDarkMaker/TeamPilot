@@ -100,6 +100,21 @@ select {
 	}
 }
 
+@media (max-width: 400px) {
+	.content-wrapper {
+		padding: 10px 8px 20px;
+	}
+
+	.dashboard-topbar {
+		padding: 5px 8px;
+		gap: 4px;
+	}
+
+	.dashboard-topbar h1 {
+		font-size: 13px;
+	}
+}
+
 img,
 video,
 svg {
