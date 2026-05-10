@@ -33,6 +33,14 @@ const { title = '工作主页', notifyVariant = 'read' }: Props = Astro.props;
         <link rel="preconnect" href="https://upos-sz-mirrorcos.bilivideo.com" />
         <link rel="preconnect" href="https://i0.hdslb.com" />
         <title>{title} · HXK</title>
+        <script>
+            document.addEventListener('astro:before-swap', (e) => {
+                const bg = localStorage.getItem('hxk_profile_background_url');
+                if (bg) {
+                    e.newDocument.documentElement.style.setProperty('--dash-bg-image', `url(${bg})`);
+                }
+            });
+        </script>
     </head>
     <body>
         <div class="dashboard-root">

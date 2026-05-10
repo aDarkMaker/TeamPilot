@@ -82,6 +82,8 @@ html.dashboard-shell body {
 	backdrop-filter: blur(16px);
 	-webkit-backdrop-filter: blur(16px);
 	z-index: 20;
+	contain: layout style;
+	will-change: backdrop-filter;
 }
 
 .dashboard-logo {
@@ -313,6 +315,7 @@ html.dashboard-shell body {
 	z-index: 10;
 	min-width: 0;
 	overflow: visible;
+	contain: layout style;
 }
 
 .dashboard-topbar h1 {
