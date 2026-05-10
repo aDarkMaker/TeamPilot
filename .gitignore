@@ -53,3 +53,8 @@ script/build.js
 
 # Nginx
 deploy/nginx.conf
+
+# Docker
+docker-compose.yml
+Dockerfile.backend
+Dockerfile.frontend
