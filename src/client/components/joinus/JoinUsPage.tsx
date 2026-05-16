@@ -5,16 +5,16 @@ import IconAu from "../../assets/img/icon/joinus/vup/Icon_Au.webp";
 import IconBili from "../../assets/img/icon/joinus/vup/Icon_Bili.webp";
 import IconObs from "../../assets/img/icon/joinus/vup/Icon_Obs.webp";
 import IconAe from "../../assets/img/icon/joinus/video/Icon_Ae.webp";
-import IconCut from "../../assets/img/icon/joinus/video/Icon_Cut.webp";
+import IconLr from "../../assets/img/icon/joinus/video/Icon_Lr.webp";
 import IconPr from "../../assets/img/icon/joinus/video/Icon_Pr.webp";
-import IconCsp from "../../assets/img/icon/joinus/art/Icon_Csp.webp";
+import IconAi from "../../assets/img/icon/joinus/art/Icon_Ai.webp";
 import IconProcreate from "../../assets/img/icon/joinus/art/Icon_Procreate.webp";
 import IconPs from "../../assets/img/icon/joinus/art/Icon_Ps.webp";
 import IconDs from "../../assets/img/icon/joinus/word/Icon_Ds.webp";
 import IconTxt from "../../assets/img/icon/joinus/word/Icon_Txt.webp";
 import IconWord from "../../assets/img/icon/joinus/word/Icon_Word.webp";
-import IconPython from "../../assets/img/icon/joinus/tech/Icon_Python.webp";
-import IconRedis from "../../assets/img/icon/joinus/tech/Icon_Redis.webp";
+import IconGo from "../../assets/img/icon/joinus/tech/Icon_Go.webp";
+import IconJs from "../../assets/img/icon/joinus/tech/Icon_Js.webp";
 import IconTs from "../../assets/img/icon/joinus/tech/Icon_Ts.webp";
 import IconExcel from "../../assets/img/icon/joinus/designer/Icon_Excel.webp";
 import IconFeishu from "../../assets/img/icon/joinus/designer/Icon_Feishu.webp";
@@ -35,17 +35,17 @@ interface DeptIcon {
 const ICONS_SOURCE: Record<string, { src: string; alt: string }[]> = {
 	VUP: [
 		{ src: assetUrl(IconAu), alt: "AU" },
-		{ src: assetUrl(IconBili), alt: "B站" },
+		{ src: assetUrl(IconBili), alt: "Bili" },
 		{ src: assetUrl(IconObs), alt: "OBS" },
 	],
 	视频组: [
 		{ src: assetUrl(IconAe), alt: "AE" },
-		{ src: assetUrl(IconCut), alt: "剪映" },
+		{ src: assetUrl(IconLr), alt: "Lr" },
 		{ src: assetUrl(IconPr), alt: "PR" },
 	],
 	美术组: [
-		{ src: assetUrl(IconCsp), alt: "CSP" },
 		{ src: assetUrl(IconProcreate), alt: "Procreate" },
+		{ src: assetUrl(IconAi), alt: "Ai" },
 		{ src: assetUrl(IconPs), alt: "PS" },
 	],
 	文案组: [
@@ -54,14 +54,14 @@ const ICONS_SOURCE: Record<string, { src: string; alt: string }[]> = {
 		{ src: assetUrl(IconWord), alt: "Word" },
 	],
 	技术组: [
-		{ src: assetUrl(IconPython), alt: "Python" },
-		{ src: assetUrl(IconRedis), alt: "Redis" },
+		{ src: assetUrl(IconJs), alt: "JS" },
 		{ src: assetUrl(IconTs), alt: "TS" },
+		{ src: assetUrl(IconGo), alt: "Go" },
 	],
 	直播组: [
 		{ src: assetUrl(IconExcel), alt: "Excel" },
-		{ src: assetUrl(IconFeishu), alt: "飞书" },
 		{ src: assetUrl(IconNotion), alt: "Notion" },
+		{ src: assetUrl(IconFeishu), alt: "Feishu" },
 	],
 };
 
@@ -313,27 +313,27 @@ export default function JoinUsPage() {
 						</p>
 					</div>
 					<div className="joinus-grid">
-						<article className="joinus-card">
+						<article className="joinus-card joinus-card--process">
 							<span className="joinus-card__tag">01</span>
 							<h3>选择你的英雄</h3>
 							<p>在六个方向中选定你最感兴趣的方向～</p>
 						</article>
-						<article className="joinus-card">
+						<article className="joinus-card joinus-card--process">
 							<span className="joinus-card__tag">02</span>
 							<h3>提交报名表</h3>
 							<p>根据实际情况填写报名表，然后提交！</p>
 						</article>
-						<article className="joinus-card">
+						<article className="joinus-card joinus-card--process">
 							<span className="joinus-card__tag">03</span>
 							<h3>坐等开饭</h3>
 							<p>提交后留意短信消息，只需等待就好哩？</p>
 						</article>
-						<article className="joinus-card">
+						<article className="joinus-card joinus-card--process">
 							<span className="joinus-card__tag">04</span>
 							<h3>速来面试</h3>
 							<p>我们会根据实际情况安排面试时间QwQ</p>
 						</article>
-						<article className="joinus-card">
+						<article className="joinus-card joinus-card--process">
 							<span className="joinus-card__tag">05</span>
 							<h3>误入贼窝</h3>
 							<p>如果你通过了面试，那么你就可以加入我们啦！</p>
