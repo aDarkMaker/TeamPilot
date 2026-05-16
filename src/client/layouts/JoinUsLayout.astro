@@ -1,5 +1,4 @@
 ---
-import { ClientRouter } from 'astro:transitions';
 import '../styles/global.css';
 import '../styles/joinus.css';
 import '../styles/joinus-transitions.css';
@@ -31,14 +30,13 @@ const { title, description, skipHref, skipLabel } = Astro.props;
 		<link rel="preload" href={assetUrl(remixiconWoff2)} as="font" type="font/woff2" crossorigin />
 		{description && <meta name="description" content={description} />}
 		<title>{title}</title>
-		<ClientRouter />
 	</head>
 	<body class="joinus-body">
 		<div class="joinus-root">
 			<a class="joinus-skip" href={skipHref}>{skipLabel}</a>
 			<header class="joinus-header">
 				<div class="joinus-header__inner">
-					<a class="joinus-brand" href="/joinus" transition:persist="joinus-brand">
+					<a class="joinus-brand" href="/joinus">
 						<img
 							class="joinus-brand-icon"
 							src={assetUrl(joinusIcon)}
@@ -56,7 +54,7 @@ const { title, description, skipHref, skipLabel } = Astro.props;
 					</div>
 				</div>
 			</header>
-			<div class="joinus-page-transition" transition:animate="none">
+			<div class="joinus-page-transition">
 				<slot />
 			</div>
 		</div>

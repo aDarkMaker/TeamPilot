@@ -145,15 +145,17 @@ export default function JoinUsPage() {
 		void document.fonts?.ready?.then(update);
 
 		const onBrandClick = (e: Event) => {
-			if (window.location.pathname !== "/joinus") return;
+			const p = window.location.pathname;
+			if (p !== "/joinus" && p !== "/joinus/") return;
 			e.preventDefault();
 			window.scrollTo({ top: 0, behavior: "smooth" });
 		};
 		const brandEl = root.querySelector(".joinus-brand");
 		brandEl?.addEventListener("click", onBrandClick);
 
-		isTouchDevice.current =
-			"ontouchstart" in window || navigator.maxTouchPoints > 0;
+		isTouchDevice.current = !window.matchMedia(
+			"(hover: hover) and (pointer: fine)",
+		).matches;
 
 		const onGlobalClick = (e: MouseEvent) => {
 			if (activeCard === null) return;
