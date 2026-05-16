@@ -73,6 +73,7 @@ rm -rf /home/ubuntu/hxk_release_tmp
 mkdir -p /home/ubuntu/hxk_release_tmp
 unzip -o ${CONFIG.remoteZipPath} -d /home/ubuntu/hxk_release_tmp
 rsync -av \\
+  --exclude '.env' \\
   --exclude '.env.production' \\
   --exclude 'data/' \\
   --exclude 'node_modules/' \\
