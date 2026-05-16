@@ -19,6 +19,7 @@ import IconTs from "../../assets/img/icon/joinus/tech/Icon_Ts.webp";
 import IconExcel from "../../assets/img/icon/joinus/designer/Icon_Excel.webp";
 import IconFeishu from "../../assets/img/icon/joinus/designer/Icon_Feishu.webp";
 import IconNotion from "../../assets/img/icon/joinus/designer/Icon_Notion.webp";
+import heroImage from "../../assets/img/image/joinus_hero.webp";
 import type { CSSProperties } from "react";
 
 interface IconPlacement {
@@ -224,6 +225,12 @@ export default function JoinUsPage() {
 							</a>
 						</div>
 					</div>
+					<img
+						className="joinus-hero__img"
+						src={assetUrl(heroImage)}
+						alt=""
+						aria-hidden="true"
+					/>
 				</section>
 				<section
 					id="dept-title"
