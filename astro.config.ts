@@ -7,6 +7,7 @@ const siteUrl = process.env.NODE_ENV !== 'development' ? (process.env.PUBLIC_SIT
 export default defineConfig({
     srcDir: './src/client',
     site: siteUrl,
+    trailingSlash: 'never',
     integrations: [react()],
     devToolbar: { enabled: false },
     build: {
