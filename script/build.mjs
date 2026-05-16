@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 import { execSync, spawnSync } from 'node:child_process';
-import { statSync, existsSync, unlinkSync } from 'node:fs';
+import { statSync, existsSync, unlinkSync, readFileSync, writeFileSync } from 'node:fs';
 import { basename, resolve, join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -89,6 +89,24 @@ echo "部署完成."
 `;
 }
 
+function ensureProductionEnv(rootDir) {
+	const envPath = join(rootDir, '.env');
+	const content = readFileSync(envPath, 'utf-8');
+	const lines = content.split(/\r?\n/);
+	let changed = false;
+	const fixed = lines.map((line) => {
+		const m = line.match(/^NODE_ENV\s*=\s*(.+)$/);
+		if (m && m[1].trim() !== 'production') {
+			changed = true;
+			return 'NODE_ENV=production';
+		}
+		return line;
+	});
+	if (!changed) return;
+	console.log('\n⚠  .env 中 NODE_ENV 不是 production，已自动修正。\n');
+	writeFileSync(envPath, fixed.join('\n'), 'utf-8');
+}
+
 function main() {
 	const root = resolve(__dirname, '..');
 	const args = new Set(process.argv.slice(2));
@@ -124,6 +142,8 @@ function main() {
 		console.log('\n已上传（未执行远程部署）.\n');
 		return;
 	}
+
+	ensureProductionEnv(root);
 
 	if (!noBuild) {
 		const cmd = CONFIG.buildCommand.startsWith('bun') && !hasBun() ? 'npm run build' : CONFIG.buildCommand;
