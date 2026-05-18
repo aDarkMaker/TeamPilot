@@ -7,6 +7,7 @@ import type { MeBrief } from '../../../lib/recruitment/recruitmentClient';
 import type { NewcomerApplicationView } from '../../../types/recruitmentUi';
 import { formatCstDateTime } from '../../../lib/timeCst';
 import { useSearchHighlight } from '../../../lib/useSearchHighlight';
+import { copyText } from '../../../lib/copyToClipboard';
 
 type Props = {
 	application: NewcomerApplicationView;
@@ -17,6 +18,7 @@ type Props = {
 	onTagRemove: (tag: string) => Promise<void>;
 	deleteBusy: boolean;
 	onApplicationDelete: () => Promise<void>;
+	onCopyResult: (ok: boolean) => void;
 };
 
 export function NewcomerDetail({
@@ -28,6 +30,7 @@ export function NewcomerDetail({
 	onTagRemove,
 	deleteBusy,
 	onApplicationDelete,
+	onCopyResult,
 }: Props) {
 	const { highlightText } = useSearchHighlight();
 	const dept = DEPARTMENT_LABELS[application.department];
@@ -63,9 +66,21 @@ export function NewcomerDetail({
 				<h3 className="nc-section-title">基本信息</h3>
 				<dl className="nc-meta-grid">
 					<dt>手机</dt>
-					<dd>{highlightText(application.contact)}</dd>
+					<dd
+						className="nc-meta-copy"
+						title="点击复制"
+						onClick={() => void copyText(application.contact).then(onCopyResult)}
+					>
+						{highlightText(application.contact)}
+					</dd>
 					<dt>QQ</dt>
-					<dd>{highlightText(application.qq)}</dd>
+					<dd
+						className="nc-meta-copy"
+						title="点击复制"
+						onClick={() => void copyText(application.qq).then(onCopyResult)}
+					>
+						{highlightText(application.qq)}
+					</dd>
 					<dt>在校生</dt>
 					<dd>{application.isStudent ? '是' : '否'}</dd>
 					{application.isStudent ? (

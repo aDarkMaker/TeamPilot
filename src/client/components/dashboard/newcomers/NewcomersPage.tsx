@@ -1,6 +1,7 @@
-import { useEffect, useMemo, useState, useSyncExternalStore } from 'react';
+import { useCallback, useEffect, useMemo, useState, useSyncExternalStore } from 'react';
 import { useSearchHighlight } from '../../../lib/useSearchHighlight';
 
+import { DashboardToast, useDashboardToast } from '../DashboardToast';
 import { CommentsPanel } from './CommentsPanel';
 import { DepartmentSelect } from './DepartmentSelect';
 import { NewcomerDetail } from './NewcomerDetail';
@@ -22,7 +23,15 @@ import type { NewcomerApplicationView, RecruitmentDepartmentSlug } from '../../.
 import { recruitmentApplicationsStore } from '../../../lib/recruitment/recruitmentApplicationsStore';
 
 export default function NewcomersPage() {
+	const toast = useDashboardToast();
 	const [me, setMe] = useState<MeBrief | null>(null);
+
+	const onCopyResult = useCallback(
+		(ok: boolean) => {
+			toast.show({ text: ok ? '已复制到剪贴板' : '复制失败', type: ok ? 'ok' : 'err' });
+		},
+		[toast],
+	);
 	const { highlightText } = useSearchHighlight();
 	const appsState = useSyncExternalStore(
 		recruitmentApplicationsStore.subscribe,
@@ -237,6 +246,7 @@ export default function NewcomersPage() {
 
 	return (
 		<div className="nc-page">
+			<DashboardToast toast={toast.toast} />
 			{confirmDeleteOpen && confirmDeleteTarget ? (
 				<div
 					className="calendar-modal"
@@ -336,6 +346,7 @@ export default function NewcomersPage() {
 						onTagRemove={onTagRemove}
 						deleteBusy={deleteBusy}
 						onApplicationDelete={onApplicationDelete}
+						onCopyResult={onCopyResult}
 					/>
 				) : (
 					<div className="nc-empty">{emptyCenterHint}</div>

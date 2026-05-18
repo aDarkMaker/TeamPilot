@@ -1174,3 +1174,23 @@
 .nc-detail-section--attach {
 	min-width: 0;
 }
+
+.nc-page {
+	user-select: none;
+	-webkit-user-select: none;
+	-webkit-touch-callout: none;
+}
+
+.nc-page input,
+.nc-page textarea {
+	user-select: text;
+	-webkit-user-select: text;
+}
+
+.nc-meta-copy {
+	cursor: pointer;
+}
+
+.nc-meta-copy:hover {
+	color: var(--dash-accent, #3182ce);
+}
