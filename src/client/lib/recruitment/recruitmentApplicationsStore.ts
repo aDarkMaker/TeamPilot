@@ -22,18 +22,25 @@ function setState(patch: Partial<State>) {
 }
 
 let inflight: Promise<void> | null = null;
+let refreshAgain = false;
+
 async function refreshInternal(): Promise<void> {
-	if (inflight) return inflight;
+	if (inflight) {
+		refreshAgain = true;
+		return inflight;
+	}
 	inflight = (async () => {
-		setState({ loading: state.items.length === 0, error: null });
-		try {
-			const list = await fetchApplications();
-			setState({ items: list, loading: false, error: null, updatedAt: Date.now() });
-		} catch (e) {
-			setState({ loading: false, error: e instanceof Error ? e.message : '加载报名列表失败' });
-		} finally {
-			inflight = null;
-		}
+		do {
+			refreshAgain = false;
+			setState({ loading: state.items.length === 0, error: null });
+			try {
+				const list = await fetchApplications();
+				setState({ items: list, loading: false, error: null, updatedAt: Date.now() });
+			} catch (e) {
+				setState({ loading: false, error: e instanceof Error ? e.message : '加载报名列表失败' });
+			}
+		} while (refreshAgain);
+		inflight = null;
 	})();
 	return inflight;
 }
@@ -84,6 +91,16 @@ export const recruitmentApplicationsStore = {
 	refresh() {
 		startSseOnce();
 		return refreshInternal();
+	},
+
+	patchApplicationRating(
+		applicationId: string,
+		patch: { ratingAverage: number | null; ratingCount: number; myRating: number | null },
+	) {
+		setState({
+			items: state.items.map((a) => (a.id === applicationId ? { ...a, ...patch } : a)),
+			updatedAt: Date.now(),
+		});
 	},
 
 	disposeSseForTests() {

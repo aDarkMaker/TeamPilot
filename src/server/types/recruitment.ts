@@ -36,6 +36,20 @@ export type RecruitmentApplication = {
 
 export type RecruitmentApplicationWithTags = RecruitmentApplication & { tags: string[] };
 
+export type RecruitmentApplicationRatingSummary = {
+	ratingAverage: number | null;
+	ratingCount: number;
+};
+
+export type RecruitmentApplicationListItem = RecruitmentApplicationWithTags &
+	RecruitmentApplicationRatingSummary & {
+		myRating: number | null;
+	};
+
+export type RecruitmentApplicationRatingState = RecruitmentApplicationRatingSummary & {
+	myRating: number | null;
+};
+
 export type RecruitmentComment = {
     id: string;
     applicationId: string;

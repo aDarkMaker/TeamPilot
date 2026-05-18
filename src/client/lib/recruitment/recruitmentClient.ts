@@ -121,6 +121,27 @@ export async function deleteApplication(applicationId: string): Promise<void> {
 	if (!res.ok || !json.ok) throw new Error(json.message || '删除申请失败了');
 }
 
+export type RecruitmentApplicationRatingDto = {
+	ratingAverage: number | null;
+	ratingCount: number;
+	myRating: number;
+};
+
+export async function putApplicationRating(
+	applicationId: string,
+	rating: number,
+): Promise<RecruitmentApplicationRatingDto> {
+	const res = await fetch(`/api/recruitment/applications/${encodeURIComponent(applicationId)}/rating`, {
+		method: 'PUT',
+		credentials: 'include',
+		headers: { 'Content-Type': 'application/json' },
+		body: JSON.stringify({ rating }),
+	});
+	const json = await parseJson<RecruitmentApplicationRatingDto>(res);
+	if (!res.ok || !json.ok) throw new Error(json.message || '评分保存失败了');
+	return json.data as RecruitmentApplicationRatingDto;
+}
+
 export function isStaffRole(role: string | undefined): boolean {
 	return role === 'admin' || role === 'super_admin';
 }

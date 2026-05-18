@@ -66,9 +66,16 @@ const CJK_TAG = /^[\u4e00-\u9fff]{1,2}$/;
 const tagValueSchema = z
 	.string()
 	.trim()
+	.regex(CJK_TAG, '标签为 1～2 个汉字');
 
 const tagSchema = z.object({
 	tag: tagValueSchema,
+});
+
+const ratingBodySchema = z.object({
+	rating: z
+		.number()
+		.refine((n) => n >= 0.5 && n <= 5 && Number.isInteger(Math.round(n * 2)), { message: '无效的评分' }),
 });
 
 const listQuerySchema = z.object({
@@ -119,16 +126,39 @@ export class RecruitmentService {
 		return created;
     }
 
-    async listApplications(query: unknown) {
+    async listApplications(query: unknown, viewerUserId: string) {
         const q = listQuerySchema.parse(query);
         const apps = await this.db.listRecruitmentApplications({ timeOrder: q.timeOrder });
+        const [summaries, myRatings] = await Promise.all([
+            this.db.listRecruitmentRatingSummaries(),
+            this.db.listRecruitmentRatingsByUser(viewerUserId),
+        ]);
         const withTags = await Promise.all(
-            apps.map(async (a) => ({
-                ...a,
-                tags: await this.db.listRecruitmentApplicationTags(a.id),
-            })),
+            apps.map(async (a) => {
+                const summary = summaries.get(a.id);
+                return {
+                    ...a,
+                    tags: await this.db.listRecruitmentApplicationTags(a.id),
+                    ratingAverage: summary?.ratingAverage ?? null,
+                    ratingCount: summary?.ratingCount ?? 0,
+                    myRating: myRatings.get(a.id) ?? null,
+                };
+            }),
         );
         return withTags;
+    }
+
+    async setApplicationRating(applicationId: string, user: { id: string }, body: unknown) {
+        const app = await this.db.findRecruitmentApplicationById(applicationId);
+        if (!app) throwMap('APPLICATION_NOT_FOUND');
+        const p = ratingBodySchema.parse(body);
+        const result = await this.db.upsertRecruitmentApplicationRating({
+            applicationId,
+            userId: user.id,
+            rating: p.rating,
+        });
+        broadcastRecruitmentApplicationsUpdated();
+        return result;
     }
 
 	async getApplication(id: string) {

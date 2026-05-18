@@ -1,6 +1,7 @@
 import { AttachmentPanel } from './AttachmentPanel';
 import { MarkdownBlock } from './MarkdownBlock';
 import { TagsSection } from './TagsSection';
+import { RatingSection } from './RatingSection';
 
 import { DEPARTMENT_LABELS } from '../../../lib/recruitment/departmentLabels';
 import type { MeBrief } from '../../../lib/recruitment/recruitmentClient';
@@ -19,6 +20,11 @@ type Props = {
 	deleteBusy: boolean;
 	onApplicationDelete: () => Promise<void>;
 	onCopyResult: (ok: boolean) => void;
+	ratingAverage: number | null;
+	ratingCount: number;
+	myRating: number | null;
+	ratingBusy?: boolean;
+	onRate: (rating: number) => void;
 };
 
 export function NewcomerDetail({
@@ -31,6 +37,11 @@ export function NewcomerDetail({
 	deleteBusy,
 	onApplicationDelete,
 	onCopyResult,
+	ratingAverage,
+	ratingCount,
+	myRating,
+	ratingBusy,
+	onRate,
 }: Props) {
 	const { highlightText } = useSearchHighlight();
 	const dept = DEPARTMENT_LABELS[application.department];
@@ -121,6 +132,15 @@ export function NewcomerDetail({
 				me={me}
 				onAdd={onTagAdd}
 				onRemove={onTagRemove}
+			/>
+
+			<RatingSection
+				ratingAverage={ratingAverage}
+				ratingCount={ratingCount}
+				myRating={myRating}
+				busy={ratingBusy}
+				canRate={!!me}
+				onRate={onRate}
 			/>
 
 			<div className="nc-detail-split">

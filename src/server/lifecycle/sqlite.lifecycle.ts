@@ -308,10 +308,26 @@ function initSchema(db: Database): void {
 	);
 	`);
 
+	db.run(`
+	CREATE TABLE IF NOT EXISTS recruitment_application_ratings (
+		application_id INTEGER NOT NULL,
+		user_id INTEGER NOT NULL,
+		rating REAL NOT NULL CHECK (rating >= 0.5 AND rating <= 5),
+		created_at TEXT NOT NULL DEFAULT (datetime('now')),
+		updated_at TEXT NOT NULL DEFAULT (datetime('now')),
+		PRIMARY KEY (application_id, user_id),
+		FOREIGN KEY(application_id) REFERENCES recruitment_applications(id) ON DELETE CASCADE,
+		FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE
+	);
+	`);
+
 	db.run(
 		`CREATE INDEX IF NOT EXISTS idx_recruitment_apps_dept_time ON recruitment_applications(department_sort_order, created_at)`,
 	);
 	db.run(`CREATE INDEX IF NOT EXISTS idx_recruitment_comments_app ON recruitment_comments(application_id, created_at)`);
+	db.run(
+		`CREATE INDEX IF NOT EXISTS idx_recruitment_ratings_app ON recruitment_application_ratings(application_id)`,
+	);
 
 	ensureRecruitmentContactUniqueIndex(db);
 

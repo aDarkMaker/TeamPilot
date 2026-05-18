@@ -197,6 +197,20 @@ export interface DB {
 	deleteRecruitmentComment(commentId: string): Promise<void>;
 
 	toggleRecruitmentCommentLike(input: { commentId: string; userId: string }): Promise<{ liked: boolean; likeCount: number }>;
+
+	listRecruitmentRatingSummaries(): Promise<Map<string, { ratingAverage: number; ratingCount: number }>>;
+
+	listRecruitmentRatingsByUser(userId: string): Promise<Map<string, number>>;
+
+	upsertRecruitmentApplicationRating(input: {
+		applicationId: string;
+		userId: string;
+		rating: number;
+	}): Promise<{ ratingAverage: number | null; ratingCount: number; myRating: number }>;
+
+	getRecruitmentApplicationRatingSummary(
+		applicationId: string,
+	): Promise<{ ratingAverage: number | null; ratingCount: number }>;
 }
 
 export interface Cache {
@@ -358,6 +372,7 @@ export function createDb(sqlite: Database): DB {
 				sqlite.query(`DELETE FROM recruitment_comment_likes WHERE user_id = ?`).run(id);
 				sqlite.query(`DELETE FROM recruitment_comments WHERE author_id = ?`).run(id);
 				sqlite.query(`DELETE FROM recruitment_application_tags WHERE created_by = ?`).run(id);
+				sqlite.query(`DELETE FROM recruitment_application_ratings WHERE user_id = ?`).run(id);
 				sqlite.query(`DELETE FROM schedule_participants WHERE user_id = ?`).run(id);
 				sqlite.query(`DELETE FROM schedules WHERE created_by = ?`).run(id);
 				sqlite.query(`DELETE FROM home_announcements WHERE created_by = ?`).run(id);
@@ -877,6 +892,62 @@ export function createDb(sqlite: Database): DB {
 
 		async deleteRecruitmentComment(commentId) {
 			sqlite.query(`DELETE FROM recruitment_comments WHERE id = ?`).run(commentId);
+		},
+
+		async listRecruitmentRatingSummaries() {
+			const rows = sqlite
+				.query(
+					`SELECT application_id, AVG(rating) AS rating_avg, COUNT(*) AS rating_count
+					 FROM recruitment_application_ratings
+					 GROUP BY application_id`,
+				)
+				.all() as Array<{ application_id: number; rating_avg: number; rating_count: number }>;
+			const map = new Map<string, { ratingAverage: number; ratingCount: number }>();
+			for (const row of rows) {
+				map.set(String(row.application_id), {
+					ratingAverage: Number(row.rating_avg),
+					ratingCount: Number(row.rating_count),
+				});
+			}
+			return map;
+		},
+
+		async listRecruitmentRatingsByUser(userId) {
+			const rows = sqlite
+				.query(`SELECT application_id, rating FROM recruitment_application_ratings WHERE user_id = ?`)
+				.all(userId) as Array<{ application_id: number; rating: number }>;
+			const map = new Map<string, number>();
+			for (const row of rows) {
+				map.set(String(row.application_id), Number(row.rating));
+			}
+			return map;
+		},
+
+		async getRecruitmentApplicationRatingSummary(applicationId) {
+			const row = sqlite
+				.query(
+					`SELECT AVG(rating) AS rating_avg, COUNT(*) AS rating_count
+					 FROM recruitment_application_ratings
+					 WHERE application_id = ?`,
+				)
+				.get(applicationId) as { rating_avg: number | null; rating_count: number } | undefined;
+			const count = Number(row?.rating_count ?? 0);
+			if (!count) return { ratingAverage: null, ratingCount: 0 };
+			return { ratingAverage: Number(row?.rating_avg), ratingCount: count };
+		},
+
+		async upsertRecruitmentApplicationRating(input) {
+			sqlite
+				.query(
+					`INSERT INTO recruitment_application_ratings (application_id, user_id, rating)
+					 VALUES (?, ?, ?)
+					 ON CONFLICT(application_id, user_id) DO UPDATE SET
+					   rating = excluded.rating,
+					   updated_at = datetime('now')`,
+				)
+				.run(input.applicationId, input.userId, input.rating);
+			const summary = await this.getRecruitmentApplicationRatingSummary(input.applicationId);
+			return { ...summary, myRating: input.rating };
 		},
 
 		async toggleRecruitmentCommentLike(input) {

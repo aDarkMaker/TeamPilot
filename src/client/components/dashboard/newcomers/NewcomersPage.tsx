@@ -5,6 +5,7 @@ import { DashboardToast, useDashboardToast } from '../DashboardToast';
 import { CommentsPanel } from './CommentsPanel';
 import { DepartmentSelect } from './DepartmentSelect';
 import { NewcomerDetail } from './NewcomerDetail';
+import { StarRatingDisplay, formatRatingAverage } from './StarRating';
 
 import {
 	deleteComment,
@@ -15,6 +16,7 @@ import {
 	patchComment,
 	postComment,
 	postTag,
+	putApplicationRating,
 	toggleCommentLike,
 	type MeBrief,
 	type RecruitmentCommentDto,
@@ -53,6 +55,7 @@ export default function NewcomersPage() {
 	const [deleteError, setDeleteError] = useState<string | null>(null);
 	const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
 	const [confirmDeleteTarget, setConfirmDeleteTarget] = useState<{ id: string; fullName: string } | null>(null);
+	const [ratingBusy, setRatingBusy] = useState(false);
 
 	useEffect(() => {
 		void fetchMe().then(setMe);
@@ -80,6 +83,26 @@ export default function NewcomersPage() {
 	const selected = useMemo(
 		() => (listSelectedId ? applications.find((a) => a.id === listSelectedId) ?? null : null),
 		[applications, listSelectedId],
+	);
+
+	const onRate = useCallback(
+		async (rating: number) => {
+			if (!selected || !me) return;
+			setRatingBusy(true);
+			try {
+				const data = await putApplicationRating(selected.id, rating);
+				recruitmentApplicationsStore.patchApplicationRating(selected.id, {
+					ratingAverage: data.ratingAverage,
+					ratingCount: data.ratingCount,
+					myRating: data.myRating,
+				});
+			} catch (e) {
+				toast.show({ text: e instanceof Error ? e.message : '评分保存失败', type: 'err' });
+			} finally {
+				setRatingBusy(false);
+			}
+		},
+		[selected, me, toast],
 	);
 
 	useEffect(() => {
@@ -327,6 +350,12 @@ export default function NewcomersPage() {
 								onClick={() => setSelectedId(app.id)}
 							>
 								<span className="nc-list-item-name">{highlightText(app.fullName) as React.ReactNode}</span>
+								{app.ratingCount > 0 ? (
+									<span className="nc-list-item-rating">
+										<StarRatingDisplay value={app.ratingAverage} size="sm" />
+										<span className="nc-list-item-rating-value">{formatRatingAverage(app.ratingAverage)}</span>
+									</span>
+								) : null}
 								<span className="nc-list-item-meta">{app.attachments.length} 个附件</span>
 							</button>
 						</li>
@@ -347,6 +376,11 @@ export default function NewcomersPage() {
 						deleteBusy={deleteBusy}
 						onApplicationDelete={onApplicationDelete}
 						onCopyResult={onCopyResult}
+						ratingAverage={selected.ratingAverage}
+						ratingCount={selected.ratingCount}
+						myRating={selected.myRating}
+						ratingBusy={ratingBusy}
+						onRate={onRate}
 					/>
 				) : (
 					<div className="nc-empty">{emptyCenterHint}</div>

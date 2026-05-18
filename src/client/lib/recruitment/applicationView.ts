@@ -27,6 +27,9 @@ export type RecruitmentApplicationDto = {
 	createdAt: string;
 	updatedAt: string;
 	tags: string[];
+	ratingAverage: number | null;
+	ratingCount: number;
+	myRating: number | null;
 };
 
 function inferAttachmentMeta(fileName: string): { kind: RecruitmentAttachmentKind; mimeType: string } {
@@ -102,5 +105,8 @@ export function mapRecruitmentApplicationDtoToView(dto: RecruitmentApplicationDt
 		tags: [...dto.tags],
 		attachments: attachmentsFromPath(dto.attachmentPath),
 		createdAt: dto.createdAt,
+		ratingAverage: dto.ratingAverage ?? null,
+		ratingCount: dto.ratingCount ?? 0,
+		myRating: dto.myRating ?? null,
 	};
 }

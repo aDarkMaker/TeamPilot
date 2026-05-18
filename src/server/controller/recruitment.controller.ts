@@ -10,7 +10,12 @@ export class RecruitmentController {
 	};
 
 	listApplications = async (ctx: Context) => {
-		const data = await this.service.listApplications(ctx.query);
+		const data = await this.service.listApplications(ctx.query, ctx.state.user!.id);
+		ctx.body = { ok: true, data };
+	};
+
+	setApplicationRating = async (ctx: Context) => {
+		const data = await this.service.setApplicationRating(ctx.params.id, ctx.state.user!, ctx.request.body);
 		ctx.body = { ok: true, data };
 	};
 

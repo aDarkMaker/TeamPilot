@@ -39,4 +39,7 @@ export type NewcomerApplicationView = {
 	tags: string[];
 	attachments: RecruitmentAttachment[];
 	createdAt: string;
+	ratingAverage: number | null;
+	ratingCount: number;
+	myRating: number | null;
 };

@@ -20,5 +20,7 @@ export function buildRecruitmentRoutes(controller: RecruitmentController): Route
 	router.post('/applications/:id/tags', requireLogin, controller.addTag);
 	router.delete('/applications/:id/tags', requireLogin, controller.removeTag);
 
+	router.put('/applications/:id/rating', requireLogin, controller.setApplicationRating);
+
 	return router;
 }
