@@ -9,6 +9,7 @@ import type { NewcomerApplicationView } from '../../../types/recruitmentUi';
 import { formatCstDateTime } from '../../../lib/timeCst';
 import { useSearchHighlight } from '../../../lib/useSearchHighlight';
 import { copyText } from '../../../lib/copyToClipboard';
+import { parseInterviewFromIntro } from '../../../../joinus/interviewIntro';
 
 type Props = {
 	application: NewcomerApplicationView;
@@ -45,7 +46,7 @@ export function NewcomerDetail({
 }: Props) {
 	const { highlightText } = useSearchHighlight();
 	const dept = DEPARTMENT_LABELS[application.department];
-	const { introClean, offlineTime, onlineTime } = extractInterviewTimes(application.introMarkdown);
+	const { introClean, offlineTime, onlineTime } = parseInterviewFromIntro(application.introMarkdown);
 	const offlinePicked = application.wantsOfflineInterview ? (offlineTime ?? null) : null;
 	const onlinePicked = application.wantsOnlineInterview ? (onlineTime ?? null) : null;
 
@@ -165,32 +166,4 @@ export function NewcomerDetail({
 
 function formatCnTime(iso: string): string {
 	return formatCstDateTime(iso);
-}
-
-function extractInterviewTimes(introMarkdown: string): {
-	introClean: string;
-	offlineTime: string | null;
-	onlineTime: string | null;
-} {
-	const raw = (introMarkdown ?? '').trim();
-	if (!raw) return { introClean: '（无）', offlineTime: null, onlineTime: null };
-
-	// 匿名报名表目前会把面试信息写在简介末尾，形如：
-	// ---
-	// 线下面试时间：xxx；线上面试时间：yyy
-	let offlineTime: string | null = null;
-	let onlineTime: string | null = null;
-
-	const off = raw.match(/线下面试时间：([^\n；]+)\s*/);
-	if (off?.[1]) offlineTime = off[1].trim() || null;
-	const on = raw.match(/线上面试时间：([^\n；]+)\s*/);
-	if (on?.[1]) onlineTime = on[1].trim() || null;
-
-	// 删除包含面试时间的尾部片段（连同分割线）
-	let introClean = raw;
-	if (offlineTime || onlineTime) {
-		introClean = introClean.replace(/\n*\s*---\s*\n[\s\S]*$/, '').trim();
-	}
-	if (!introClean) introClean = '（无）';
-	return { introClean, offlineTime, onlineTime };
 }

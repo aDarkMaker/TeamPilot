@@ -7,29 +7,29 @@
 		{
 			"id": "name",
 			"type": "input",
-			"inputType": "text",
 			"label": "姓名",
 			"required": true,
 			"placeholder": "请输入您的真实姓名",
-			"icon": "ri-user-smile-line"
+			"icon": "ri-user-smile-line",
+			"inputType": "text"
 		},
 		{
 			"id": "contact",
 			"type": "input",
-			"inputType": "tel",
 			"label": "联系方式",
 			"required": true,
 			"placeholder": "请输入您的手机号码",
-			"icon": "ri-smartphone-line"
+			"icon": "ri-smartphone-line",
+			"inputType": "tel"
 		},
 		{
 			"id": "qq",
 			"type": "input",
-			"inputType": "text",
 			"label": "QQ号",
 			"required": true,
 			"placeholder": "请输入您的QQ号",
-			"icon": "ri-qq-line"
+			"icon": "ri-qq-line",
+			"inputType": "text"
 		},
 		{
 			"id": "department",
@@ -38,7 +38,15 @@
 			"required": true,
 			"placeholder": "请选择您感兴趣的部门",
 			"icon": "ri-team-line",
-			"options": ["中之人", "视频组", "美术组", "直播组", "文案组", "切片组", "技术组"]
+			"options": [
+				"中之人",
+				"视频组",
+				"美术组",
+				"直播组",
+				"文案组",
+				"切片组",
+				"技术组"
+			]
 		},
 		{
 			"id": "student",
@@ -51,22 +59,28 @@
 		{
 			"id": "college",
 			"type": "input",
-			"inputType": "text",
 			"label": "学院",
 			"required": true,
 			"placeholder": "请输入您的学院",
 			"icon": "ri-building-line",
-			"showWhen": { "questionId": "student", "value": "是" }
+			"inputType": "text",
+			"showWhen": {
+				"questionId": "student",
+				"value": "是"
+			}
 		},
 		{
 			"id": "grade",
 			"type": "input",
-			"inputType": "text",
 			"label": "年级",
 			"required": true,
 			"placeholder": "请输入您的年级",
 			"icon": "ri-calendar-line",
-			"showWhen": { "questionId": "student", "value": "是" }
+			"inputType": "text",
+			"showWhen": {
+				"questionId": "student",
+				"value": "是"
+			}
 		},
 		{
 			"id": "offline_interview",
@@ -83,8 +97,14 @@
 			"required": true,
 			"placeholder": "请选择面试时间",
 			"icon": "ri-time-line",
-			"options": ["2月30号上午", "2月31号下午"],
-			"showWhen": { "questionId": "offline_interview", "value": "是" }
+			"options": [
+				"2月30号上午",
+				"2月31号下午"
+			],
+			"showWhen": {
+				"questionId": "offline_interview",
+				"value": "是"
+			}
 		},
 		{
 			"id": "online_interview",
@@ -93,7 +113,10 @@
 			"required": true,
 			"placeholder": "请选择",
 			"icon": "ri-video-line",
-			"showWhen": { "questionId": "offline_interview", "value": "否" }
+			"showWhen": {
+				"questionId": "offline_interview",
+				"value": "否"
+			}
 		},
 		{
 			"id": "interview_time_online",
@@ -102,8 +125,14 @@
 			"required": true,
 			"placeholder": "请选择面试时间",
 			"icon": "ri-time-line",
-			"options": ["3月14号上午", "3月14号下午"],
-			"showWhen": { "questionId": "online_interview", "value": "是" }
+			"options": [
+				"3月14号上午",
+				"3月14号下午"
+			],
+			"showWhen": {
+				"questionId": "online_interview",
+				"value": "是"
+			}
 		},
 		{
 			"id": "intro",

@@ -1,0 +1,207 @@
+import { readFile, writeFile, rename } from 'node:fs/promises';
+import { join } from 'node:path';
+import { z } from 'zod';
+import { AppError } from '../types/api';
+import { DEPT_CN_TO_SLUG } from './joinusSubmit.service';
+import {
+	INTERVIEW_OFFLINE_FIELD,
+	INTERVIEW_ONLINE_FIELD,
+} from '../../joinus/interviewIntro';
+
+const FORM_PATH = join(process.cwd(), 'public', 'joinus', 'form.json');
+
+const DEPARTMENT_OPTIONS = Object.keys(DEPT_CN_TO_SLUG);
+
+const showWhenSchema = z.object({
+	questionId: z.string(),
+	value: z.union([z.string(), z.array(z.string())]),
+});
+
+const questionSchema = z.object({
+	id: z.string(),
+	type: z.enum(['input', 'select', 'textarea', 'file', 'boolean']),
+	label: z.string(),
+	required: z.boolean().optional(),
+	placeholder: z.string().optional(),
+	icon: z.string().optional(),
+	inputType: z.enum(['text', 'tel', 'email']).optional(),
+	options: z.array(z.string()).optional(),
+	rows: z.number().optional(),
+	accept: z.string().optional(),
+	multiple: z.boolean().optional(),
+	showWhen: showWhenSchema.optional(),
+});
+
+const formConfigSchema = z.object({
+	title: z.string().trim().min(1).max(80),
+	subtitle: z.string().max(80).optional(),
+	welcome: z.string().max(5000).optional(),
+	theme: z.string().max(40).optional(),
+	questions: z.array(questionSchema).min(1),
+	submit: z
+		.object({
+			label: z.string().optional(),
+			url: z.string().optional(),
+			successMessage: z.string().optional(),
+			successTitle: z.string().optional(),
+			successSubtitle: z.string().optional(),
+			successNote: z.string().optional(),
+			successBackUrl: z.string().optional(),
+			successBackLabel: z.string().optional(),
+		})
+		.optional(),
+});
+
+export type JoinUsFormConfig = z.infer<typeof formConfigSchema>;
+
+const questionPatchSchema = z.object({
+	id: z.string(),
+	label: z.string().trim().min(1).max(120).optional(),
+	placeholder: z.string().max(200).optional(),
+	options: z.array(z.string()).optional(),
+});
+
+const updateBodySchema = z.object({
+	title: z.string().trim().min(1).max(80).optional(),
+	subtitle: z.string().max(80).optional(),
+	welcome: z.string().max(5000).optional(),
+	questions: z.array(questionPatchSchema).optional(),
+});
+
+function normalizeOptions(raw: string[]): string[] {
+	const seen = new Set<string>();
+	const out: string[] = [];
+	for (const item of raw) {
+		const t = item.trim();
+		if (!t || seen.has(t)) continue;
+		seen.add(t);
+		out.push(t);
+	}
+	return out;
+}
+
+function assertDepartmentOptions(q: z.infer<typeof questionSchema>): void {
+	if (q.id !== 'department') return;
+	const opts = q.options ?? [];
+	if (opts.length !== DEPARTMENT_OPTIONS.length || !DEPARTMENT_OPTIONS.every((d, i) => opts[i] === d)) {
+		throw new AppError(400, 'INVALID_DEPARTMENT_OPTIONS', '意向部门选项不可修改');
+	}
+}
+
+export class JoinUsFormService {
+	async getForm(): Promise<JoinUsFormConfig> {
+		return this.readForm();
+	}
+
+	async updateForm(patch: unknown): Promise<JoinUsFormConfig> {
+		const parsed = updateBodySchema.safeParse(patch);
+		if (!parsed.success) {
+			throw new AppError(400, 'INVALID_BODY', '请求体格式不对');
+		}
+		const body = parsed.data;
+		const base = await this.readForm();
+
+		const next: JoinUsFormConfig = { ...base };
+
+		if (body.title !== undefined) next.title = body.title;
+		if (body.subtitle !== undefined) next.subtitle = body.subtitle;
+		if (body.welcome !== undefined) next.welcome = body.welcome;
+
+		if (body.questions?.length) {
+			const byId = new Map(base.questions.map((q) => [q.id, q]));
+			const patchIds = new Set(body.questions.map((p) => p.id));
+
+			if (patchIds.size !== body.questions.length) {
+				throw new AppError(400, 'DUPLICATE_QUESTION_ID', '题目 id 重复');
+			}
+
+			for (const p of body.questions) {
+				const orig = byId.get(p.id);
+				if (!orig) throw new AppError(400, 'UNKNOWN_QUESTION', `未知题目：${p.id}`);
+
+				if (p.label !== undefined) orig.label = p.label;
+				if (p.placeholder !== undefined) orig.placeholder = p.placeholder;
+
+				const isInterviewSlot =
+					p.id === INTERVIEW_OFFLINE_FIELD || p.id === INTERVIEW_ONLINE_FIELD;
+				if (p.options !== undefined) {
+					if (!isInterviewSlot) {
+						throw new AppError(400, 'OPTIONS_NOT_EDITABLE', `${p.id} 的选项不可在此修改`);
+					}
+					if (orig.type !== 'select') {
+						throw new AppError(400, 'INVALID_QUESTION_TYPE', '面试时间题目类型异常');
+					}
+					const opts = normalizeOptions(p.options);
+					if (!opts.length) {
+						throw new AppError(400, 'EMPTY_OPTIONS', '面试时间选项不能为空');
+					}
+					orig.options = opts;
+				}
+			}
+
+			next.questions = [...base.questions];
+		}
+
+		if (next.questions.length !== base.questions.length) {
+			throw new AppError(400, 'QUESTION_COUNT_CHANGED', '不可增删题目');
+		}
+		for (let i = 0; i < base.questions.length; i++) {
+			const a = base.questions[i];
+			const b = next.questions[i];
+			if (!a || !b) continue;
+			if (a.id !== b.id || a.type !== b.type) {
+				throw new AppError(400, 'QUESTION_STRUCTURE_CHANGED', '题目结构不可修改');
+			}
+			if (JSON.stringify(a.showWhen) !== JSON.stringify(b.showWhen)) {
+				throw new AppError(400, 'SHOW_WHEN_CHANGED', '题目显示条件不可修改');
+			}
+			if (a.id !== INTERVIEW_OFFLINE_FIELD && a.id !== INTERVIEW_ONLINE_FIELD) {
+				if (JSON.stringify(a.options) !== JSON.stringify(b.options)) {
+					throw new AppError(400, 'OPTIONS_CHANGED', `${a.id} 的选项不可修改`);
+				}
+			}
+		}
+
+		for (const q of next.questions) {
+			assertDepartmentOptions(q);
+		}
+
+		const validated = formConfigSchema.safeParse(next);
+		if (!validated.success) {
+			throw new AppError(400, 'INVALID_FORM', '表单配置校验失败');
+		}
+
+		await this.writeForm(validated.data);
+		return validated.data;
+	}
+
+	private async readForm(): Promise<JoinUsFormConfig> {
+		let raw: string;
+		try {
+			raw = await readFile(FORM_PATH, 'utf8');
+		} catch {
+			throw new AppError(500, 'FORM_READ_FAILED', '无法读取表单配置');
+		}
+		let json: unknown;
+		try {
+			json = JSON.parse(raw);
+		} catch {
+			throw new AppError(500, 'FORM_PARSE_FAILED', '表单配置格式错误');
+		}
+		const parsed = formConfigSchema.safeParse(json);
+		if (!parsed.success) {
+			throw new AppError(500, 'FORM_INVALID', '表单配置无效');
+		}
+		for (const q of parsed.data.questions) {
+			assertDepartmentOptions(q);
+		}
+		return parsed.data;
+	}
+
+	private async writeForm(config: JoinUsFormConfig): Promise<void> {
+		const tmp = `${FORM_PATH}.tmp`;
+		const content = `${JSON.stringify(config, null, '\t')}\n`;
+		await writeFile(tmp, content, 'utf8');
+		await rename(tmp, FORM_PATH);
+	}
+}

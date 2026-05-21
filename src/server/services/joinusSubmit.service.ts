@@ -9,10 +9,14 @@ import { join } from "node:path";
 import { randomUUID } from "node:crypto";
 import { pinyin } from "pinyin-pro";
 import { broadcastRecruitmentApplicationsUpdated } from "../recruitment/recruitmentEvents";
+import {
+	appendInterviewIntroToMarkdown,
+	buildInterviewIntroExtra,
+} from "../../joinus/interviewIntro";
 
 type UploadedFile = { buffer: Buffer; mimetype: string; originalName: string };
 
-const DEPT_CN_TO_SLUG: Record<string, RecruitmentDepartment> = {
+export const DEPT_CN_TO_SLUG: Record<string, RecruitmentDepartment> = {
 	中之人: 'vup',
 	视频组: 'video',
 	美术组: 'art',
@@ -116,11 +120,13 @@ export class JoinUsSubmitService {
 		const offlineTime = normalizeText(fields.interview_time_offline);
 		const onlineTime = normalizeText(fields.interview_time_online);
 
-		const extra: string[] = [];
-		if (wantsOfflineInterview) extra.push(`线下面试时间：${offlineTime || '待定'}`);
-		if (wantsOnlineInterview) extra.push(`线上面试时间：${onlineTime || '待定'}`);
-		if (!wantsOfflineInterview && !wantsOnlineInterview) extra.push('面试：待定');
-		const introMarkdown = extra.length ? `${introBase}\n\n---\n${extra.join('；')}` : introBase;
+		const extra = buildInterviewIntroExtra({
+			wantsOfflineInterview,
+			offlineTime,
+			wantsOnlineInterview,
+			onlineTime,
+		});
+		const introMarkdown = appendInterviewIntroToMarkdown(introBase, extra);
 		const worksMarkdown = uploads.length
 			? `已上传附件：\n${uploads.map((u) => `- ${u.originalName}`).join('\n')}`
 			: '（无）';

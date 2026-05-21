@@ -11,6 +11,7 @@ import iconCalendar from '../../assets/img/icon/navbar/calendar.webp';
 import iconUserPlus from '../../assets/img/icon/navbar/user-plus.webp';
 import iconLogout from '../../assets/img/icon/navbar/logout.webp';
 import iconSettings from '../../assets/img/icon/navbar/settings.webp';
+import iconQuestion from '../../assets/img/icon/navbar/question.webp';
 import { fetchUsersMeDeduped } from '../../lib/api/fetchUsersMeDeduped';
 
 type MeResponse = {
@@ -163,6 +164,14 @@ export default function DashboardSidebar({ initialPath }: Props) {
 						<a className={linkClass('/dashboard/users')} href="/dashboard/users" onClick={closeSidebar}>
 							<OptimizedImage src={assetUrl(iconUser)} alt="" width={24} height={24} />
 							<span>成员管理</span>
+						</a>
+					</li>
+				)}
+				{isStaff(me?.role) && (
+					<li>
+						<a className={linkClass('/dashboard/joinus-form')} href="/dashboard/joinus-form" onClick={closeSidebar}>
+							<OptimizedImage src={assetUrl(iconQuestion)} alt="" width={24} height={24} />
+							<span>报名修改</span>
 						</a>
 					</li>
 				)}

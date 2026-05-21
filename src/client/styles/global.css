@@ -33,7 +33,9 @@ select {
 .nc-list-item,
 .nc-comment-card,
 .users-admin-user-card,
-.settings-section {
+.settings-section,
+.joinus-form-admin,
+.joinus-form-admin-card {
 	user-select: none;
 }
 

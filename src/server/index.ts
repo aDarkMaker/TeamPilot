@@ -19,6 +19,8 @@ import { RecruitmentService } from './services/recruitment.service';
 import { RecruitmentController } from './controller/recruitment.controller';
 import { JoinUsSubmitService } from './services/joinusSubmit.service';
 import { JoinusSubmitController } from './controller/joinusSubmit.controller';
+import { JoinUsFormService } from './services/joinusForm.service';
+import { JoinusFormController } from './controller/joinusForm.controller';
 import { TaskService } from './services/task.service';
 import { TaskController } from './controller/task.controller';
 import { HomeService } from './services/home.service';
@@ -76,6 +78,9 @@ async function main() {
 	const joinusSubmitService = new JoinUsSubmitService(db);
 	const joinusSubmitController = new JoinusSubmitController(joinusSubmitService);
 
+	const joinusFormService = new JoinUsFormService();
+	const joinusFormController = new JoinusFormController(joinusFormService);
+
 	const bilibiliService = new BilibiliService(sqlite, config);
 	const homeService = new HomeService(db, cache, config, bilibiliService);
 	const homeController = new HomeController(homeService);
@@ -92,7 +97,7 @@ async function main() {
 	app.proxy = true; // X-forwarded-for 你家不要了
 	applyGlobalMiddleware(app);
 
-	const apiRouter = composeApiRouter({ applicationController, adminController, authController, profileController, scheduleController, recruitmentController, joinusSubmitController, homeController, taskController, searchController, bilibiliController });
+	const apiRouter = composeApiRouter({ applicationController, adminController, authController, profileController, scheduleController, recruitmentController, joinusSubmitController, joinusFormController, homeController, taskController, searchController, bilibiliController });
 	app.use(apiRouter.routes());
 	app.use(apiRouter.allowedMethods());
 
