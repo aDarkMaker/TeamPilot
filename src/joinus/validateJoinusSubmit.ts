@@ -37,19 +37,19 @@ const JOINUS_NAME_RE = /^[\u4e00-\u9fff]+(?:·[\u4e00-\u9fff]+)*$/;
 
 function assertValidJoinUsName(fullName: string): void {
 	if (!fullName) {
-		throw new AppError(400, 'INVALID_NAME', '姓名不能为空');
+		throw new AppError(400, 'INVALID_NAME', '你好无名氏！');
 	}
 	if (/\d/.test(fullName)) {
-		throw new AppError(400, 'INVALID_NAME', '姓名不能包含数字');
+		throw new AppError(400, 'INVALID_NAME', '谁家名字带数字！');
 	}
 	if (fullName.length < JOINUS_NAME_MIN_LEN) {
-		throw new AppError(400, 'INVALID_NAME', '姓名至少2个汉字');
+		throw new AppError(400, 'INVALID_NAME', '单字有点帅哦……');
 	}
 	if (fullName.length > JOINUS_NAME_MAX_LEN) {
-		throw new AppError(400, 'INVALID_NAME', '姓名过长，请缩短后重试');
+		throw new AppError(400, 'INVALID_NAME', '有点太长了吧……');
 	}
 	if (!JOINUS_NAME_RE.test(fullName)) {
-		throw new AppError(400, 'INVALID_NAME', '姓名须为汉字，少数民族姓名可用「·」连接');
+		throw new AppError(400, 'INVALID_NAME', '你真叫这个吗？');
 	}
 }
 
@@ -64,26 +64,26 @@ export function validateJoinusSubmitAgainstConfig(
 	assertValidJoinUsName(fullName);
 
 	if (!contact) {
-		throw new AppError(400, 'INVALID_CONTACT', '联系方式不能为空');
+		throw new AppError(400, 'INVALID_CONTACT', '留个联系方式！');
 	}
 	if (!/^\d{11}$/.test(contact)) {
-		throw new AppError(400, 'INVALID_CONTACT', '请输入11位手机号码');
+		throw new AppError(400, 'INVALID_CONTACT', '看看几位数！');
 	}
 
 	if (!qq) {
-		throw new AppError(400, 'INVALID_QQ', 'QQ不能为空');
+		throw new AppError(400, 'INVALID_QQ', '加个QQ！');
 	}
 	if (!/^\d{5,11}$/.test(qq)) {
-		throw new AppError(400, 'INVALID_QQ', 'QQ号须为5-11位纯数字');
+		throw new AppError(400, 'INVALID_QQ', '这真是QQ号吗？');
 	}
 
 	const departmentCn = normalizeText(fields.department);
 	if (!departmentCn || !DEPT_CN_TO_SLUG[departmentCn]) {
-		throw new AppError(400, 'INVALID_DEPARTMENT', '意向部门不合法');
+		throw new AppError(400, 'INVALID_DEPARTMENT', '选一个呗～');
 	}
 	const deptOpts = questionOptions(config, 'department');
 	if (!deptOpts.includes(departmentCn)) {
-		formOutdated('意向部门选项已更新，请刷新页面后重新选择');
+		formOutdated('增删了部门哦，刷新下吧！');
 	}
 
 	const wantsOfflineInterview = isYes(fields.offline_interview);
@@ -95,27 +95,27 @@ export function validateJoinusSubmitAgainstConfig(
 	const onlineOpts = questionOptions(config, INTERVIEW_ONLINE_FIELD);
 
 	if (!wantsOfflineInterview && offlineTime) {
-		formOutdated('线下面试选项已更新，请刷新页面后重新填写');
+		formOutdated('改了下时间，请刷新一下！');
 	}
 	if (!wantsOnlineInterview && onlineTime) {
-		formOutdated('线上面试选项已更新，请刷新页面后重新填写');
+		formOutdated('改了下时间，刷新下吧！');
 	}
 
 	if (wantsOfflineInterview) {
 		if (!offlineTime) {
-			throw new AppError(400, 'INVALID_OFFLINE_TIME', '请选择线下面试时间');
+			throw new AppError(400, 'INVALID_OFFLINE_TIME', '选一个呗～');
 		}
 		if (!offlineOpts.includes(offlineTime)) {
-			formOutdated('线下面试时间选项已更新，请刷新页面后重新选择');
+			formOutdated('改了下时间，刷新下吧！');
 		}
 	}
 
 	if (wantsOnlineInterview) {
 		if (!onlineTime) {
-			throw new AppError(400, 'INVALID_ONLINE_TIME', '请选择线上面试时间');
+			throw new AppError(400, 'INVALID_ONLINE_TIME', '选一个呗～');
 		}
 		if (!onlineOpts.includes(onlineTime)) {
-			formOutdated('线上面试时间选项已更新，请刷新页面后重新选择');
+			formOutdated('改了下时间，刷新下吧！');
 		}
 	}
 }
