@@ -83,7 +83,6 @@ html.dashboard-shell body {
 	-webkit-backdrop-filter: blur(16px);
 	z-index: 20;
 	contain: layout style;
-	will-change: backdrop-filter;
 }
 
 .dashboard-logo {
@@ -290,6 +289,17 @@ html.dashboard-shell body {
 .dashboard-logout img {
 	width: 22px;
 	height: 22px;
+}
+
+.dashboard-nav-item--hidden {
+	display: none !important;
+	pointer-events: none;
+}
+
+.dash-is-transitioning .dashboard-nav a,
+.dash-is-transitioning .dashboard-nav a img {
+	transition: none !important;
+	transform: none !important;
 }
 
 .dashboard-main {

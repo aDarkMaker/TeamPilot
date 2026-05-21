@@ -12,7 +12,7 @@ import iconUserPlus from '../../assets/img/icon/navbar/user-plus.webp';
 import iconLogout from '../../assets/img/icon/navbar/logout.webp';
 import iconSettings from '../../assets/img/icon/navbar/settings.webp';
 import iconQuestion from '../../assets/img/icon/navbar/question.webp';
-import { fetchUsersMeDeduped } from '../../lib/api/fetchUsersMeDeduped';
+import { fetchUsersMeDeduped, getCachedMe, clearCachedMe } from '../../lib/api/fetchUsersMeDeduped';
 
 type MeResponse = {
 	id: string;
@@ -48,7 +48,10 @@ function stripTrailingSlash(path: string): string {
 }
 
 export default function DashboardSidebar({ initialPath }: Props) {
-    const [me, setMe] = useState<MeResponse | null>(null);
+    const [me, setMe] = useState<MeResponse | null>(() => {
+        const cached = getCachedMe() as MeApiJson | undefined;
+        return cached?.ok && cached.data ? cached.data : null;
+    });
     const [pathname, setPathname] = useState(() => stripTrailingSlash(initialPath));
     const [sidebarOpen, setSidebarOpen] = useState(false);
     const sidebarRef = useRef<HTMLElement>(null);
@@ -94,13 +97,13 @@ export default function DashboardSidebar({ initialPath }: Props) {
             }
         };
 
-        const onPage = () => {
-            syncPath();
-            void load();
-        };
-
         syncPath();
         void load();
+
+        const onPage = () => {
+            syncPath();
+        };
+
         document.addEventListener('astro:page-load', onPage);
         return () => {
             cancelled = true;
@@ -132,6 +135,7 @@ export default function DashboardSidebar({ initialPath }: Props) {
         try {
 			await fetch('/api/auth/logout', { method: 'POST', credentials: 'include' });
 		} finally {
+			clearCachedMe();
 			window.location.href = '/auth';
 		}
     };
@@ -159,22 +163,18 @@ export default function DashboardSidebar({ initialPath }: Props) {
 						<span>任务列表</span>
 					</a>
 				</li>
-				{isStaff(me?.role) && (
-					<li>
+				<li className={isStaff(me?.role) ? undefined : 'dashboard-nav-item--hidden'} aria-hidden={!isStaff(me?.role)}>
 						<a className={linkClass('/dashboard/users')} href="/dashboard/users" onClick={closeSidebar}>
 							<OptimizedImage src={assetUrl(iconUser)} alt="" width={24} height={24} />
 							<span>成员管理</span>
 						</a>
 					</li>
-				)}
-				{isStaff(me?.role) && (
-					<li>
+				<li className={isStaff(me?.role) ? undefined : 'dashboard-nav-item--hidden'} aria-hidden={!isStaff(me?.role)}>
 						<a className={linkClass('/dashboard/joinus-form')} href="/dashboard/joinus-form" onClick={closeSidebar}>
 							<OptimizedImage src={assetUrl(iconQuestion)} alt="" width={24} height={24} />
 							<span>报名修改</span>
 						</a>
 					</li>
-				)}
 				<li>
 					<a className={linkClass('/dashboard/calendar')} href="/dashboard/calendar" onClick={closeSidebar}>
 						<OptimizedImage src={assetUrl(iconCalendar)} alt="" width={24} height={24} />
