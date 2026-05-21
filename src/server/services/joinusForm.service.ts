@@ -1,58 +1,17 @@
-import { readFile, writeFile, rename } from 'node:fs/promises';
-import { join } from 'node:path';
 import { z } from 'zod';
 import { AppError } from '../types/api';
-import { DEPT_CN_TO_SLUG } from './joinusSubmit.service';
 import {
 	INTERVIEW_OFFLINE_FIELD,
 	INTERVIEW_ONLINE_FIELD,
 } from '../../joinus/interviewIntro';
+import { readJoinUsFormConfig, writeJoinUsFormConfig } from '../../joinus/formConfigIO';
+import {
+	assertDepartmentOptions,
+	formConfigSchema,
+	type JoinUsFormConfig,
+} from '../../joinus/formConfigSchema';
 
-const FORM_PATH = join(process.cwd(), 'public', 'joinus', 'form.json');
-
-const DEPARTMENT_OPTIONS = Object.keys(DEPT_CN_TO_SLUG);
-
-const showWhenSchema = z.object({
-	questionId: z.string(),
-	value: z.union([z.string(), z.array(z.string())]),
-});
-
-const questionSchema = z.object({
-	id: z.string(),
-	type: z.enum(['input', 'select', 'textarea', 'file', 'boolean']),
-	label: z.string(),
-	required: z.boolean().optional(),
-	placeholder: z.string().optional(),
-	icon: z.string().optional(),
-	inputType: z.enum(['text', 'tel', 'email']).optional(),
-	options: z.array(z.string()).optional(),
-	rows: z.number().optional(),
-	accept: z.string().optional(),
-	multiple: z.boolean().optional(),
-	showWhen: showWhenSchema.optional(),
-});
-
-const formConfigSchema = z.object({
-	title: z.string().trim().min(1).max(80),
-	subtitle: z.string().max(80).optional(),
-	welcome: z.string().max(5000).optional(),
-	theme: z.string().max(40).optional(),
-	questions: z.array(questionSchema).min(1),
-	submit: z
-		.object({
-			label: z.string().optional(),
-			url: z.string().optional(),
-			successMessage: z.string().optional(),
-			successTitle: z.string().optional(),
-			successSubtitle: z.string().optional(),
-			successNote: z.string().optional(),
-			successBackUrl: z.string().optional(),
-			successBackLabel: z.string().optional(),
-		})
-		.optional(),
-});
-
-export type JoinUsFormConfig = z.infer<typeof formConfigSchema>;
+export type { JoinUsFormConfig } from '../../joinus/formConfigSchema';
 
 const questionPatchSchema = z.object({
 	id: z.string(),
@@ -80,17 +39,9 @@ function normalizeOptions(raw: string[]): string[] {
 	return out;
 }
 
-function assertDepartmentOptions(q: z.infer<typeof questionSchema>): void {
-	if (q.id !== 'department') return;
-	const opts = q.options ?? [];
-	if (opts.length !== DEPARTMENT_OPTIONS.length || !DEPARTMENT_OPTIONS.every((d, i) => opts[i] === d)) {
-		throw new AppError(400, 'INVALID_DEPARTMENT_OPTIONS', '意向部门选项不可修改');
-	}
-}
-
 export class JoinUsFormService {
 	async getForm(): Promise<JoinUsFormConfig> {
-		return this.readForm();
+		return readJoinUsFormConfig();
 	}
 
 	async updateForm(patch: unknown): Promise<JoinUsFormConfig> {
@@ -99,7 +50,7 @@ export class JoinUsFormService {
 			throw new AppError(400, 'INVALID_BODY', '请求体格式不对');
 		}
 		const body = parsed.data;
-		const base = await this.readForm();
+		const base = await readJoinUsFormConfig();
 
 		const next: JoinUsFormConfig = { ...base };
 
@@ -162,46 +113,15 @@ export class JoinUsFormService {
 			}
 		}
 
-		for (const q of next.questions) {
-			assertDepartmentOptions(q);
-		}
-
 		const validated = formConfigSchema.safeParse(next);
 		if (!validated.success) {
 			throw new AppError(400, 'INVALID_FORM', '表单配置校验失败');
 		}
-
-		await this.writeForm(validated.data);
-		return validated.data;
-	}
-
-	private async readForm(): Promise<JoinUsFormConfig> {
-		let raw: string;
-		try {
-			raw = await readFile(FORM_PATH, 'utf8');
-		} catch {
-			throw new AppError(500, 'FORM_READ_FAILED', '无法读取表单配置');
-		}
-		let json: unknown;
-		try {
-			json = JSON.parse(raw);
-		} catch {
-			throw new AppError(500, 'FORM_PARSE_FAILED', '表单配置格式错误');
-		}
-		const parsed = formConfigSchema.safeParse(json);
-		if (!parsed.success) {
-			throw new AppError(500, 'FORM_INVALID', '表单配置无效');
-		}
-		for (const q of parsed.data.questions) {
+		for (const q of validated.data.questions) {
 			assertDepartmentOptions(q);
 		}
-		return parsed.data;
-	}
 
-	private async writeForm(config: JoinUsFormConfig): Promise<void> {
-		const tmp = `${FORM_PATH}.tmp`;
-		const content = `${JSON.stringify(config, null, '\t')}\n`;
-		await writeFile(tmp, content, 'utf8');
-		await rename(tmp, FORM_PATH);
+		await writeJoinUsFormConfig(validated.data);
+		return validated.data;
 	}
 }

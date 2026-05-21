@@ -1,5 +1,6 @@
 import type { Context } from "koa";
 import type { JoinUsSubmitService } from "../services/joinusSubmit.service";
+import { JOINUS_DUPLICATE_SUBMIT_CODE } from "../services/joinusSubmit.service";
 import { AppError } from "../types/api";
 
 type UploadedTempFile = {
@@ -77,6 +78,12 @@ export class JoinusSubmitController {
         try {
             await this.service.submitAnonymous(fields, uploads);
         } catch (e) {
+            if (e instanceof AppError && e.code === JOINUS_DUPLICATE_SUBMIT_CODE) {
+                ctx.status = 409;
+                ctx.set('X-Duplicate', 'true');
+                ctx.body = { ok: false, duplicate: true, code: e.code, message: e.message };
+                return;
+            }
             if (e instanceof AppError) throw e;
             const raw = e instanceof Error ? e.message : '';
             const userMsg = /READ_FILE|NO_FILE_PATH/i.test(raw)

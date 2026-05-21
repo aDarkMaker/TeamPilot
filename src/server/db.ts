@@ -169,6 +169,34 @@ export interface DB {
 
 	findRecruitmentApplicationByContact(contact: string): Promise<RecruitmentApplication | null>;
 
+	findRecruitmentApplicationByIdentityConflict(
+		fullName: string,
+		contact: string,
+		qq: string
+	): Promise<RecruitmentApplication | null>;
+
+	updateRecruitmentApplicationById(
+		id: string,
+		input: {
+			submitterUserId: string;
+			fullName: string;
+			contact: string;
+			qq: string;
+			department: RecruitmentDepartment;
+			departmentSortOrder: number;
+			isStudent: boolean;
+			schoolCollege: string | null;
+			grade: string | null;
+			wantsOfflineInterview: boolean;
+			offlineInterviewSlot: RecruitmentInterviewSlot | null;
+			wantsOnlineInterview: boolean;
+			onlineInterviewSlot: RecruitmentInterviewSlot | null;
+			introMarkdown: string;
+			worksMarkdown: string;
+			attachmentPath: string | null;
+		}
+	): Promise<RecruitmentApplication>;
+
 	listRecruitmentApplications(input: { timeOrder: 'asc' | 'desc' }): Promise<RecruitmentApplication[]>;
 
 	findRecruitmentApplicationById(id: string): Promise<RecruitmentApplication | null>;
@@ -770,6 +798,74 @@ export function createDb(sqlite: Database): DB {
 				.query(`SELECT * FROM recruitment_applications WHERE contact = ? LIMIT 1`)
 				.get(String(contact).trim());
 			return row ? mapRecruitmentApplication(row) : null;
+		},
+
+		async findRecruitmentApplicationByIdentityConflict(fullName, contact, qq) {
+			const name = String(fullName).trim();
+			const phone = String(contact).trim();
+			const qqNum = String(qq).trim();
+			const row = sqlite
+				.query(
+					`SELECT * FROM recruitment_applications
+					WHERE full_name = ? OR contact = ? OR qq = ?
+					ORDER BY
+						CASE
+							WHEN contact = ? THEN 0
+							WHEN qq = ? THEN 1
+							WHEN full_name = ? THEN 2
+							ELSE 3
+						END
+					LIMIT 1`
+				)
+				.get(name, phone, qqNum, phone, qqNum, name);
+			return row ? mapRecruitmentApplication(row) : null;
+		},
+
+		async updateRecruitmentApplicationById(id, input) {
+			sqlite
+				.query(
+					`UPDATE recruitment_applications SET
+						submitter_user_id = ?,
+						full_name = ?,
+						contact = ?,
+						qq = ?,
+						department = ?,
+						department_sort_order = ?,
+						is_student = ?,
+						school_college = ?,
+						grade = ?,
+						wants_offline_interview = ?,
+						offline_interview_slot = ?,
+						wants_online_interview = ?,
+						online_interview_slot = ?,
+						intro_markdown = ?,
+						works_markdown = ?,
+						attachment_path = ?,
+						updated_at = datetime('now')
+					WHERE id = ?`
+				)
+				.run(
+					input.submitterUserId,
+					input.fullName,
+					input.contact.trim(),
+					input.qq,
+					input.department,
+					input.departmentSortOrder,
+					input.isStudent ? 1 : 0,
+					input.schoolCollege,
+					input.grade,
+					input.wantsOfflineInterview ? 1 : 0,
+					input.offlineInterviewSlot,
+					input.wantsOnlineInterview ? 1 : 0,
+					input.onlineInterviewSlot,
+					input.introMarkdown,
+					input.worksMarkdown,
+					input.attachmentPath,
+					id
+				);
+			const row = sqlite.query(`SELECT * FROM recruitment_applications WHERE id = ? LIMIT 1`).get(id);
+			if (!row) throw new Error('UPDATE_RECRUITMENT_FAILED');
+			return mapRecruitmentApplication(row);
 		},
 
 		async listRecruitmentApplications(input) {

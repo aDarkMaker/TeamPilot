@@ -380,11 +380,21 @@ function initFile(wrap: HTMLElement): void {
 	});
 }
 
+const SUBMIT_ERROR_FIELD: Record<string, string> = {
+	INVALID_NAME: 'name',
+	INVALID_CONTACT: 'contact',
+	INVALID_QQ: 'qq',
+	INVALID_DEPARTMENT: 'department',
+	INVALID_OFFLINE_TIME: 'interview_time_offline',
+	INVALID_ONLINE_TIME: 'interview_time_online',
+};
+
 export function renderForm(container: HTMLElement, config: FormConfig): void {
 	const form = document.createElement('form');
 	form.action = config.submit?.url ?? '#';
 	form.method = 'POST';
 	form.enctype = 'multipart/form-data';
+	form.noValidate = true;
 	form.onsubmit = (e) => e.preventDefault();
 
 	for (const q of config.questions) {
@@ -455,12 +465,149 @@ export function renderForm(container: HTMLElement, config: FormConfig): void {
 		}, duration);
 	}
 
-	function showOverwriteModal(firstSubmitData: FormData): void {
+	const FORM_OUTDATED_CODE = 'FORM_OUTDATED';
+
+	type SubmitApiJson = {
+		ok?: boolean;
+		duplicate?: boolean;
+		code?: string;
+		message?: string;
+	};
+
+	function getModalRoot(): HTMLElement {
+		return container.closest('.joinus-form-apply') ?? container.closest('.joinus-root') ?? document.body;
+	}
+
+	function clearFieldErrors(): void {
+		form.querySelectorAll('.joinus-field-error').forEach((el) => {
+			el.classList.remove('joinus-field-error', 'joinus-field-shake');
+			el.querySelector('.joinus-field-error-msg')?.remove();
+		});
+		form.querySelector('.joinus-submit-banner')?.remove();
+	}
+
+	function focusFieldError(questionId: string, message: string): void {
+		clearFieldErrors();
+		const field = form.querySelector<HTMLElement>(`.joinus-field[data-question-id="${questionId}"]`);
+		if (!field) return;
+
+		field.classList.remove('joinus-field-hidden');
+		field.classList.add('joinus-field-error');
+
+		const msg = document.createElement('p');
+		msg.className = 'joinus-field-error-msg';
+		msg.setAttribute('role', 'alert');
+		msg.textContent = message;
+		field.appendChild(msg);
+
+		field.scrollIntoView({ block: 'center', behavior: 'smooth' });
+
+		requestAnimationFrame(() => {
+			field.classList.add('joinus-field-shake');
+			field.addEventListener(
+				'animationend',
+				() => field.classList.remove('joinus-field-shake'),
+				{ once: true }
+			);
+		});
+
+		const focusable = field.querySelector<HTMLElement>(
+			'input:not([type="hidden"]), textarea, button.joinus-select-trigger, .joinus-file-wrap'
+		);
+		focusable?.focus({ preventScroll: true });
+	}
+
+	function openJoinusModal(
+		html: string,
+		bind: (overlay: HTMLElement, close: () => void) => void,
+		portal = false
+	): void {
 		const overlay = document.createElement('div');
-		overlay.className = 'joinus-modal-overlay';
+		overlay.className =
+			'joinus-modal-overlay' +
+			(portal ? ' joinus-modal-overlay--portal joinus-form-apply' : '');
 		overlay.setAttribute('role', 'dialog');
 		overlay.setAttribute('aria-modal', 'true');
-		overlay.innerHTML = `
+		overlay.innerHTML = html;
+		const close = () => {
+			overlay.classList.remove('joinus-modal-visible');
+			if (portal) document.body.classList.remove('joinus-modal-open');
+			setTimeout(() => overlay.remove(), 300);
+		};
+		bind(overlay, close);
+		if (portal) {
+			document.body.classList.add('joinus-modal-open');
+			document.body.appendChild(overlay);
+		} else {
+			getModalRoot().appendChild(overlay);
+		}
+		requestAnimationFrame(() => overlay.classList.add('joinus-modal-visible'));
+	}
+
+	function showFormOutdatedModal(message: string): void {
+		clearFieldErrors();
+		openJoinusModal(
+			`
+			<div class="joinus-modal-card">
+				<h2 class="joinus-modal-title">表单已更新</h2>
+				<p class="joinus-modal-subtitle">${escapeHtml(message)}</p>
+				<div class="joinus-modal-actions">
+					<button type="button" class="joinus-btn joinus-modal-refresh">刷新页面</button>
+				</div>
+			</div>
+		`,
+			(overlay) => {
+				overlay.querySelector('.joinus-modal-refresh')?.addEventListener('click', () => {
+					location.reload();
+				});
+			},
+			true
+		);
+	}
+
+	function handleSubmitFailure(json: SubmitApiJson): void {
+		const message =
+			typeof json.message === 'string' && json.message.trim() ? json.message : '提交失败';
+
+		if (json.code === FORM_OUTDATED_CODE) {
+			showFormOutdatedModal(message);
+			return;
+		}
+
+		const questionId = json.code ? SUBMIT_ERROR_FIELD[json.code] : undefined;
+		if (questionId) {
+			focusFieldError(questionId, message);
+			return;
+		}
+
+		clearFieldErrors();
+		const banner = document.createElement('p');
+		banner.className = 'joinus-submit-banner';
+		banner.setAttribute('role', 'alert');
+		banner.textContent = message;
+		form.insertBefore(banner, form.firstChild);
+		banner.scrollIntoView({ block: 'center', behavior: 'smooth' });
+	}
+
+	async function postJoinUsForm(data: FormData): Promise<'ok' | 'duplicate' | 'failed'> {
+		const url = getSubmitUrl();
+		if (!url) return 'ok';
+		const r = await fetch(url, { method: 'POST', body: data });
+		const json = (await r.json().catch(() => ({}))) as SubmitApiJson;
+		if (r.status === 409 || r.headers.get('X-Duplicate') === 'true' || json.duplicate) {
+			return 'duplicate';
+		}
+		if (!r.ok || !json.ok) {
+			handleSubmitFailure(json);
+			return 'failed';
+		}
+		return 'ok';
+	}
+
+	function showOverwriteModal(firstSubmitData: FormData): void {
+		clearFieldErrors();
+		openJoinusModal(
+			`
 			<div class="joinus-modal-card">
 				<h2 class="joinus-modal-title">你已经提交过了</h2>
 				<p class="joinus-modal-subtitle">是否覆盖之前的提交</p>
@@ -469,37 +616,29 @@ export function renderForm(container: HTMLElement, config: FormConfig): void {
 					<button type="button" class="joinus-btn joinus-modal-overwrite">确定覆盖</button>
 				</div>
 			</div>
-		`;
-		const close = () => {
-			overlay.classList.remove('joinus-modal-visible');
-			setTimeout(() => overlay.remove(), 300);
-		};
-		overlay.querySelector('.joinus-modal-cancel')?.addEventListener('click', close);
-		overlay.querySelector('.joinus-modal-overwrite')?.addEventListener('click', async () => {
-			close();
-			// 复用首次提交的 FormData，保证服务端查重能命中同一人
-			const data = new FormData();
-			for (const [key, value] of firstSubmitData.entries()) {
-				data.append(key, value);
-			}
-			data.append('overwrite', '1');
-			const url = getSubmitUrl();
-			if (!url) return;
-			try {
-				const r = await fetch(url, { method: 'POST', body: data });
-				const json = (await r.json().catch(() => ({}))) as { ok?: boolean };
-				console.log('[JoinUs] overwrite', { status: r.status, ok: r.ok, json });
-				if (r.ok && json.ok) showSuccess();
-				else alert('提交失败');
-			} catch (e) {
-				console.error('[JoinUs] overwrite error', e);
-				alert('提交失败: ' + (e instanceof Error ? e.message : String(e)));
-			}
-		});
-		const root =
-			container.closest('.joinus-form-apply') ?? container.closest('.joinus-root') ?? document.body;
-		root.appendChild(overlay);
-		requestAnimationFrame(() => overlay.classList.add('joinus-modal-visible'));
+		`,
+			(overlay, close) => {
+				overlay.querySelector('.joinus-modal-cancel')?.addEventListener('click', close);
+				overlay.querySelector('.joinus-modal-overwrite')?.addEventListener('click', async () => {
+					close();
+					const data = new FormData();
+					for (const [key, value] of firstSubmitData.entries()) {
+						data.append(key, value);
+					}
+					data.append('overwrite', '1');
+					try {
+						const outcome = await postJoinUsForm(data);
+						if (outcome === 'ok') showSuccess();
+					} catch (e) {
+						console.error('[JoinUs] overwrite error', e);
+						handleSubmitFailure({
+							message: e instanceof Error ? e.message : '提交失败',
+						});
+					}
+				});
+			},
+			true
+		);
 	}
 
 	form.addEventListener('submit', async (e) => {
@@ -507,32 +646,34 @@ export function renderForm(container: HTMLElement, config: FormConfig): void {
 		const fileWraps = Array.from(form.querySelectorAll('.joinus-file-wrap[data-required="true"]')) as unknown as FileWrapEl[];
 		for (const w of fileWraps) {
 			if (!w._files?.length) {
-				alert('请上传必填的附件');
+				const name = w.dataset.name ?? 'portfolio';
+				focusFieldError(name, '请上传必填的附件');
 				return;
 			}
 		}
 		const data = buildFormData();
-		const url = getSubmitUrl();
-		if (url) {
-			try {
-				const r = await fetch(url, { method: 'POST', body: data });
-				const json = (await r.json().catch(() => ({}))) as { ok?: boolean; duplicate?: boolean };
-				console.log('[JoinUs] submit', { status: r.status, ok: r.ok, json, xDuplicate: r.headers.get('X-Duplicate') });
-				if (r.status === 409 || r.headers.get('X-Duplicate') === 'true' || json.duplicate) {
-					showOverwriteModal(data);
-					return;
-				}
-				if (!r.ok || !json.ok) {
-					alert('提交失败');
-					return;
-				}
-			} catch (e) {
-				console.error('[JoinUs] submit error', e);
-				alert('提交失败: ' + (e instanceof Error ? e.message : String(e)));
+		try {
+			const outcome = await postJoinUsForm(data);
+			if (outcome === 'duplicate') {
+				showOverwriteModal(data);
 				return;
 			}
+			if (outcome === 'failed') return;
+		} catch (e) {
+			console.error('[JoinUs] submit error', e);
+			handleSubmitFailure({
+				message: e instanceof Error ? e.message : '提交失败',
+			});
+			return;
 		}
 		showSuccess();
+	});
+
+	form.addEventListener('input', (e) => {
+		const field = (e.target as HTMLElement).closest('.joinus-field.joinus-field-error');
+		if (!field) return;
+		field.classList.remove('joinus-field-error', 'joinus-field-shake');
+		field.querySelector('.joinus-field-error-msg')?.remove();
 	});
 
 	container.appendChild(form);

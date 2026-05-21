@@ -1,6 +1,9 @@
 import type { DB } from "../db";
 import { AppError } from "../types/api";
-import type { RecruitmentDepartment, RecruitmentInterviewSlot } from "../types/recruitment";
+import type { RecruitmentInterviewSlot } from "../types/recruitment";
+import { DEPT_CN_TO_SLUG } from "../../joinus/departments";
+import { readJoinUsFormConfig } from "../../joinus/formConfigIO";
+import { validateJoinusSubmitAgainstConfig } from "../../joinus/validateJoinusSubmit";
 import { departmentOrderFromSlug } from "../recruitment/departmentOrder";
 import { getJoinUsPublicUserId } from "../auth/bootstrapJoinUsPublicUser";
 
@@ -16,17 +19,15 @@ import {
 
 type UploadedFile = { buffer: Buffer; mimetype: string; originalName: string };
 
-export const DEPT_CN_TO_SLUG: Record<string, RecruitmentDepartment> = {
-	中之人: 'vup',
-	视频组: 'video',
-	美术组: 'art',
-	直播组: 'live',
-	文案组: 'copywriting',
-	切片组: 'clip',
-	技术组: 'tech',
-};
-
 const INTERVIEW_SLOT_NONE: RecruitmentInterviewSlot = 'none';
+
+export const JOINUS_DUPLICATE_SUBMIT_CODE = 'DUPLICATE_SUBMIT';
+
+function isOverwrite(fields: Record<string, unknown>): boolean {
+	const v = fields.overwrite;
+	if (v === true || v === 1) return true;
+	return normalizeText(v) === '1';
+}
 
 function toStr(v: unknown): string {
     if (v == null) return '';
@@ -93,17 +94,15 @@ function ensureExt(fileName: string, ext: string): string {
 export class JoinUsSubmitService {
 	constructor(private db: DB) {}
 	async submitAnonymous(fields: Record<string, unknown>, uploads: UploadedFile[]): Promise<void> {
+		const formConfig = await readJoinUsFormConfig();
+		validateJoinusSubmitAgainstConfig(formConfig, fields);
+
 		const fullName = normalizeText(fields.name);
 		const contact = normalizeText(fields.contact);
 		const qq = normalizeText(fields.qq);
 
-		if (!fullName) throw new AppError(400, 'INVALID_NAME', '姓名不能为空');
-		if (!contact) throw new AppError(400, 'INVALID_CONTACT', '联系方式不能为空');
-		if (!qq) throw new AppError(400, 'INVALID_QQ', 'QQ不能为空');
-
 		const departmentCn = normalizeText(fields.department);
-		const department = DEPT_CN_TO_SLUG[departmentCn];
-		if (!department) throw new AppError(400, 'INVALID_DEPARTMENT', '意向部门不合法');
+		const department = DEPT_CN_TO_SLUG[departmentCn]!;
 
 		const isStudent = isYes(fields.student);
 		const schoolCollege = isStudent ? normalizeText(fields.college) || null : null;
@@ -155,7 +154,7 @@ export class JoinUsSubmitService {
 		}
 		const submitterUserId = await getJoinUsPublicUserId(this.db);
 		const departmentSortOrder = departmentOrderFromSlug(department);
-		await this.db.upsertRecruitmentApplicationByContact({
+		const payload = {
 			submitterUserId,
 			fullName,
 			contact,
@@ -172,7 +171,22 @@ export class JoinUsSubmitService {
 			introMarkdown,
 			worksMarkdown,
 			attachmentPath,
-		});
+		};
+
+		const existing = await this.db.findRecruitmentApplicationByIdentityConflict(fullName, contact, qq);
+		if (existing && !isOverwrite(fields)) {
+			throw new AppError(409, JOINUS_DUPLICATE_SUBMIT_CODE, '你已经提交过了');
+		}
+
+		if (existing && isOverwrite(fields)) {
+			const contactOwner = await this.db.findRecruitmentApplicationByContact(contact);
+			if (contactOwner && contactOwner.id !== existing.id) {
+				throw new AppError(409, JOINUS_DUPLICATE_SUBMIT_CODE, '该手机号已被其他报名使用');
+			}
+			await this.db.updateRecruitmentApplicationById(existing.id, payload);
+		} else {
+			await this.db.createRecruitmentApplication(payload);
+		}
 		broadcastRecruitmentApplicationsUpdated();
 	}
 }
