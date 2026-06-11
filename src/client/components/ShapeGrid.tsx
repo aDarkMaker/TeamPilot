@@ -5,7 +5,6 @@ interface ShapeGridProps {
   gradientStartColor?: string;
   gradientEndColor?: string;
   borderColor?: string;
-  hoverFillColor?: string;
   shape?: 'square' | 'circle';
   squareSize?: number;
   speed?: number;
@@ -16,7 +15,6 @@ const ShapeGrid: React.FC<ShapeGridProps> = ({
   gradientStartColor = '#eef1f6',
   gradientEndColor = '#eef1f6',
   borderColor = 'rgba(15, 23, 42, 0.07)',
-  hoverFillColor = 'rgba(255, 201, 0, 0.28)',
   shape = 'square',
   squareSize = 48,
   speed = 0.25,
@@ -25,7 +23,6 @@ const ShapeGrid: React.FC<ShapeGridProps> = ({
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const animFrameRef = useRef<number>(0);
   const offsetRef = useRef(0);
-  const mouseRef = useRef<{ x: number; y: number } | null>(null);
   const dimsRef = useRef({ w: 0, h: 0 });
   const dprRef = useRef(1);
 
@@ -37,7 +34,6 @@ const ShapeGrid: React.FC<ShapeGridProps> = ({
     if (!ctx) return;
 
     const { w, h } = dimsRef.current;
-    const dpr = dprRef.current;
     const size = squareSize;
     const gap = 2;
     const step = size + gap;
@@ -54,45 +50,10 @@ const ShapeGrid: React.FC<ShapeGridProps> = ({
     ctx.fillStyle = grad;
     ctx.fillRect(0, 0, w, h);
 
-    const hoverX = mouseRef.current?.x ?? -1;
-    const hoverY = mouseRef.current?.y ?? -1;
-
-    let hoverCol = -1;
-    let hoverRow = -1;
-    if (hoverX >= 0 && hoverY >= 0) {
-      const shiftX = (offset * dx * speed) % step;
-      const shiftY = (offset * dy * speed) % step;
-
-      for (let row = -1; row < Math.ceil(h / step) + 1; row++) {
-        for (let col = -1; col < Math.ceil(w / step) + 1; col++) {
-          const cellX = col * step + shiftX;
-          const cellY = row * step + shiftY;
-          if (hoverX >= cellX && hoverX < cellX + size && hoverY >= cellY && hoverY < cellY + size) {
-            hoverCol = col;
-            hoverRow = row;
-          }
-        }
-      }
-    }
-
     for (let row = -1; row < Math.ceil(h / step) + 1; row++) {
       for (let col = -1; col < Math.ceil(w / step) + 1; col++) {
         const x = col * step + ((offset * dx * speed) % step);
         const y = row * step + ((offset * dy * speed) % step);
-
-        const isHovered = col === hoverCol && row === hoverRow;
-
-        if (isHovered) {
-          ctx.beginPath();
-          if (shape === 'circle') {
-            const r = (size / 2);
-            ctx.arc(x + size / 2, y + size / 2, r, 0, Math.PI * 2);
-          } else {
-            ctx.rect(x, y, size, size);
-          }
-          ctx.fillStyle = hoverFillColor;
-          ctx.fill();
-        }
 
         ctx.beginPath();
         if (shape === 'circle') {
@@ -106,7 +67,7 @@ const ShapeGrid: React.FC<ShapeGridProps> = ({
         ctx.stroke();
       }
     }
-  }, [squareSize, speed, direction, borderColor, hoverFillColor, shape, gradientStartColor, gradientEndColor]);
+  }, [squareSize, speed, direction, borderColor, shape, gradientStartColor, gradientEndColor]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -143,25 +104,10 @@ const ShapeGrid: React.FC<ShapeGridProps> = ({
     };
   }, [draw]);
 
-  const handlePointerMove = useCallback((e: React.PointerEvent<HTMLCanvasElement>) => {
-    const rect = e.currentTarget.getBoundingClientRect();
-    const dpr = dprRef.current;
-    mouseRef.current = {
-      x: (e.clientX - rect.left) * dpr,
-      y: (e.clientY - rect.top) * dpr,
-    };
-  }, []);
-
-  const handlePointerLeave = useCallback(() => {
-    mouseRef.current = null;
-  }, []);
-
   return (
     <canvas
       ref={canvasRef}
       className="shapegrid-canvas"
-      onPointerMove={handlePointerMove}
-      onPointerLeave={handlePointerLeave}
       aria-hidden="true"
     />
   );

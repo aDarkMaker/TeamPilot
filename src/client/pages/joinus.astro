@@ -6,11 +6,23 @@ import JoinUsPage from '../components/joinus/JoinUsPage';
 <JoinUsLayout title="加入我们 · HXK" skipHref="#joinus-main" skipLabel="报名表端上来罢！">
 	<div slot="header-actions" class="joinus-header-actions-inner">
 		<nav class="joinus-nav" aria-label="页面内导航">
-			<a href="#dept-title">组别</a>
-			<a href="#process-title">流程</a>
-			<a href="#faq-title">猜你想搜</a>
+			<a href="#dept-title">
+				<span class="pill-label">组别</span>
+				<span class="pill-label-hover">组别</span>
+			</a>
+			<a href="#process-title">
+				<span class="pill-label">流程</span>
+				<span class="pill-label-hover">流程</span>
+			</a>
+			<a href="#faq-title">
+				<span class="pill-label">问答</span>
+				<span class="pill-label-hover">问答</span>
+			</a>
 		</nav>
-		<a class="joinus-header__cta" href="/joinus/apply">前往报名</a>
+		<a class="joinus-header__cta" href="/joinus/apply">
+			<span class="pill-label">前往报名</span>
+			<span class="pill-label-hover">前往报名</span>
+		</a>
 	</div>
 	<JoinUsPage client:load />
 </JoinUsLayout>

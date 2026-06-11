@@ -90,7 +90,7 @@ html.joinus-page::-webkit-scrollbar {
 	right: 0;
 	z-index: 50;
 	backdrop-filter: blur(14px);
-	background: #ffffff;
+	background: transparent;
 	border-bottom: 1px solid var(--joinus-line);
 	box-shadow: 0 1px 2px rgba(15, 23, 42, 0.06);
 }
@@ -150,31 +150,159 @@ html.joinus-page::-webkit-scrollbar {
 }
 
 .joinus-nav a {
-	color: var(--joinus-muted);
+	position: relative;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	height: 34px;
+	padding: 0 16px;
+	border-radius: 9999px;
+	background: #fff;
+	border: 1px solid var(--joinus-line);
 	text-decoration: none;
-	font-size: 0.9rem;
-	font-weight: 500;
+	font-size: 0.85rem;
+	font-weight: 600;
 }
 
-.joinus-nav a:hover {
-	color: var(--joinus-accent);
+.joinus-nav a .pill-label {
+	position: relative;
+	z-index: 1;
+	color: var(--joinus-fg, #1a1d24);
+}
+
+.joinus-nav a .pill-label-hover {
+	display: none;
+}
+
+@media (hover: hover) {
+	.joinus-nav a {
+		overflow: hidden;
+	}
+
+	.joinus-nav a::before {
+		content: '';
+		position: absolute;
+		left: 50%;
+		bottom: -1.2%;
+		width: 200px;
+		height: 200px;
+		border-radius: 50%;
+		background: #1a1d24;
+		transform: translateX(-50%) scale(0);
+		transform-origin: center bottom;
+		transition: transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
+		pointer-events: none;
+	}
+
+	.joinus-nav a:hover::before {
+		transform: translateX(-50%) scale(1.4);
+	}
+
+	.joinus-nav a .pill-label {
+		transition: transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.35s ease;
+	}
+
+	.joinus-nav a .pill-label-hover {
+		display: block;
+		position: absolute;
+		left: 50%;
+		top: 50%;
+		z-index: 2;
+		color: #fff;
+		white-space: nowrap;
+		transform: translate(-50%, calc(-50% + 42px));
+		opacity: 0;
+		transition: transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.35s ease;
+		pointer-events: none;
+	}
+
+	.joinus-nav a:hover .pill-label {
+		transform: translateY(-42px);
+		opacity: 0;
+	}
+
+	.joinus-nav a:hover .pill-label-hover {
+		transform: translate(-50%, -50%);
+		opacity: 1;
+	}
 }
 
 .joinus-header__cta {
-	flex-shrink: 0;
-	padding: 0.5rem 1rem;
+	position: relative;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	height: 34px;
+	padding: 0 18px;
+	border: 1px solid var(--joinus-line);
 	border-radius: 999px;
 	background: var(--joinus-accent);
-	color: #14151a;
-	font-weight: 600;
+	font-weight: 700;
 	font-size: 0.85rem;
 	text-decoration: none;
-	border: none;
-	cursor: pointer;
 }
 
-.joinus-header__cta:hover {
-	filter: brightness(1.05);
+.joinus-header__cta .pill-label {
+	position: relative;
+	z-index: 1;
+	color: #fff;
+}
+
+.joinus-header__cta .pill-label-hover {
+	display: none;
+}
+
+@media (hover: hover) {
+	.joinus-header__cta {
+		overflow: hidden;
+	}
+
+	.joinus-header__cta::before {
+		content: '';
+		position: absolute;
+		left: 50%;
+		bottom: -10%;
+		width: 200px;
+		height: 200px;
+		border-radius: 50%;
+		background: #fff;
+		transform: translateX(-50%) scale(0);
+		transform-origin: center bottom;
+		transition: transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
+		pointer-events: none;
+	}
+
+	.joinus-header__cta:hover::before {
+		transform: translateX(-50%) scale(1.4);
+	}
+
+	.joinus-header__cta .pill-label {
+		transition: transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.35s ease;
+	}
+
+	.joinus-header__cta .pill-label-hover {
+		display: block;
+		position: absolute;
+		left: 50%;
+		top: 50%;
+		z-index: 2;
+		color: var(--joinus-accent);
+		white-space: nowrap;
+		transform: translate(-50%, calc(-50% + 42px));
+		opacity: 0;
+		transition: transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.35s ease;
+		pointer-events: none;
+	}
+
+	.joinus-header__cta:hover .pill-label {
+		transform: translateY(-42px);
+		opacity: 0;
+	}
+
+	.joinus-header__cta:hover .pill-label-hover {
+		transform: translate(-50%, -50%);
+		opacity: 1;
+	}
 }
 
 .joinus-main {
@@ -675,11 +803,75 @@ html.joinus-page::-webkit-scrollbar {
 	font-weight: 600;
 	gap: 0.35rem;
 	text-decoration: none;
+	border-radius: 9999px;
 }
 
 .joinus-apply-back.joinus-btn i {
 	font-size: 1.05rem;
 	line-height: 1;
+	position: relative;
+	z-index: 1;
+}
+
+.joinus-apply-back .pill-label-hover {
+	display: none;
+}
+
+@media (hover: hover) {
+	.joinus-apply-back.joinus-btn {
+		position: relative;
+		overflow: hidden;
+	}
+
+	.joinus-apply-back.joinus-btn::before {
+		content: '';
+		position: absolute;
+		left: 50%;
+		bottom: -10%;
+		width: 200px;
+		height: 200px;
+		border-radius: 50%;
+		background: #1a1d24;
+		transform: translateX(-50%) scale(0);
+		transform-origin: center bottom;
+		transition: transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
+		pointer-events: none;
+	}
+
+	.joinus-apply-back.joinus-btn:hover::before {
+		transform: translateX(-50%) scale(1.4);
+	}
+
+	.joinus-apply-back.joinus-btn .pill-label {
+		position: relative;
+		z-index: 1;
+		color: var(--joinus-fg, #1a1d24);
+		transition: transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.35s ease;
+	}
+
+	.joinus-apply-back .pill-label-hover {
+		display: block;
+		position: absolute;
+		left: 50%;
+		top: 50%;
+		z-index: 2;
+		color: #fff;
+		white-space: nowrap;
+		transform: translate(-50%, calc(-50% + 42px));
+		opacity: 0;
+		transition: transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.35s ease;
+		pointer-events: none;
+	}
+
+	.joinus-apply-back.joinus-btn:hover .pill-label {
+		transform: translateY(-42px);
+		opacity: 0;
+	}
+
+	.joinus-apply-back.joinus-btn:hover .pill-label-hover {
+		transform: translate(-50%, -50%);
+		opacity: 1;
+	}
 }
 
 .joinus-apply-sheet {
