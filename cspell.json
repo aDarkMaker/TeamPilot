@@ -4,7 +4,9 @@
 		"anns",
 		"AUTOINCREMENT",
 		"balabalabalabala",
+		"borderglow",
 		"bvid",
+		"clickspark",
 		"conten",
 		"DBFILENAME",
 		"DEPTS",
@@ -20,9 +22,11 @@
 		"procs",
 		"setex",
 		"shapegrid",
+		"textpressure",
 		"topbar",
 		"unparseable",
-		"wawoff"
+		"wawoff",
+		"wght"
 	],
 	"ignorePaths": [
 		".gitignore",
