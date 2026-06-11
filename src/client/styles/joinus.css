@@ -21,7 +21,6 @@ html.joinus-page::-webkit-scrollbar {
 .joinus-body {
 	margin: 0;
 	min-height: 100dvh;
-	background: var(--joinus-bg, #eef1f6);
 	color: var(--joinus-fg, #1a1d24);
 	-webkit-font-smoothing: antialiased;
 	scrollbar-width: none;
@@ -36,6 +35,8 @@ html.joinus-page::-webkit-scrollbar {
 }
 
 .joinus-root {
+	position: relative;
+	z-index: 1;
 	--joinus-font-display: 'JoinUsTitle', sans-serif;
 	--joinus-font-body: 'HxkFont', sans-serif;
 	--joinus-accent: #ffc900;
@@ -221,8 +222,8 @@ html.joinus-page::-webkit-scrollbar {
 	height: auto;
 	object-fit: contain;
 	transform: scaleX(-1);
-	mask-image: linear-gradient(to bottom left, rgba(0, 0, 0, 0.85) 0%, transparent 100%);
-	-webkit-mask-image: linear-gradient(to bottom left, rgba(0, 0, 0, 0.85) 0%, transparent 100%);
+	mask-image: linear-gradient(to bottom left, rgba(0, 0, 0, 0.95) 45%, transparent 100%);
+	-webkit-mask-image: linear-gradient(to bottom left, rgba(0, 0, 0, 0.95) 45%, transparent 100%);
 	pointer-events: none;
 	user-select: none;
 	flex-shrink: 0;
@@ -319,7 +320,7 @@ html.joinus-page::-webkit-scrollbar {
 .joinus-section {
 	scroll-margin-top: -2px;
 	padding: var(--joinus-section-y) 0;
-	border-top: 1px solid var(--joinus-line);
+	border-top: 1px solid #fff;
 }
 
 .joinus-section__head {

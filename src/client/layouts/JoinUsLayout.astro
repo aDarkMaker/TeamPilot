@@ -3,12 +3,14 @@ import '../styles/global.css';
 import '../styles/joinus.css';
 import '../styles/joinus-transitions.css';
 import '../styles/remixicon-local.css';
+import '../styles/shapegrid.css';
 import { assetUrl } from '../lib/assetUrl';
 import favicon from '../assets/img/icon/icon-hxk.webp';
 import joinusIcon from '../assets/img/icon/joinus/joinus.webp';
 import hxkFontWoff2 from '../assets/fonts/fonts.woff2';
 import joinusFontWoff2 from '../assets/fonts/joinusTitle.woff2';
 import remixiconWoff2 from '../assets/fonts/remixicon.woff2';
+import ShapeGrid from '../components/ShapeGrid';
 
 interface Props {
 	title: string;
@@ -32,6 +34,7 @@ const { title, description, skipHref, skipLabel } = Astro.props;
 		<title>{title}</title>
 	</head>
 	<body class="joinus-body">
+		<ShapeGrid client:load />
 		<div class="joinus-root">
 			<a class="joinus-skip" href={skipHref}>{skipLabel}</a>
 			<header class="joinus-header">
