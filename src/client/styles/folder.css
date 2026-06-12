@@ -35,7 +35,7 @@
 }
 
 .folder.open .paper:nth-child(1):hover {
-  transform: translate(-120%, -70%) rotateZ(-15deg) scale(1.08);
+  transform: translate(-120%, -70%) rotateZ(-15deg) scale(1.18);
 }
 
 .folder.open .paper:nth-child(2) {
@@ -44,7 +44,7 @@
 }
 
 .folder.open .paper:nth-child(2):hover {
-  transform: translate(10%, -70%) rotateZ(15deg) scale(1.08);
+  transform: translate(10%, -70%) rotateZ(15deg) scale(1.18);
 }
 
 .folder.open .paper:nth-child(3) {
