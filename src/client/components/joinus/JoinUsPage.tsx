@@ -1,5 +1,6 @@
 import { useEffect, useState, useCallback, useRef } from "react";
 import "../../styles/joinus.css";
+import ShuffleTitle from "./ShuffleTitle";
 import { assetUrl } from "../../lib/assetUrl";
 import IconAu from "../../assets/img/icon/joinus/vup/Icon_Au.webp";
 import IconBili from "../../assets/img/icon/joinus/vup/Icon_Bili.webp";
@@ -240,12 +241,7 @@ export default function JoinUsPage() {
 					aria-labelledby="dept-title-heading"
 				>
 					<div className="joinus-section__head">
-						<h2
-							id="dept-title-heading"
-							className="joinus-section__title"
-						>
-							组别一览
-						</h2>
+						<ShuffleTitle id="dept-title-heading" className="joinus-section__title" text="组别一览" />
 						<p className="joinus-section__desc">
 							当前开放 VUP、视频、美术、文案、技术与直播六个方向，你可结合兴趣与作品基础选择意向组别！
 						</p>
@@ -311,12 +307,7 @@ export default function JoinUsPage() {
 					aria-labelledby="process-title-heading"
 				>
 					<div className="joinus-section__head">
-						<h2
-							id="process-title-heading"
-							className="joinus-section__title"
-						>
-							报名流程
-						</h2>
+						<ShuffleTitle id="process-title-heading" className="joinus-section__title" text="报名流程" />
 						<p className="joinus-section__desc">
 							先确定意向组别，再提交报名表就可以啦！
 						</p>
@@ -355,12 +346,7 @@ export default function JoinUsPage() {
 					aria-labelledby="faq-title-heading"
 				>
 					<div className="joinus-section__head">
-						<h2
-							id="faq-title-heading"
-							className="joinus-section__title"
-						>
-							猜你想搜
-						</h2>
+						<ShuffleTitle id="faq-title-heading" className="joinus-section__title" text="猜你想搜" />
 						<p className="joinus-section__desc">
 							我为你的求知欲感到喜悦！
 						</p>
