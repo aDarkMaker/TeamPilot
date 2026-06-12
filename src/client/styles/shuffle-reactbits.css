@@ -1,0 +1,12 @@
+.shuffle-rbits-parent {
+  display: inline-block;
+  white-space: normal;
+  word-wrap: break-word;
+  will-change: transform;
+  line-height: 1;
+  visibility: hidden;
+}
+
+.shuffle-rbits-parent.is-ready {
+  visibility: visible;
+}

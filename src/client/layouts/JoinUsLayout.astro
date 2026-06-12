@@ -7,6 +7,7 @@ import '../styles/shapegrid.css';
 import '../styles/clickspark.css';
 import '../styles/shuffle.css';
 import '../styles/folder.css';
+import '../styles/shuffle-reactbits.css';
 import { assetUrl } from '../lib/assetUrl';
 import favicon from '../assets/img/icon/icon-hxk.webp';
 import joinusIcon from '../assets/img/icon/joinus/joinus.webp';
@@ -15,6 +16,7 @@ import joinusFontWoff2 from '../assets/fonts/joinusTitle.woff2';
 import remixiconWoff2 from '../assets/fonts/remixicon.woff2';
 import ShapeGrid from '../components/ShapeGrid';
 import ClickSpark from '../components/ClickSpark';
+import Shuffle from '../components/joinus/Shuffle';
 
 interface Props {
 	title: string;
@@ -55,7 +57,22 @@ const { title, description, skipHref, skipLabel } = Astro.props;
 							fetchpriority="high"
 							loading="eager"
 						/>
-						招新指北
+						<Shuffle
+							client:load
+							text="招新指北"
+							tag="span"
+							shuffleDirection="down"
+							duration={0.80}
+							shuffleTimes={1}
+							ease="back.out(1.1)"
+							stagger={0.06}
+							threshold={0.1}
+							triggerOnce={true}
+							triggerOnHover={true}
+							triggerOnTouch={true}
+							textAlign="left"
+							respectReducedMotion={true}
+						/>
 					</a>
 					<div class="joinus-header-actions">
 						<slot name="header-actions" />
