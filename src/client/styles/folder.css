@@ -1,10 +1,6 @@
 .folder {
   --folder-color: #f7c14b;
   --folder-back-color: #edb02b;
-  --paper-1: #f0f0f0;
-  --paper-2: #f7f7f7;
-  --paper-3: #ffffff;
-
   flex-shrink: 0;
   perspective: 500px;
   cursor: pointer;
@@ -97,19 +93,35 @@
   transform: translate(-50%, 10%);
   width: 70%;
   height: 80%;
-  background: var(--paper-1);
+  background: transparent;
   border-radius: 10px;
   transition: all 0.3s ease-in-out;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.paper img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: center;
+  display: block;
+}
+
+@media (min-width: 768px) {
+  .paper img {
+    width: 110%;
+    height: 110%;
+  }
 }
 
 .paper:nth-child(2) {
-  background: var(--paper-2);
   width: 80%;
   height: 70%;
 }
 
 .paper:nth-child(3) {
-  background: var(--paper-3);
   width: 90%;
   height: 60%;
 }
@@ -127,26 +139,26 @@
 
 @media (max-width: 480px) {
   .folder.open .paper:nth-child(1) {
-    transform: translate(-85%, -70%) rotateZ(-10deg);
+    transform: translate(-110%, -50%) rotateZ(-10deg);
   }
 
   .folder.open .paper:nth-child(1):hover {
-    transform: translate(-85%, -70%) rotateZ(-10deg) scale(1.08);
+    transform: translate(-100%, -50%) rotateZ(-10deg) scale(1.08);
   }
 
   .folder.open .paper:nth-child(2) {
-    transform: translate(6%, -70%) rotateZ(10deg);
+    transform: translate(6%, -50%) rotateZ(10deg);
   }
 
   .folder.open .paper:nth-child(2):hover {
-    transform: translate(6%, -70%) rotateZ(10deg) scale(1.08);
+    transform: translate(6%, -50%) rotateZ(10deg) scale(1.08);
   }
 
   .folder.open .paper:nth-child(3) {
-    transform: translate(-50%, -100%) rotateZ(3deg);
+    transform: translate(-50%, -70%) rotateZ(3deg);
   }
 
   .folder.open .paper:nth-child(3):hover {
-    transform: translate(-50%, -100%) rotateZ(3deg) scale(1.08);
+    transform: translate(-50%, -70%) rotateZ(3deg) scale(1.08);
   }
 }

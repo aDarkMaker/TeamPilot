@@ -1,9 +1,15 @@
 import { useState, useRef, useCallback, useEffect } from "react";
+import { assetUrl } from "../../lib/assetUrl";
+import joinusLeft from "../../assets/img/image/section_hero/joinus_left.png";
+import joinusMiddle from "../../assets/img/image/section_hero/joinus_middle.png";
+import joinusRight from "../../assets/img/image/section_hero/joinus_right.png";
 
 interface Props {
   items?: React.ReactNode[];
   className?: string;
 }
+
+const IMAGES_BY_PAPER = [joinusLeft, joinusRight, joinusMiddle] as const;
 
 const INITIAL_TILT = "perspective(500px) rotateY(-6deg) rotateX(2deg)";
 
@@ -50,7 +56,7 @@ export default function Folder({ items = [], className = "" }: Props) {
         <div className="folder__back">
           {papers.map((item, i) => (
             <div key={i} className={`paper paper-${i + 1}`}>
-              {item}
+              {item ?? <img src={assetUrl(IMAGES_BY_PAPER[i])} alt="" />}
             </div>
           ))}
           <div className="folder__front" />
