@@ -143,6 +143,22 @@ export default function TargetCursor({ targetSelector = ".joinus-card--process" 
       }, 400);
     };
 
+    const releaseTargetOnly = () => {
+      gsap.ticker.remove(tickerFnRef.current!);
+      targetPositionsRef.current = null;
+      gsap.set(strengthRef.current, { current: 0, overwrite: true });
+      activeTarget = null;
+      if (resumeTimeout) { clearTimeout(resumeTimeout); resumeTimeout = null; }
+      killCornerTweens();
+      spinTl.current?.kill();
+      animateCornersToRest(0.3);
+      breatheTimeout = setTimeout(() => {
+        createSpin();
+        startBreathe();
+        breatheTimeout = null;
+      }, 400);
+    };
+
     const lockOntoTarget = (target: Element) => {
       activeTarget = target;
       killCornerTweens();
@@ -236,7 +252,7 @@ export default function TargetCursor({ targetSelector = ".joinus-card--process" 
 
         const leave = () => {
           gsap.ticker.remove(tickerFnRef.current!);
-          releaseTarget();
+          releaseTargetOnly();
           cleanup(target);
         };
         currentLeaveHandler = leave;
