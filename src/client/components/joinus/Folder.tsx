@@ -1,8 +1,8 @@
 import { useState, useRef, useCallback, useEffect } from "react";
 import { assetUrl } from "../../lib/assetUrl";
-import joinusLeft from "../../assets/img/image/section_hero/joinus_left.png";
-import joinusMiddle from "../../assets/img/image/section_hero/joinus_middle.png";
-import joinusRight from "../../assets/img/image/section_hero/joinus_right.png";
+import joinusLeft from "../../assets/img/image/section_hero/joinus_left.webp";
+import joinusMiddle from "../../assets/img/image/section_hero/joinus_middle.webp";
+import joinusRight from "../../assets/img/image/section_hero/joinus_right.webp";
 
 interface Props {
   items?: React.ReactNode[];
