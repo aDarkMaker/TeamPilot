@@ -23,6 +23,17 @@ export default function Folder({ items = [], className = "" }: Props) {
     hasTilt.current = !window.matchMedia("(hover: none) and (pointer: coarse)").matches;
   }, []);
 
+  useEffect(() => {
+    if (!open) return;
+    const handleClickOutside = (e: MouseEvent) => {
+      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+        setOpen(false);
+      }
+    };
+    document.addEventListener("click", handleClickOutside);
+    return () => document.removeEventListener("click", handleClickOutside);
+  }, [open]);
+
   const maxItems = 3;
   const papers = items.slice(0, maxItems);
   while (papers.length < maxItems) {
@@ -48,7 +59,7 @@ export default function Folder({ items = [], className = "" }: Props) {
     <div
       ref={containerRef}
       className={`folder ${open ? "open" : ""} ${className}`.trim()}
-      onClick={() => setOpen((v) => !v)}
+      onClick={() => { if (!open) setOpen(true); }}
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
     >
