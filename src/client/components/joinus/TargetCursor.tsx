@@ -127,6 +127,7 @@ export default function TargetCursor({ targetSelector = ".joinus-card--process" 
     };
 
     const releaseTarget = () => {
+      idleRef.current = true;
       gsap.ticker.remove(tickerFnRef.current!);
       targetPositionsRef.current = null;
       gsap.set(strengthRef.current, { current: 0, overwrite: true });
@@ -183,7 +184,6 @@ export default function TargetCursor({ targetSelector = ".joinus-card--process" 
       });
     };
 
-    /* ---- 共享 idle 初始化 ---- */
     const anchor = getAnchorPosition();
     const initX = anchor?.x ?? window.innerWidth / 2;
     const initY = anchor?.y ?? window.innerHeight / 2;
@@ -193,7 +193,6 @@ export default function TargetCursor({ targetSelector = ".joinus-card--process" 
     startBreathe();
     anchorRafRef.current = requestAnimationFrame(anchorPoll);
 
-    /* ---- ticker（桌面 card hover 视差）---- */
     const tickerFn = () => {
       if (!targetPositionsRef.current || !cursorRef.current || !cornerElsRef.current) return;
       const str = strengthRef.current.current;
@@ -210,9 +209,6 @@ export default function TargetCursor({ targetSelector = ".joinus-card--process" 
     };
     tickerFnRef.current = tickerFn;
 
-    /* ==============================
-       桌面端：section hover / card hover
-       ============================== */
     if (!isMobile) {
       const sectionEnter = (e: Event) => {
         const me = e as MouseEvent;
@@ -289,9 +285,6 @@ export default function TargetCursor({ targetSelector = ".joinus-card--process" 
       };
     }
 
-    /* ==============================
-       移动端：点击卡片即锁定，点击其他地方释放
-       ============================== */
     const onClick = (e: Event) => {
       const me = e as MouseEvent;
       const target = (me.target as Element).closest(targetSelector);
@@ -307,7 +300,6 @@ export default function TargetCursor({ targetSelector = ".joinus-card--process" 
         killCornerTweens();
         gsap.killTweensOf(cursor, "x,y");
 
-        /* 先收回角落 → 移到点击位置 → 展开到新卡片 */
         const tl = gsap.timeline();
         if (wasActive) {
           const r = target.getBoundingClientRect();
@@ -337,9 +329,18 @@ export default function TargetCursor({ targetSelector = ".joinus-card--process" 
       section.addEventListener("click", onClick);
     }
 
+    const onMobileScroll = () => {
+      if (activeTarget) {
+        cleanup(activeTarget);
+        releaseTarget();
+      }
+    };
+    window.addEventListener("scroll", onMobileScroll, { passive: true });
+
     return () => {
       cancelAnimationFrame(anchorRafRef.current);
       if (section) section.removeEventListener("click", onClick);
+      window.removeEventListener("scroll", onMobileScroll);
       if (resumeTimeout) clearTimeout(resumeTimeout);
       if (breatheTimeout) clearTimeout(breatheTimeout);
       spinTl.current?.kill();
