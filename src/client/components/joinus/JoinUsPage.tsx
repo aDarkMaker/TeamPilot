@@ -2,6 +2,7 @@ import { useEffect, useState, useCallback, useRef } from "react";
 import "../../styles/joinus.css";
 import ShuffleTitle from "./ShuffleTitle";
 import Folder from "./Folder";
+import TargetCursor from "./TargetCursor";
 import { assetUrl } from "../../lib/assetUrl";
 import IconAu from "../../assets/img/icon/joinus/vup/Icon_Au.webp";
 import IconBili from "../../assets/img/icon/joinus/vup/Icon_Bili.webp";
@@ -310,7 +311,7 @@ export default function JoinUsPage() {
 					<div className="joinus-section__head">
 						<ShuffleTitle id="process-title-heading" className="joinus-section__title" text="报名流程" />
 						<p className="joinus-section__desc">
-							先确定意向组别，再提交报名表就可以啦！
+							先定意向，再提交报名！
 						</p>
 					</div>
 					<div className="joinus-grid">
@@ -388,6 +389,7 @@ export default function JoinUsPage() {
 					All Rights Reserved
 				</p>
 			</footer>
+			<TargetCursor />
 		</>
 	);
 }
