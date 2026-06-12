@@ -2,7 +2,6 @@ import { useEffect, useState, useCallback, useRef } from "react";
 import "../../styles/joinus.css";
 import ShuffleTitle from "./ShuffleTitle";
 import Folder from "./Folder";
-import TargetCursor from "./TargetCursor";
 import { assetUrl } from "../../lib/assetUrl";
 import IconAu from "../../assets/img/icon/joinus/vup/Icon_Au.webp";
 import IconBili from "../../assets/img/icon/joinus/vup/Icon_Bili.webp";
@@ -389,7 +388,6 @@ export default function JoinUsPage() {
 					All Rights Reserved
 				</p>
 			</footer>
-			<TargetCursor />
 		</>
 	);
 }
