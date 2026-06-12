@@ -97,7 +97,20 @@ async function main() {
 	app.proxy = true; // X-forwarded-for 你家不要了
 	applyGlobalMiddleware(app);
 
-	const apiRouter = composeApiRouter({ applicationController, adminController, authController, profileController, scheduleController, recruitmentController, joinusSubmitController, joinusFormController, homeController, taskController, searchController, bilibiliController });
+	const apiRouter = composeApiRouter({
+		applicationController,
+		adminController,
+		authController,
+		profileController,
+		scheduleController,
+		recruitmentController,
+		joinusSubmitController,
+		joinusFormController,
+		homeController,
+		taskController,
+		searchController,
+		bilibiliController,
+	});
 	app.use(apiRouter.routes());
 	app.use(apiRouter.allowedMethods());
 
@@ -105,7 +118,7 @@ async function main() {
 	mkdirSync(uploadRoot, { recursive: true });
 	app.use(webpFallback);
 	app.use(mount('/uploads', serve(uploadRoot)));
-	
+
 	const joinusRoot = join(process.cwd(), 'data', 'joinus');
 	mkdirSync(joinusRoot, { recursive: true });
 	app.use(mount('/joinus-files', serve(joinusRoot)));

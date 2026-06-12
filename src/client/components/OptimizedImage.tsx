@@ -34,10 +34,5 @@ export default function OptimizedImage({ critical, intrinsic, ...props }: Optimi
 		};
 	}
 
-	return (
-		<img
-			{...attrs}
-			{...(fetchpriority ? ({ fetchpriority } as ImgHTMLAttributes<HTMLImageElement>) : {})}
-		/>
-	);
+	return <img {...attrs} {...(fetchpriority ? ({ fetchpriority } as ImgHTMLAttributes<HTMLImageElement>) : {})} />;
 }

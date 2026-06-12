@@ -1,15 +1,8 @@
 import { z } from 'zod';
 import { AppError } from '../types/api';
-import {
-	INTERVIEW_OFFLINE_FIELD,
-	INTERVIEW_ONLINE_FIELD,
-} from '../../joinus/interviewIntro';
+import { INTERVIEW_OFFLINE_FIELD, INTERVIEW_ONLINE_FIELD } from '../../joinus/interviewIntro';
 import { readJoinUsFormConfig, writeJoinUsFormConfig } from '../../joinus/formConfigIO';
-import {
-	assertDepartmentOptions,
-	formConfigSchema,
-	type JoinUsFormConfig,
-} from '../../joinus/formConfigSchema';
+import { assertDepartmentOptions, formConfigSchema, type JoinUsFormConfig } from '../../joinus/formConfigSchema';
 
 export type { JoinUsFormConfig } from '../../joinus/formConfigSchema';
 
@@ -73,8 +66,7 @@ export class JoinUsFormService {
 				if (p.label !== undefined) orig.label = p.label;
 				if (p.placeholder !== undefined) orig.placeholder = p.placeholder;
 
-				const isInterviewSlot =
-					p.id === INTERVIEW_OFFLINE_FIELD || p.id === INTERVIEW_ONLINE_FIELD;
+				const isInterviewSlot = p.id === INTERVIEW_OFFLINE_FIELD || p.id === INTERVIEW_ONLINE_FIELD;
 				if (p.options !== undefined) {
 					if (!isInterviewSlot) {
 						throw new AppError(400, 'OPTIONS_NOT_EDITABLE', `${p.id} 的选项不可在此修改`);

@@ -13,6 +13,6 @@ export function buildAdminRoutes(controller: AdminController): Router {
 
 	router.post('/:id/appoint-admin', requireSuperAdmin, controller.appointAdmin);
 	router.post('/:id/revoke-admin', requireSuperAdmin, controller.revokeAdmin);
-	
+
 	return router;
 }

@@ -199,11 +199,7 @@ export default function Calendar() {
 			}),
 		[weekDays]
 	);
-	const storeState = useSyncExternalStore(
-		scheduleStore.subscribe,
-		scheduleStore.getSnapshot,
-		() => SERVER_SCHEDULE_SNAPSHOT
-	);
+	const storeState = useSyncExternalStore(scheduleStore.subscribe, scheduleStore.getSnapshot, () => SERVER_SCHEDULE_SNAPSHOT);
 	const rowsByDay = useMemo(() => {
 		const out: Record<string, ScheduleDayItem[]> = {};
 		for (const d of dayKeys) out[d.key] = storeState.byDay[d.key]?.items ?? [];
@@ -508,7 +504,7 @@ export default function Calendar() {
 	return (
 		<div className="calendar-page">
 			<DashboardToast toast={toast.toast} />
-				<div className="calendar-head">
+			<div className="calendar-head">
 				<div className="calendar-head-title">
 					<button type="button" className="calendar-date-btn" onClick={() => setAnchorDate((d) => addDays(d, -7))}>
 						‹
@@ -541,22 +537,20 @@ export default function Calendar() {
 			<section className="calendar-card">
 				<div className="calendar-card-head">
 					<h2>日程</h2>
-					<div className="calendar-sub">
-						{dayKeys.reduce((sum, d) => sum + (rowsByDay[d.key]?.length ?? 0), 0)} 条
-					</div>
+					<div className="calendar-sub">{dayKeys.reduce((sum, d) => sum + (rowsByDay[d.key]?.length ?? 0), 0)} 条</div>
 				</div>
 				<div className="calendar-week">
 					<div className="calendar-week-head">
 						<div className="calendar-week-head-left" />
 						{dayKeys.map((d) => (
-						<button
-							key={d.key}
-							type="button"
-							className={`calendar-week-day ${d.ymd.year === selectedYmd.year && d.ymd.month === selectedYmd.month && d.ymd.day === selectedYmd.day ? 'active' : ''}`}
-							onClick={() => setSelectedYmd(d.ymd)}
-						>
+							<button
+								key={d.key}
+								type="button"
+								className={`calendar-week-day ${d.ymd.year === selectedYmd.year && d.ymd.month === selectedYmd.month && d.ymd.day === selectedYmd.day ? 'active' : ''}`}
+								onClick={() => setSelectedYmd(d.ymd)}
+							>
 								{d.label}
-						</button>
+							</button>
 						))}
 					</div>
 					<div className="calendar-week-body">
@@ -574,73 +568,71 @@ export default function Calendar() {
 							{dayKeys.map((d) => {
 								const dayLayouts = layoutsByDay[d.key] ?? [];
 								return (
-								<div
-									key={d.key}
-									className="calendar-sheet"
-									data-label={d.label}
-									data-has-items={dayLayouts.length > 0 ? 'true' : 'false'}
-									onPointerDown={(e) => {
-										const target = e.target as HTMLElement;
-										if (target.closest('.calendar-block')) return;
-										const el = e.currentTarget as HTMLElement;
-										const start = minuteFromClientY(el, e.clientY);
-										setDraftRange({
-											dayKey: d.key,
-											day: d.ymd,
-											startMin: start,
-											endMin: clamp(start + STEP_MINUTES, START_HOUR * 60, END_HOUR * 60),
-											active: true,
-										});
-									}}
-									onPointerMove={(e) => {
-										if (!draftRange?.active || draftRange.dayKey !== d.key) return;
-										const el = e.currentTarget as HTMLElement;
-										const cur = minuteFromClientY(el, e.clientY);
-										setDraftRange((prev) =>
-											prev && prev.dayKey === d.key ? { ...prev, endMin: cur } : prev
-										);
-									}}
-									onPointerUp={() => {
-										if (!draftRange?.active || draftRange.dayKey !== d.key) return;
-										const start = Math.min(draftRange.startMin, draftRange.endMin);
-										const end = Math.max(draftRange.startMin, draftRange.endMin);
-										openCreateAt(d.ymd, start, end);
-										setDraftRange(null);
-									}}
-									onPointerLeave={() => {
-										// Keep draft when dragging across the same column edge.
-									}}
-								>
-									{draftRange?.active && draftRange.dayKey === d.key ? (
-										<div
-											className="calendar-draft-block"
-											style={{
-												top: `${((Math.min(draftRange.startMin, draftRange.endMin) - START_HOUR * 60) / ((END_HOUR - START_HOUR) * 60)) * 100}%`,
-												height: `${(Math.max(Math.abs(draftRange.endMin - draftRange.startMin), 30) / ((END_HOUR - START_HOUR) * 60)) * 100}%`,
-											}}
-										/>
-									) : null}
-									{(layoutsByDay[d.key] ?? []).map((b) => (
-										<div
-											key={b.item.id}
-											className="calendar-block"
-											style={{
-												top: `${b.top}%`,
-												height: `${b.height}%`,
-												left: `${b.leftPct}%`,
-												width: `${b.widthPct}%`,
-											}}
-											role="button"
-											tabIndex={0}
-											onClick={() => setDetail(b.item)}
-											onKeyDown={(e) => {
-												if (e.key === 'Enter' || e.key === ' ') setDetail(b.item);
-											}}
-										>
-											<div className="calendar-block-title">{highlightText(b.item.title)}</div>
-										</div>
-									))}
-								</div>
+									<div
+										key={d.key}
+										className="calendar-sheet"
+										data-label={d.label}
+										data-has-items={dayLayouts.length > 0 ? 'true' : 'false'}
+										onPointerDown={(e) => {
+											const target = e.target as HTMLElement;
+											if (target.closest('.calendar-block')) return;
+											const el = e.currentTarget as HTMLElement;
+											const start = minuteFromClientY(el, e.clientY);
+											setDraftRange({
+												dayKey: d.key,
+												day: d.ymd,
+												startMin: start,
+												endMin: clamp(start + STEP_MINUTES, START_HOUR * 60, END_HOUR * 60),
+												active: true,
+											});
+										}}
+										onPointerMove={(e) => {
+											if (!draftRange?.active || draftRange.dayKey !== d.key) return;
+											const el = e.currentTarget as HTMLElement;
+											const cur = minuteFromClientY(el, e.clientY);
+											setDraftRange((prev) => (prev && prev.dayKey === d.key ? { ...prev, endMin: cur } : prev));
+										}}
+										onPointerUp={() => {
+											if (!draftRange?.active || draftRange.dayKey !== d.key) return;
+											const start = Math.min(draftRange.startMin, draftRange.endMin);
+											const end = Math.max(draftRange.startMin, draftRange.endMin);
+											openCreateAt(d.ymd, start, end);
+											setDraftRange(null);
+										}}
+										onPointerLeave={() => {
+											// Keep draft when dragging across the same column edge.
+										}}
+									>
+										{draftRange?.active && draftRange.dayKey === d.key ? (
+											<div
+												className="calendar-draft-block"
+												style={{
+													top: `${((Math.min(draftRange.startMin, draftRange.endMin) - START_HOUR * 60) / ((END_HOUR - START_HOUR) * 60)) * 100}%`,
+													height: `${(Math.max(Math.abs(draftRange.endMin - draftRange.startMin), 30) / ((END_HOUR - START_HOUR) * 60)) * 100}%`,
+												}}
+											/>
+										) : null}
+										{(layoutsByDay[d.key] ?? []).map((b) => (
+											<div
+												key={b.item.id}
+												className="calendar-block"
+												style={{
+													top: `${b.top}%`,
+													height: `${b.height}%`,
+													left: `${b.leftPct}%`,
+													width: `${b.widthPct}%`,
+												}}
+												role="button"
+												tabIndex={0}
+												onClick={() => setDetail(b.item)}
+												onKeyDown={(e) => {
+													if (e.key === 'Enter' || e.key === ' ') setDetail(b.item);
+												}}
+											>
+												<div className="calendar-block-title">{highlightText(b.item.title)}</div>
+											</div>
+										))}
+									</div>
 								);
 							})}
 						</div>
@@ -649,12 +641,7 @@ export default function Calendar() {
 			</section>
 
 			{modalOpen && (
-				<div
-					className={`calendar-modal ${closing.create ? 'closing' : 'open'}`}
-					role="dialog"
-					aria-modal="true"
-					onClick={() => closeCreate()}
-				>
+				<div className={`calendar-modal ${closing.create ? 'closing' : 'open'}`} role="dialog" aria-modal="true" onClick={() => closeCreate()}>
 					<div className="calendar-modal-card" onClick={(e) => e.stopPropagation()}>
 						<div className="calendar-modal-head">
 							<div className="calendar-modal-title">创建日程</div>
@@ -671,11 +658,7 @@ export default function Calendar() {
 										<button type="button" className={`calendar-scope-btn ${scope === 'all' ? 'active' : ''}`} onClick={() => setScope('all')}>
 											全体
 										</button>
-										<button
-											type="button"
-											className={`calendar-scope-btn ${scope === 'custom' ? 'active' : ''}`}
-											onClick={() => setScope('custom')}
-										>
+										<button type="button" className={`calendar-scope-btn ${scope === 'custom' ? 'active' : ''}`} onClick={() => setScope('custom')}>
 											指定
 										</button>
 										<button type="button" className={`calendar-scope-btn ${scope === 'self' ? 'active' : ''}`} onClick={() => setScope('self')}>
@@ -749,7 +732,9 @@ export default function Calendar() {
 																<span className="avatar-fallback">{u.username.slice(0, 1)}</span>
 															</span>
 															<span className="name">{(u.nickname && u.nickname.trim()) || u.username}</span>
-															<span className={`role ${u.role ?? 'user'}`}>{u.role === 'super_admin' ? '超管' : u.role === 'admin' ? '管理员' : '成员'}</span>
+															<span className={`role ${u.role ?? 'user'}`}>
+																{u.role === 'super_admin' ? '超管' : u.role === 'admin' ? '管理员' : '成员'}
+															</span>
 														</button>
 													);
 												})}
@@ -761,12 +746,7 @@ export default function Calendar() {
 
 							<div className="calendar-field">
 								<label htmlFor="cal-desc2">描述</label>
-								<textarea
-									id="cal-desc2"
-									value={description}
-									onChange={(e) => setDescription(e.target.value)}
-									rows={4}
-								/>
+								<textarea id="cal-desc2" value={description} onChange={(e) => setDescription(e.target.value)} rows={4} />
 							</div>
 
 							<div className="calendar-field">
@@ -777,23 +757,13 @@ export default function Calendar() {
 							<div className="calendar-row">
 								<div className="calendar-field">
 									<label htmlFor="cal-start">开始</label>
-									<button
-										id="cal-start"
-										type="button"
-										className="calendar-time-btn"
-										onClick={() => setTimePicker({ open: true, field: 'start' })}
-									>
+									<button id="cal-start" type="button" className="calendar-time-btn" onClick={() => setTimePicker({ open: true, field: 'start' })}>
 										{startAt}
 									</button>
 								</div>
 								<div className="calendar-field">
 									<label htmlFor="cal-end">结束</label>
-									<button
-										id="cal-end"
-										type="button"
-										className="calendar-time-btn"
-										onClick={() => setTimePicker({ open: true, field: 'end' })}
-									>
+									<button id="cal-end" type="button" className="calendar-time-btn" onClick={() => setTimePicker({ open: true, field: 'end' })}>
 										{endAt}
 									</button>
 								</div>
@@ -853,11 +823,7 @@ export default function Calendar() {
 							<div className="calendar-modal-title">详情</div>
 							<div className="calendar-modal-head-actions">
 								{me?.id && detail.createdBy && me.id === detail.createdBy && (
-									<button
-										type="button"
-										className="calendar-btn danger"
-										onClick={() => void cancelSchedule(detail.id)}
-									>
+									<button type="button" className="calendar-btn danger" onClick={() => void cancelSchedule(detail.id)}>
 										取消
 									</button>
 								)}
@@ -918,9 +884,7 @@ export default function Calendar() {
 									))}
 								</div>
 							) : null}
-							{detail.description ? (
-								<div className="calendar-detail-desc">{highlightText(detail.description)}</div>
-							) : null}
+							{detail.description ? <div className="calendar-detail-desc">{highlightText(detail.description)}</div> : null}
 						</div>
 					</div>
 				</div>

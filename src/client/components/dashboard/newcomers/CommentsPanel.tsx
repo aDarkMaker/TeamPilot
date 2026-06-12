@@ -68,11 +68,7 @@ export function CommentsPanel({ me, comments, busy, error, onAdd, onEdit, onDele
 				<span className="nc-comments-count">{comments.length}</span>
 			</div>
 			{error ? <div className="nc-inline-err">{error}</div> : null}
-			<div
-				ref={listRef}
-				className="nc-comments-list"
-				style={listMaxHeightPx != null ? { maxHeight: listMaxHeightPx } : undefined}
-			>
+			<div ref={listRef} className="nc-comments-list" style={listMaxHeightPx != null ? { maxHeight: listMaxHeightPx } : undefined}>
 				{comments.map((c) => (
 					<div key={c.id} className="nc-comment-card">
 						<div className="nc-comment-top">
@@ -86,12 +82,7 @@ export function CommentsPanel({ me, comments, busy, error, onAdd, onEdit, onDele
 						</div>
 						{editingId === c.id ? (
 							<div className="nc-comment-edit">
-								<textarea
-									className="nc-comment-textarea"
-									value={editDraft}
-									onChange={(e) => setEditDraft(e.target.value)}
-									rows={4}
-								/>
+								<textarea className="nc-comment-textarea" value={editDraft} onChange={(e) => setEditDraft(e.target.value)} rows={4} />
 								<div className="nc-comment-edit-actions">
 									<button
 										type="button"

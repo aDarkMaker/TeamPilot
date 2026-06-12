@@ -1,36 +1,36 @@
 .shuffle-parent {
-  display: block;
-  white-space: normal;
-  word-wrap: break-word;
+	display: block;
+	white-space: normal;
+	word-wrap: break-word;
 }
 
 .shuffle-char {
-  display: inline-block;
-  opacity: 0;
-  transform: translateY(80%);
-  transition: none;
+	display: inline-block;
+	opacity: 0;
+	transform: translateY(80%);
+	transition: none;
 }
 
 .shuffle-active .shuffle-char {
-  animation: shuffleIn 0.55s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
-  animation-delay: calc(var(--shuffle-index, 0) * 60ms);
+	animation: shuffleIn 0.55s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+	animation-delay: calc(var(--shuffle-index, 0) * 60ms);
 }
 
 @keyframes shuffleIn {
-  0% {
-    opacity: 0;
-    transform: translateY(80%);
-  }
-  100% {
-    opacity: 1;
-    transform: translateY(0);
-  }
+	0% {
+		opacity: 0;
+		transform: translateY(80%);
+	}
+	100% {
+		opacity: 1;
+		transform: translateY(0);
+	}
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .shuffle-char {
-    opacity: 1;
-    transform: translateY(0);
-    animation: none;
-  }
+	.shuffle-char {
+		opacity: 1;
+		transform: translateY(0);
+		animation: none;
+	}
 }

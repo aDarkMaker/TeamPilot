@@ -88,4 +88,3 @@ export function broadcastApplicationsUpdated() {
 	if (typeof window === 'undefined') return;
 	window.dispatchEvent(new CustomEvent('hxk:applications-updated', { detail: { updatedAt: Date.now() } }));
 }
-

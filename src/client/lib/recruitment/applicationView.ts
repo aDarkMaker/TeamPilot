@@ -59,7 +59,7 @@ function attachmentsFromPath(attachmentPath: string | null): RecruitmentAttachme
 		.split('|')
 		.map((x) => x.trim())
 		.filter(Boolean);
-	
+
 	return parts
 		.map((raw, i) => {
 			const storedName = raw.split(/[/\\]/).pop() || '附件';

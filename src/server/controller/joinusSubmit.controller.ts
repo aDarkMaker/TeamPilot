@@ -1,59 +1,53 @@
-import type { Context } from "koa";
-import type { JoinUsSubmitService } from "../services/joinusSubmit.service";
-import { JOINUS_DUPLICATE_SUBMIT_CODE } from "../services/joinusSubmit.service";
-import { AppError } from "../types/api";
+import type { Context } from 'koa';
+import type { JoinUsSubmitService } from '../services/joinusSubmit.service';
+import { JOINUS_DUPLICATE_SUBMIT_CODE } from '../services/joinusSubmit.service';
+import { AppError } from '../types/api';
 
 type UploadedTempFile = {
-    filepath?: string;
-    filePath?: string;
-    path?: string;
-    mimetype?: string;
-    originalName?: string;
-    originalFilename?: string;
-    newFilename?: string;
+	filepath?: string;
+	filePath?: string;
+	path?: string;
+	mimetype?: string;
+	originalName?: string;
+	originalFilename?: string;
+	newFilename?: string;
 };
 
 type UploadedFile = {
-    buffer: Buffer;
-    mimetype: string;
-    originalName: string;
+	buffer: Buffer;
+	mimetype: string;
+	originalName: string;
 };
 
 function getUploadedTempFilePath(file: UploadedTempFile): string {
-    const p = file.filepath ?? file.filePath ?? file.path;
-    if (!p) throw new Error('NO_FILE_PATH');
-    return p;
+	const p = file.filepath ?? file.filePath ?? file.path;
+	if (!p) throw new Error('NO_FILE_PATH');
+	return p;
 }
 
 async function readUploadedBufferAndUnlink(file: UploadedTempFile): Promise<UploadedFile> {
-    const { readFile, unlink } = await import('node:fs/promises');
-    const filePath = getUploadedTempFilePath(file);
+	const { readFile, unlink } = await import('node:fs/promises');
+	const filePath = getUploadedTempFilePath(file);
 
-    let buffer: Buffer;
-    try {
-        buffer = await readFile(filePath);
-    } catch (e) {
-        const msg = e instanceof Error ? e.message : 'READ_FILE_FAILED';
-        throw new Error(`READ_FILE_FAILED: ${msg}`);
-    }
+	let buffer: Buffer;
+	try {
+		buffer = await readFile(filePath);
+	} catch (e) {
+		const msg = e instanceof Error ? e.message : 'READ_FILE_FAILED';
+		throw new Error(`READ_FILE_FAILED: ${msg}`);
+	}
 
-    await unlink(filePath).catch(() => undefined);
+	await unlink(filePath).catch(() => undefined);
 
-    const mimetype = file.mimetype ?? 'application/octet-stream';
-    const originalName =
-        file.originalName ??
-        file.originalFilename ??
-        (file as any).name ??
-        (file as any).filename ??
-        file.newFilename ??
-        'attachment';
+	const mimetype = file.mimetype ?? 'application/octet-stream';
+	const originalName = file.originalName ?? file.originalFilename ?? (file as any).name ?? (file as any).filename ?? file.newFilename ?? 'attachment';
 
-    return { buffer, mimetype, originalName };
+	return { buffer, mimetype, originalName };
 }
 
 function toBodyRecord(body: unknown): Record<string, unknown> {
-    if (!body || typeof body !== 'object') return {};
-    return body as Record<string, unknown>;
+	if (!body || typeof body !== 'object') return {};
+	return body as Record<string, unknown>;
 }
 
 function toFileList(raw: unknown): UploadedTempFile[] {
@@ -63,35 +57,33 @@ function toFileList(raw: unknown): UploadedTempFile[] {
 }
 
 export class JoinusSubmitController {
-    constructor(private service: JoinUsSubmitService) {}
+	constructor(private service: JoinUsSubmitService) {}
 
-    submitAnonymous = async (ctx: Context) => {
-        const fields = toBodyRecord(ctx.request.body);
-        const portfolioRaw = (ctx.request.files as any)?.portfolio;
+	submitAnonymous = async (ctx: Context) => {
+		const fields = toBodyRecord(ctx.request.body);
+		const portfolioRaw = (ctx.request.files as any)?.portfolio;
 
-        const tmpFiles = toFileList(portfolioRaw);
-        const uploads: UploadedFile[] = [];
-        for (const f of tmpFiles) {
-            uploads.push(await readUploadedBufferAndUnlink(f));
-        }
+		const tmpFiles = toFileList(portfolioRaw);
+		const uploads: UploadedFile[] = [];
+		for (const f of tmpFiles) {
+			uploads.push(await readUploadedBufferAndUnlink(f));
+		}
 
-        try {
-            await this.service.submitAnonymous(fields, uploads);
-        } catch (e) {
-            if (e instanceof AppError && e.code === JOINUS_DUPLICATE_SUBMIT_CODE) {
-                ctx.status = 409;
-                ctx.set('X-Duplicate', 'true');
-                ctx.body = { ok: false, duplicate: true, code: e.code, message: e.message };
-                return;
-            }
-            if (e instanceof AppError) throw e;
-            const raw = e instanceof Error ? e.message : '';
-            const userMsg = /READ_FILE|NO_FILE_PATH/i.test(raw)
-                ? '附件没传好，重新选一下试试～'
-                : '提交出了点小状况，稍后再试';
-            throw new AppError(400, 'SUBMIT_FAILED', userMsg);
-        }
+		try {
+			await this.service.submitAnonymous(fields, uploads);
+		} catch (e) {
+			if (e instanceof AppError && e.code === JOINUS_DUPLICATE_SUBMIT_CODE) {
+				ctx.status = 409;
+				ctx.set('X-Duplicate', 'true');
+				ctx.body = { ok: false, duplicate: true, code: e.code, message: e.message };
+				return;
+			}
+			if (e instanceof AppError) throw e;
+			const raw = e instanceof Error ? e.message : '';
+			const userMsg = /READ_FILE|NO_FILE_PATH/i.test(raw) ? '附件没传好，重新选一下试试～' : '提交出了点小状况，稍后再试';
+			throw new AppError(400, 'SUBMIT_FAILED', userMsg);
+		}
 
-        ctx.body = { ok: true };
-    };
+		ctx.body = { ok: true };
+	};
 }

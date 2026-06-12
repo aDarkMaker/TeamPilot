@@ -56,5 +56,5 @@ export default defineConfig(
 				FormData: 'readonly',
 			},
 		},
-	},
+	}
 );

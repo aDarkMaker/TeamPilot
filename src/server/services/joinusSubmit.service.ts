@@ -1,21 +1,18 @@
-import type { DB } from "../db";
-import { AppError } from "../types/api";
-import type { RecruitmentInterviewSlot } from "../types/recruitment";
-import { DEPT_CN_TO_SLUG } from "../../joinus/departments";
-import { readJoinUsFormConfig } from "../../joinus/formConfigIO";
-import { validateJoinusSubmitAgainstConfig } from "../../joinus/validateJoinusSubmit";
-import { departmentOrderFromSlug } from "../recruitment/departmentOrder";
-import { getJoinUsPublicUserId } from "../auth/bootstrapJoinUsPublicUser";
+import type { DB } from '../db';
+import { AppError } from '../types/api';
+import type { RecruitmentInterviewSlot } from '../types/recruitment';
+import { DEPT_CN_TO_SLUG } from '../../joinus/departments';
+import { readJoinUsFormConfig } from '../../joinus/formConfigIO';
+import { validateJoinusSubmitAgainstConfig } from '../../joinus/validateJoinusSubmit';
+import { departmentOrderFromSlug } from '../recruitment/departmentOrder';
+import { getJoinUsPublicUserId } from '../auth/bootstrapJoinUsPublicUser';
 
-import { mkdirSync, writeFileSync } from "node:fs";
-import { join } from "node:path";
-import { randomUUID } from "node:crypto";
-import { pinyin } from "pinyin-pro";
-import { broadcastRecruitmentApplicationsUpdated } from "../recruitment/recruitmentEvents";
-import {
-	appendInterviewIntroToMarkdown,
-	buildInterviewIntroExtra,
-} from "../../joinus/interviewIntro";
+import { mkdirSync, writeFileSync } from 'node:fs';
+import { join } from 'node:path';
+import { randomUUID } from 'node:crypto';
+import { pinyin } from 'pinyin-pro';
+import { broadcastRecruitmentApplicationsUpdated } from '../recruitment/recruitmentEvents';
+import { appendInterviewIntroToMarkdown, buildInterviewIntroExtra } from '../../joinus/interviewIntro';
 
 type UploadedFile = { buffer: Buffer; mimetype: string; originalName: string };
 
@@ -30,39 +27,39 @@ function isOverwrite(fields: Record<string, unknown>): boolean {
 }
 
 function toStr(v: unknown): string {
-    if (v == null) return '';
-    if (Array.isArray(v)) return String(v[0] ?? '');
-    return String(v);
+	if (v == null) return '';
+	if (Array.isArray(v)) return String(v[0] ?? '');
+	return String(v);
 }
 
 function normalizeText(raw: unknown): string {
-    return toStr(raw).trim();
+	return toStr(raw).trim();
 }
 
 function isYes(v: unknown): boolean {
-    return normalizeText(v) === '是';
+	return normalizeText(v) === '是';
 }
 
 function nameToPinyinSlug(rawName: string): string {
-    const normalized = rawName.trim();
-    if (!normalized) return 'unknown';
+	const normalized = rawName.trim();
+	if (!normalized) return 'unknown';
 
-    const slugRaw = pinyin(normalized, {
-        toneType: 'none',
-        type: 'string',
-        separator: '',
-        nonZh: 'removed',
-    });
-    const fallback = normalized.toLowerCase().replace(/[^a-z0-9]/g, '-');
+	const slugRaw = pinyin(normalized, {
+		toneType: 'none',
+		type: 'string',
+		separator: '',
+		nonZh: 'removed',
+	});
+	const fallback = normalized.toLowerCase().replace(/[^a-z0-9]/g, '-');
 
-    const raw = (slugRaw ? String(slugRaw) : fallback).toLowerCase();
+	const raw = (slugRaw ? String(slugRaw) : fallback).toLowerCase();
 	const safe = raw.replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '');
-    return safe || 'unknown';
+	return safe || 'unknown';
 }
 
 function extFromMime(mime: string): string | null {
-    if (!mime) return null;
-    const m = mime.toLowerCase();
+	if (!mime) return null;
+	const m = mime.toLowerCase();
 	if (m === 'application/pdf') return 'pdf';
 	if (m === 'image/jpeg') return 'jpg';
 	if (m === 'image/png') return 'png';
@@ -126,9 +123,7 @@ export class JoinUsSubmitService {
 			onlineTime,
 		});
 		const introMarkdown = appendInterviewIntroToMarkdown(introBase, extra);
-		const worksMarkdown = uploads.length
-			? `已上传附件：\n${uploads.map((u) => `- ${u.originalName}`).join('\n')}`
-			: '（无）';
+		const worksMarkdown = uploads.length ? `已上传附件：\n${uploads.map((u) => `- ${u.originalName}`).join('\n')}` : '（无）';
 
 		let attachmentPath: string | null = null;
 		if (uploads.length > 0) {
@@ -138,8 +133,8 @@ export class JoinUsSubmitService {
 			const relPaths: string[] = [];
 			for (let i = 0; i < uploads.length; i++) {
 				const u = uploads[i];
-                if (u === undefined) continue;
-                
+				if (u === undefined) continue;
+
 				const ext = extFromMime(u.mimetype) || 'bin';
 				const base = `${randomUUID().slice(0, 8)}_${i}__${sanitizeFileName(u.originalName)}`;
 				const destName = ensureExt(base, ext);

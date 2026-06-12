@@ -35,7 +35,7 @@ export class SearchService {
 				type: 'string',
 				separator: '',
 				nonZh: 'removed',
-			}),
+			})
 		);
 		const initials = this.normalizeKey(
 			pinyin(normalized, {
@@ -44,7 +44,7 @@ export class SearchService {
 				type: 'string',
 				separator: '',
 				nonZh: 'removed',
-			}),
+			})
 		);
 		return { full, initials };
 	}
@@ -69,18 +69,12 @@ export class SearchService {
 	}
 
 	/** 同一来源任务派发给多人时多行 task_cards，搜索只保留更新时间最新的一条 */
-	private dedupeTaskCardsBySource<
-		T extends { sourceType: string; sourceId: string; updatedAt: string; createdAt: string },
-	>(tasks: T[]): T[] {
+	private dedupeTaskCardsBySource<T extends { sourceType: string; sourceId: string; updatedAt: string; createdAt: string }>(tasks: T[]): T[] {
 		const map = new Map<string, T>();
 		for (const t of tasks) {
 			const key = `${t.sourceType}:${t.sourceId}`;
 			const prev = map.get(key);
-			if (
-				!prev ||
-				t.updatedAt > prev.updatedAt ||
-				(t.updatedAt === prev.updatedAt && t.createdAt > prev.createdAt)
-			) {
+			if (!prev || t.updatedAt > prev.updatedAt || (t.updatedAt === prev.updatedAt && t.createdAt > prev.createdAt)) {
 				map.set(key, t);
 			}
 		}
@@ -125,9 +119,7 @@ export class SearchService {
 
 		// ---- 1. 成员 ----
 		const allUsers = await this.db.listUsers();
-		const matchedUsers = allUsers.filter((u) =>
-			this.matchesUser(q, { username: u.username, nickname: u.nickname ?? null }),
-		);
+		const matchedUsers = allUsers.filter((u) => this.matchesUser(q, { username: u.username, nickname: u.nickname ?? null }));
 		for (const u of matchedUsers.slice(0, 5)) {
 			const displayName = u.nickname?.trim() || u.username || '';
 			results.push({
@@ -149,7 +141,7 @@ export class SearchService {
 			allTasks.push(...tasks);
 		}
 		const matchedTasks = this.dedupeTaskCardsBySource(
-			allTasks.filter((t) => this.textContains(t.title, rawQ) || this.textContains(t.content, rawQ)),
+			allTasks.filter((t) => this.textContains(t.title, rawQ) || this.textContains(t.content, rawQ))
 		).sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
 		for (const t of matchedTasks.slice(0, 5)) {
 			const matchInTitle = this.textContains(t.title, rawQ);
@@ -194,9 +186,7 @@ export class SearchService {
 
 		// ---- 4. 待审批申请 ----
 		const pendingApps = await this.db.findPendingApplications();
-		const matchedApps = pendingApps.filter(
-			(a) => this.textContains(a.username, rawQ) || this.textContains(a.reason, rawQ),
-		);
+		const matchedApps = pendingApps.filter((a) => this.textContains(a.username, rawQ) || this.textContains(a.reason, rawQ));
 		for (const a of this.dedupePendingByUsername(matchedApps)
 			.sort((a, b) => b.createdAt.localeCompare(a.createdAt))
 			.slice(0, 3)) {
@@ -223,11 +213,7 @@ export class SearchService {
 		const monthSchedules = await this.db.listSchedulesByMonth({ year: thisYear, month: thisMonth });
 		const matchedSchedules: Schedule[] = [];
 		for (const s of monthSchedules) {
-			if (
-				this.textContains(s.title, rawQ) ||
-				this.textContains(s.description, rawQ) ||
-				this.textContains(s.location, rawQ)
-			) {
+			if (this.textContains(s.title, rawQ) || this.textContains(s.description, rawQ) || this.textContains(s.location, rawQ)) {
 				matchedSchedules.push(s);
 			}
 		}

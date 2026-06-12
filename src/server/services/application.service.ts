@@ -88,8 +88,8 @@ export class ApplicationService {
 						startAt: s.startAt,
 						endAt: s.endAt,
 					}),
-				}),
-			),
+				})
+			)
 		);
 
 		await this.db.setApplicationReview({

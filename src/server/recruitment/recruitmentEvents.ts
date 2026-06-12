@@ -17,4 +17,3 @@ export function broadcastRecruitmentApplicationsUpdated(): void {
 	const ev: RecruitmentEvent = { type: 'applications_updated', updatedAt: Date.now() };
 	emitter.emit('event', ev);
 }
-

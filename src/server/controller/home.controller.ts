@@ -29,13 +29,13 @@ export class HomeController {
 	listTodayBirthdays = async (ctx: Context) => {
 		const data = await this.service.listTodayBirthdays();
 		ctx.body = { ok: true, data };
-	}
+	};
 	listBirthdayWishes = async (ctx: Context) => {
 		const recipientUserId = typeof ctx.query.recipientUserId === 'string' ? ctx.query.recipientUserId : '';
 		const data = await this.service.listWishes(recipientUserId);
 		ctx.body = { ok: true, data };
 	};
-	
+
 	createBirthdayWish = async (ctx: Context) => {
 		const data = await this.service.createWish(ctx.state.user!, ctx.request.body);
 		ctx.body = { ok: true, data };

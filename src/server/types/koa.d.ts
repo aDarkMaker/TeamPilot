@@ -8,7 +8,7 @@ declare module 'koa' {
 			username: string;
 			role: Role;
 		};
-	};
+	}
 	interface Request {
 		file?: MulterFile;
 		files?: { [fieldName: string]: MulterFile[] };

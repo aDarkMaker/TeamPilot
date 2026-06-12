@@ -35,6 +35,6 @@ export class AuthController {
 			maxAge: 0,
 			path: '/',
 		});
-		ctx.body = { ok: true, data: { status: 'ok' } }; 
-	}
+		ctx.body = { ok: true, data: { status: 'ok' } };
+	};
 }

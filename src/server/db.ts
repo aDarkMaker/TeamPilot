@@ -6,12 +6,7 @@ import type { User } from './types/user';
 import type { AccountApplication } from './types/application';
 import type { Schedule, ScheduleParticipant } from './types/schedule';
 import type { HomeAnnouncement } from './types/home';
-import type {
-	RecruitmentApplication,
-	RecruitmentComment,
-	RecruitmentDepartment,
-	RecruitmentInterviewSlot,
-} from './types/recruitment';
+import type { RecruitmentApplication, RecruitmentComment, RecruitmentDepartment, RecruitmentInterviewSlot } from './types/recruitment';
 import type { TaskCard, TaskSourceType, TaskStatus } from './types/task';
 
 export interface DB {
@@ -22,20 +17,32 @@ export interface DB {
 	listUsers(): Promise<User[]>;
 	updateUserStatus(userId: string, status: UserStatus): Promise<void>;
 	deleteUser(userId: string): Promise<void>;
-	listUsersByBirthday(input: { month: number; day: number }): Promise<Array<{ id: string; username: string; nickname: string | null; avatarPath: string | null }>>;
+	listUsersByBirthday(input: {
+		month: number;
+		day: number;
+	}): Promise<Array<{ id: string; username: string; nickname: string | null; avatarPath: string | null }>>;
 	listBirthdayWishes(input: { recipientUserId: string; wishDate: string }): Promise<
-		Array<{ id: string; message: string; createdAt: string; authorId: string; authorUsername: string; authorNickname: string | null; authorAvatarPath: string | null }>
+		Array<{
+			id: string;
+			message: string;
+			createdAt: string;
+			authorId: string;
+			authorUsername: string;
+			authorNickname: string | null;
+			authorAvatarPath: string | null;
+		}>
 	>;
-	createBirthdayWish(input: { recipientUserId: string; authorUserId: string; message: string; wishDate: string }): Promise<
-		{ id: string; message: string; createdAt: string; authorId: string; authorUsername: string; authorNickname: string | null; authorAvatarPath: string | null }
-	>;
+	createBirthdayWish(input: { recipientUserId: string; authorUserId: string; message: string; wishDate: string }): Promise<{
+		id: string;
+		message: string;
+		createdAt: string;
+		authorId: string;
+		authorUsername: string;
+		authorNickname: string | null;
+		authorAvatarPath: string | null;
+	}>;
 
-	listTaskCardsByUser(input: {
-		targetUserId: string;
-		status?: TaskStatus;
-		limit?: number;
-		offset?: number;
-	}): Promise<TaskCard[]>;
+	listTaskCardsByUser(input: { targetUserId: string; status?: TaskStatus; limit?: number; offset?: number }): Promise<TaskCard[]>;
 
 	countPendingTaskCardsByUser(targetUserId: string): Promise<number>;
 
@@ -49,11 +56,7 @@ export interface DB {
 		payloadJson?: string | null;
 	}): Promise<TaskCard>;
 
-	decideTaskCard(input: {
-		taskId: string;
-		targetUserId: string;
-		status: Extract<TaskStatus, 'accepted' | 'leave'>;
-	}): Promise<TaskCard>;
+	decideTaskCard(input: { taskId: string; targetUserId: string; status: Extract<TaskStatus, 'accepted' | 'leave'> }): Promise<TaskCard>;
 	listTaskCardsBySource(input: { sourceType: TaskSourceType; sourceId: string }): Promise<TaskCard[]>;
 	pruneTaskCardsBySourceTargets(input: { sourceType: TaskSourceType; sourceId: string; keepTargetUserIds: string[] }): Promise<void>;
 	deleteTaskCardsBySource(input: { sourceType: TaskSourceType; sourceId: string }): Promise<void>;
@@ -101,7 +104,7 @@ export interface DB {
 
 	searchUsersByUsername(keyword: string, limit?: number): Promise<Array<{ id: string; username: string; avatarPath: string | null }>>;
 	findScheduleById(scheduleId: string): Promise<Schedule | null>;
-	
+
 	listAllSchedulesFromDate(input: { startDate: string }): Promise<Schedule[]>;
 
 	deleteSchedule(scheduleId: string, actor: { id: string }): Promise<void>;
@@ -169,11 +172,7 @@ export interface DB {
 
 	findRecruitmentApplicationByContact(contact: string): Promise<RecruitmentApplication | null>;
 
-	findRecruitmentApplicationByIdentityConflict(
-		fullName: string,
-		contact: string,
-		qq: string
-	): Promise<RecruitmentApplication | null>;
+	findRecruitmentApplicationByIdentityConflict(fullName: string, contact: string, qq: string): Promise<RecruitmentApplication | null>;
 
 	updateRecruitmentApplicationById(
 		id: string,
@@ -218,9 +217,7 @@ export interface DB {
 
 	updateRecruitmentComment(input: { commentId: string; authorId: string; bodyMarkdown: string }): Promise<RecruitmentComment>;
 
-	findRecruitmentCommentMeta(
-		commentId: string,
-	): Promise<{ id: string; applicationId: string; authorId: string; authorRole: Role } | null>;
+	findRecruitmentCommentMeta(commentId: string): Promise<{ id: string; applicationId: string; authorId: string; authorRole: Role } | null>;
 
 	deleteRecruitmentComment(commentId: string): Promise<void>;
 
@@ -236,9 +233,7 @@ export interface DB {
 		rating: number;
 	}): Promise<{ ratingAverage: number | null; ratingCount: number; myRating: number }>;
 
-	getRecruitmentApplicationRatingSummary(
-		applicationId: string,
-	): Promise<{ ratingAverage: number | null; ratingCount: number }>;
+	getRecruitmentApplicationRatingSummary(applicationId: string): Promise<{ ratingAverage: number | null; ratingCount: number }>;
 }
 
 export interface Cache {
@@ -291,8 +286,8 @@ function mapUser(row: any): User {
 		profileBgPath: row.profile_bg_path ?? null,
 		createdAt: String(row.created_at),
 		updatedAt: String(row.updated_at),
-		birthdayMonth: row.birthday_month == null ? null: Number(row.birthday_month),
-		birthdayDay: row.birthday_day == null ? null: Number(row.birthday_day),
+		birthdayMonth: row.birthday_month == null ? null : Number(row.birthday_month),
+		birthdayDay: row.birthday_day == null ? null : Number(row.birthday_day),
 	};
 }
 
@@ -386,9 +381,7 @@ export function createDb(sqlite: Database): DB {
 			sqlite.query("UPDATE users SET role = ?, updated_at = datetime('now') WHERE id = ?").run(role, userId);
 		},
 		async listUsers() {
-			const rows = sqlite
-				.query('SELECT * FROM users WHERE username != ? ORDER BY created_at DESC')
-				.all(JOINUS_PUBLIC_USERNAME);
+			const rows = sqlite.query('SELECT * FROM users WHERE username != ? ORDER BY created_at DESC').all(JOINUS_PUBLIC_USERNAME);
 			return rows.map(mapUser);
 		},
 		async updateUserStatus(userId, status) {
@@ -488,7 +481,7 @@ export function createDb(sqlite: Database): DB {
 					FROM home_announcements a
 					INNER JOIN users u ON u.id = a.created_by
 					ORDER BY a.is_pinned DESC, a.created_at DESC
-					LIMIT ?`,
+					LIMIT ?`
 				)
 				.all(cap);
 			return rows.map(mapHomeAnnouncementRow);
@@ -499,15 +492,17 @@ export function createDb(sqlite: Database): DB {
 					.query(`INSERT INTO home_announcements (title, content_markdown, is_pinned, created_by) VALUES (?, ?, ?, ?)`)
 					.run(payload.title, payload.contentMarkdown, payload.isPinned ? 1 : 0, payload.createdBy);
 
-				sqlite.query(
-					`DELETE FROM home_announcements
+				sqlite
+					.query(
+						`DELETE FROM home_announcements
 					 WHERE id IN (
 					   SELECT id
 					   FROM home_announcements
 					   ORDER BY is_pinned DESC, created_at DESC
 					   LIMIT -1 OFFSET 5
-					 )`,
-				).run();
+					 )`
+					)
+					.run();
 				return inserted;
 			})(input);
 			const row = sqlite
@@ -523,16 +518,14 @@ export function createDb(sqlite: Database): DB {
 						u.username AS created_by_username
 					FROM home_announcements a
 					INNER JOIN users u ON u.id = a.created_by
-					WHERE a.id = ? LIMIT 1`,
+					WHERE a.id = ? LIMIT 1`
 				)
 				.get(r.lastInsertRowid);
 			if (!row) throw new Error('HOME_ANNOUNCEMENT_CREATE_FAILED');
 			return mapHomeAnnouncementRow(row);
 		},
 		async setHomeAnnouncementPinned(input) {
-			sqlite
-				.query(`UPDATE home_announcements SET is_pinned = ?, updated_at = datetime('now') WHERE id = ?`)
-				.run(input.isPinned ? 1 : 0, input.id);
+			sqlite.query(`UPDATE home_announcements SET is_pinned = ?, updated_at = datetime('now') WHERE id = ?`).run(input.isPinned ? 1 : 0, input.id);
 		},
 		async deleteHomeAnnouncement(id) {
 			sqlite.query(`DELETE FROM home_announcements WHERE id = ?`).run(id);
@@ -556,17 +549,15 @@ export function createDb(sqlite: Database): DB {
 						payload.startAt,
 						payload.endAt,
 						payload.durationMinutes,
-						payload.createdBy,
+						payload.createdBy
 					);
-				
+
 				const scheduleId = String(result.lastInsertRowid);
 
 				if (!payload.isAll) {
 					const uniq = Array.from(new Set(payload.participantIds));
 					for (const userId of uniq) {
-						sqlite
-							.query(`INSERT OR IGNORE INTO schedule_participants (schedule_id, user_id) VALUES (?, ?)`)
-							.run(scheduleId, userId);
+						sqlite.query(`INSERT OR IGNORE INTO schedule_participants (schedule_id, user_id) VALUES (?, ?)`).run(scheduleId, userId);
 					}
 				}
 
@@ -624,9 +615,7 @@ export function createDb(sqlite: Database): DB {
 		},
 
 		async listSchedulesByMonth(input) {
-			const rows = sqlite
-				.query(`SELECT * FROM schedules WHERE year = ? AND month = ? ORDER BY day ASC, start_at ASC`)
-				.all(input.year, input.month);
+			const rows = sqlite.query(`SELECT * FROM schedules WHERE year = ? AND month = ? ORDER BY day ASC, start_at ASC`).all(input.year, input.month);
 			return rows.map(mapSchedule);
 		},
 		async listSchedulesByDayForUser(input) {
@@ -665,7 +654,7 @@ export function createDb(sqlite: Database): DB {
 					 FROM schedules s
 					 WHERE s.is_all = 1
 					   AND printf('%04d-%02d-%02d', s.year, s.month, s.day) >= ?
-					 ORDER BY s.year ASC, s.month ASC, s.day ASC, s.start_at ASC`,
+					 ORDER BY s.year ASC, s.month ASC, s.day ASC, s.start_at ASC`
 				)
 				.all(input.startDate);
 			return rows.map(mapSchedule);
@@ -691,9 +680,7 @@ export function createDb(sqlite: Database): DB {
 
 		async searchUsersByUsername(keyword, limit = 8) {
 			const rows = sqlite
-				.query(
-					`SELECT id, username, avatar_path FROM users WHERE username LIKE ? AND username != ? ORDER BY username ASC LIMIT ?`,
-				)
+				.query(`SELECT id, username, avatar_path FROM users WHERE username LIKE ? AND username != ? ORDER BY username ASC LIMIT ?`)
 				.all(`%${keyword}%`, JOINUS_PUBLIC_USERNAME, limit);
 			return rows.map((r: any) => ({ id: String(r.id), username: String(r.username), avatarPath: r.avatar_path ?? null }));
 		},
@@ -717,7 +704,7 @@ export function createDb(sqlite: Database): DB {
 						wants_offline_interview, offline_interview_slot,
 						wants_online_interview, online_interview_slot,
 						intro_markdown, works_markdown, attachment_path
-					) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+					) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
 				)
 				.run(
 					input.submitterUserId,
@@ -735,7 +722,7 @@ export function createDb(sqlite: Database): DB {
 					input.onlineInterviewSlot,
 					input.introMarkdown,
 					input.worksMarkdown,
-					input.attachmentPath,
+					input.attachmentPath
 				);
 			const row = sqlite.query(`SELECT * FROM recruitment_applications WHERE id = ?`).get(r.lastInsertRowid);
 			return mapRecruitmentApplication(row);
@@ -768,7 +755,7 @@ export function createDb(sqlite: Database): DB {
 						intro_markdown = excluded.intro_markdown,
 						works_markdown = excluded.works_markdown,
 						attachment_path = excluded.attachment_path,
-						updated_at = datetime('now')`,
+						updated_at = datetime('now')`
 				)
 				.run(
 					input.submitterUserId,
@@ -786,7 +773,7 @@ export function createDb(sqlite: Database): DB {
 					input.onlineInterviewSlot,
 					input.introMarkdown,
 					input.worksMarkdown,
-					input.attachmentPath,
+					input.attachmentPath
 				);
 			const row = sqlite.query(`SELECT * FROM recruitment_applications WHERE contact = ? LIMIT 1`).get(contact);
 			if (!row) throw new Error('UPSERT_RECRUITMENT_FAILED');
@@ -794,9 +781,7 @@ export function createDb(sqlite: Database): DB {
 		},
 
 		async findRecruitmentApplicationByContact(contact) {
-			const row = sqlite
-				.query(`SELECT * FROM recruitment_applications WHERE contact = ? LIMIT 1`)
-				.get(String(contact).trim());
+			const row = sqlite.query(`SELECT * FROM recruitment_applications WHERE contact = ? LIMIT 1`).get(String(contact).trim());
 			return row ? mapRecruitmentApplication(row) : null;
 		},
 
@@ -870,9 +855,7 @@ export function createDb(sqlite: Database): DB {
 
 		async listRecruitmentApplications(input) {
 			const dir = input.timeOrder === 'asc' ? 'ASC' : 'DESC';
-			const rows = sqlite
-				.query(`SELECT * FROM recruitment_applications ORDER BY department_sort_order ASC, created_at ${dir}`)
-				.all();
+			const rows = sqlite.query(`SELECT * FROM recruitment_applications ORDER BY department_sort_order ASC, created_at ${dir}`).all();
 			return rows.map(mapRecruitmentApplication);
 		},
 
@@ -886,16 +869,12 @@ export function createDb(sqlite: Database): DB {
 		},
 
 		async countRecruitmentApplicationsBySubmitter(submitterUserId) {
-			const row = sqlite
-				.query(`SELECT COUNT(*) AS c FROM recruitment_applications WHERE submitter_user_id = ?`)
-				.get(submitterUserId) as any;
+			const row = sqlite.query(`SELECT COUNT(*) AS c FROM recruitment_applications WHERE submitter_user_id = ?`).get(submitterUserId) as any;
 			return Number(row?.c ?? 0);
 		},
 
 		async listRecruitmentApplicationTags(applicationId) {
-			const rows = sqlite
-				.query(`SELECT tag FROM recruitment_application_tags WHERE application_id = ? ORDER BY tag ASC`)
-				.all(applicationId);
+			const rows = sqlite.query(`SELECT tag FROM recruitment_application_tags WHERE application_id = ? ORDER BY tag ASC`).all(applicationId);
 			return rows.map((r: any) => String(r.tag));
 		},
 
@@ -925,7 +904,7 @@ export function createDb(sqlite: Database): DB {
 					 FROM recruitment_comments c
 					 INNER JOIN users u ON u.id = c.author_id
 					 WHERE c.application_id = ?
-					 ORDER BY c.created_at ASC`,
+					 ORDER BY c.created_at ASC`
 				)
 				.all(viewerUserId, applicationId);
 			return rows.map(mapRecruitmentCommentRow);
@@ -942,7 +921,7 @@ export function createDb(sqlite: Database): DB {
 						EXISTS(SELECT 1 FROM recruitment_comment_likes lx WHERE lx.comment_id = c.id AND lx.user_id = ?) AS liked_by_me
 					 FROM recruitment_comments c
 					 INNER JOIN users u ON u.id = c.author_id
-					 WHERE c.id = ?`,
+					 WHERE c.id = ?`
 				)
 				.get(input.authorId, r.lastInsertRowid);
 			return mapRecruitmentCommentRow(row);
@@ -950,9 +929,7 @@ export function createDb(sqlite: Database): DB {
 
 		async updateRecruitmentComment(input) {
 			const n = sqlite
-				.query(
-					`UPDATE recruitment_comments SET body_markdown = ?, updated_at = datetime('now') WHERE id = ? AND author_id = ?`,
-				)
+				.query(`UPDATE recruitment_comments SET body_markdown = ?, updated_at = datetime('now') WHERE id = ? AND author_id = ?`)
 				.run(input.bodyMarkdown, input.commentId, input.authorId).changes;
 			if (!n) throw new Error('COMMENT_NOT_FOUND_OR_FORBIDDEN');
 			const row = sqlite
@@ -962,7 +939,7 @@ export function createDb(sqlite: Database): DB {
 						EXISTS(SELECT 1 FROM recruitment_comment_likes lx WHERE lx.comment_id = c.id AND lx.user_id = ?) AS liked_by_me
 					 FROM recruitment_comments c
 					 INNER JOIN users u ON u.id = c.author_id
-					 WHERE c.id = ?`,
+					 WHERE c.id = ?`
 				)
 				.get(input.authorId, input.commentId);
 			return mapRecruitmentCommentRow(row);
@@ -974,7 +951,7 @@ export function createDb(sqlite: Database): DB {
 					`SELECT c.id, c.application_id, c.author_id, u.role AS author_role
 					 FROM recruitment_comments c
 					 INNER JOIN users u ON u.id = c.author_id
-					 WHERE c.id = ? LIMIT 1`,
+					 WHERE c.id = ? LIMIT 1`
 				)
 				.get(commentId) as any;
 			if (!row) return null;
@@ -995,7 +972,7 @@ export function createDb(sqlite: Database): DB {
 				.query(
 					`SELECT application_id, AVG(rating) AS rating_avg, COUNT(*) AS rating_count
 					 FROM recruitment_application_ratings
-					 GROUP BY application_id`,
+					 GROUP BY application_id`
 				)
 				.all() as Array<{ application_id: number; rating_avg: number; rating_count: number }>;
 			const map = new Map<string, { ratingAverage: number; ratingCount: number }>();
@@ -1009,9 +986,10 @@ export function createDb(sqlite: Database): DB {
 		},
 
 		async listRecruitmentRatingsByUser(userId) {
-			const rows = sqlite
-				.query(`SELECT application_id, rating FROM recruitment_application_ratings WHERE user_id = ?`)
-				.all(userId) as Array<{ application_id: number; rating: number }>;
+			const rows = sqlite.query(`SELECT application_id, rating FROM recruitment_application_ratings WHERE user_id = ?`).all(userId) as Array<{
+				application_id: number;
+				rating: number;
+			}>;
 			const map = new Map<string, number>();
 			for (const row of rows) {
 				map.set(String(row.application_id), Number(row.rating));
@@ -1024,7 +1002,7 @@ export function createDb(sqlite: Database): DB {
 				.query(
 					`SELECT AVG(rating) AS rating_avg, COUNT(*) AS rating_count
 					 FROM recruitment_application_ratings
-					 WHERE application_id = ?`,
+					 WHERE application_id = ?`
 				)
 				.get(applicationId) as { rating_avg: number | null; rating_count: number } | undefined;
 			const count = Number(row?.rating_count ?? 0);
@@ -1039,7 +1017,7 @@ export function createDb(sqlite: Database): DB {
 					 VALUES (?, ?, ?)
 					 ON CONFLICT(application_id, user_id) DO UPDATE SET
 					   rating = excluded.rating,
-					   updated_at = datetime('now')`,
+					   updated_at = datetime('now')`
 				)
 				.run(input.applicationId, input.userId, input.rating);
 			const summary = await this.getRecruitmentApplicationRatingSummary(input.applicationId);
@@ -1056,13 +1034,11 @@ export function createDb(sqlite: Database): DB {
 				} else {
 					sqlite.query(`INSERT INTO recruitment_comment_likes (comment_id, user_id) VALUES (?, ?)`).run(input.commentId, input.userId);
 				}
-				const cnt = sqlite
-					.query(`SELECT COUNT(*) AS c FROM recruitment_comment_likes WHERE comment_id = ?`)
-					.get(input.commentId) as any;
+				const cnt = sqlite.query(`SELECT COUNT(*) AS c FROM recruitment_comment_likes WHERE comment_id = ?`).get(input.commentId) as any;
 				return Number(cnt?.c ?? 0);
 			})();
 			const liked = Boolean(
-				sqlite.query(`SELECT 1 FROM recruitment_comment_likes WHERE comment_id = ? AND user_id = ?`).get(input.commentId, input.userId),
+				sqlite.query(`SELECT 1 FROM recruitment_comment_likes WHERE comment_id = ? AND user_id = ?`).get(input.commentId, input.userId)
 			);
 			return { liked, likeCount };
 		},
@@ -1075,7 +1051,7 @@ export function createDb(sqlite: Database): DB {
 				WHERE status = 'active'
 					AND birthday_month = ?
 					AND birthday_day = ?
-				ORDER BY role DESC, created_at ASC`,
+				ORDER BY role DESC, created_at ASC`
 				)
 				.all(input.month, input.day) as any[];
 
@@ -1101,10 +1077,10 @@ export function createDb(sqlite: Database): DB {
 					FROM birthday_wishes w
 					INNER JOIN users u ON u.id = w.author_user_id
 					WHERE w.recipient_user_id = ? AND w.wish_date = ?
-					ORDER BY w.created_at ASC`,
+					ORDER BY w.created_at ASC`
 				)
 				.all(input.recipientUserId, input.wishDate) as any[];
-			
+
 			return rows.map((r) => ({
 				id: String(r.id),
 				message: String(r.message),
@@ -1120,7 +1096,7 @@ export function createDb(sqlite: Database): DB {
 			const r = sqlite
 				.query(
 					`INSERT INTO birthday_wishes (recipient_user_id, author_user_id, message, wish_date)
-						VALUES (?, ?, ?, ?)`,
+						VALUES (?, ?, ?, ?)`
 				)
 				.run(input.recipientUserId, input.authorUserId, input.message, input.wishDate);
 
@@ -1136,7 +1112,7 @@ export function createDb(sqlite: Database): DB {
 						u.avatar_path AS author_avatar_path
 					FROM birthday_wishes w
 					INNER JOIN users u ON u.id = w.author_user_id
-					WHERE w.id = ?`,
+					WHERE w.id = ?`
 				)
 				.get(r.lastInsertRowid) as any;
 
@@ -1181,10 +1157,10 @@ export function createDb(sqlite: Database): DB {
 					FROM task_cards
 					WHERE ${where.join(' AND ')}
 					ORDER BY created_at DESC
-					LIMIT ? OFFSET ?`,
+					LIMIT ? OFFSET ?`
 				)
 				.all(...bindings, limit, offset) as any[];
-			
+
 			return rows.map((r) => ({
 				id: String(r.id),
 				targetUserId: String(r.target_user_id),
@@ -1202,9 +1178,7 @@ export function createDb(sqlite: Database): DB {
 		},
 
 		async countPendingTaskCardsByUser(targetUserId) {
-			const row = sqlite
-				.query(`SELECT COUNT(*) AS c FROM task_cards WHERE target_user_id = ? AND status = 'pending'`)
-				.get(targetUserId) as any;
+			const row = sqlite.query(`SELECT COUNT(*) AS c FROM task_cards WHERE target_user_id = ? AND status = 'pending'`).get(targetUserId) as any;
 			return Number(row?.c ?? 0);
 		},
 
@@ -1219,17 +1193,9 @@ export function createDb(sqlite: Database): DB {
 						title = excluded.title,
 						content = excluded.content,
 						payload_json = excluded.payload_json,
-						updated_at = datetime('now')`,
+						updated_at = datetime('now')`
 				)
-				.run(
-					input.targetUserId,
-					input.actorUserId,
-					input.sourceType,
-					input.sourceId,
-					input.title,
-					input.content ?? null,
-					input.payloadJson ?? null,
-				);
+				.run(input.targetUserId, input.actorUserId, input.sourceType, input.sourceId, input.title, input.content ?? null, input.payloadJson ?? null);
 
 			const row = sqlite
 				.query(
@@ -1248,10 +1214,10 @@ export function createDb(sqlite: Database): DB {
 						updated_at
 					FROM task_cards
 					WHERE target_user_id = ? AND source_type = ? AND source_id = ?
-					LIMIT 1`,
+					LIMIT 1`
 				)
 				.get(input.targetUserId, input.sourceType, input.sourceId) as any;
-			
+
 			return {
 				id: String(row.id),
 				targetUserId: String(row.target_user_id),
@@ -1270,17 +1236,15 @@ export function createDb(sqlite: Database): DB {
 
 		async decideTaskCard(input) {
 			const tx = sqlite.transaction((payload: typeof input) => {
-				const row = sqlite
-					.query(`SELECT id, target_user_id, status FROM task_cards WHERE id = ? LIMIT 1`)
-					.get(payload.taskId) as any;
+				const row = sqlite.query(`SELECT id, target_user_id, status FROM task_cards WHERE id = ? LIMIT 1`).get(payload.taskId) as any;
 				if (!row) throw new Error('TASK_NOT_FOUND');
 				if (String(row.target_user_id) !== String(payload.targetUserId)) throw new Error('FORBIDDEN');
-				
+
 				sqlite
 					.query(
 						`UPDATE task_cards
 						SET status = ?, decided_at = datetime('now'), updated_at = datetime('now')
-						WHERE id = ?`,
+						WHERE id = ?`
 					)
 					.run(payload.status, payload.taskId);
 
@@ -1299,10 +1263,10 @@ export function createDb(sqlite: Database): DB {
 							decided_at,
 							created_at,
 							updated_at
-						FROM task_cards WHERE id = ? LIMIT 1`,
+						FROM task_cards WHERE id = ? LIMIT 1`
 					)
 					.get(payload.taskId) as any;
-				
+
 				return next;
 			});
 
@@ -1342,7 +1306,7 @@ export function createDb(sqlite: Database): DB {
 						updated_at
 					FROM task_cards
 					WHERE source_type = ? AND source_id = ?
-					ORDER BY created_at DESC`,
+					ORDER BY created_at DESC`
 				)
 				.all(input.sourceType, input.sourceId) as any[];
 			return rows.map((r) => ({
@@ -1364,9 +1328,7 @@ export function createDb(sqlite: Database): DB {
 		async pruneTaskCardsBySourceTargets(input) {
 			const keep = Array.from(new Set(input.keepTargetUserIds)).filter(Boolean);
 			if (keep.length === 0) {
-				sqlite
-					.query(`DELETE FROM task_cards WHERE source_type = ? AND source_id = ?`)
-					.run(input.sourceType, input.sourceId);
+				sqlite.query(`DELETE FROM task_cards WHERE source_type = ? AND source_id = ?`).run(input.sourceType, input.sourceId);
 				return;
 			}
 			const placeholders = keep.map(() => '?').join(', ');
@@ -1374,15 +1336,13 @@ export function createDb(sqlite: Database): DB {
 				.query(
 					`DELETE FROM task_cards
 					 WHERE source_type = ? AND source_id = ?
-					   AND target_user_id NOT IN (${placeholders})`,
+					   AND target_user_id NOT IN (${placeholders})`
 				)
 				.run(input.sourceType, input.sourceId, ...keep);
 		},
 
 		async deleteTaskCardsBySource(input) {
-			sqlite
-				.query(`DELETE FROM task_cards WHERE source_type = ? AND source_id = ?`)
-				.run(input.sourceType, input.sourceId);
+			sqlite.query(`DELETE FROM task_cards WHERE source_type = ? AND source_id = ?`).run(input.sourceType, input.sourceId);
 		},
 	};
 }

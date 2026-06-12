@@ -102,4 +102,3 @@ export function broadcastScheduleUpdated(dayKey?: string) {
 	if (typeof window === 'undefined') return;
 	window.dispatchEvent(new CustomEvent('hxk:schedule-updated', { detail: { dayKey } }));
 }
-

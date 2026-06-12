@@ -7,17 +7,21 @@ import type { TaskStatus } from '../types/task';
 import { pinyin } from 'pinyin-pro';
 
 const createSchema = z.object({
-    title: z.string().min(1).max(100),
+	title: z.string().min(1).max(100),
 	scope: z.enum(['self', 'all', 'custom']).default('self'),
 	participantIds: z.array(z.string()).default([]),
-    description: z.string().max(2000).nullable().optional(),
-    year: z.number().int().min(2000).max(2100),
-    month: z.number().int().min(1).max(12),
-    day: z.number().int().min(1).max(31),
-    startAt: z.string().regex(/^\d{2}:\d{2}$/),
-    endAt: z.string().regex(/^\d{2}:\d{2}$/),
-    durationMinutes: z.number().int().min(5).max(24 * 60),
-    location: z.string().max(200).nullable().optional(),
+	description: z.string().max(2000).nullable().optional(),
+	year: z.number().int().min(2000).max(2100),
+	month: z.number().int().min(1).max(12),
+	day: z.number().int().min(1).max(31),
+	startAt: z.string().regex(/^\d{2}:\d{2}$/),
+	endAt: z.string().regex(/^\d{2}:\d{2}$/),
+	durationMinutes: z
+		.number()
+		.int()
+		.min(5)
+		.max(24 * 60),
+	location: z.string().max(200).nullable().optional(),
 });
 
 const daySchema = z.object({
@@ -31,7 +35,7 @@ const weekSchema = z.object({
 });
 
 export class ScheduleService {
-    constructor(private db: DB) {}
+	constructor(private db: DB) {}
 
 	private getNowShanghaiParts() {
 		const parts = new Intl.DateTimeFormat('zh-CN', {
@@ -43,8 +47,7 @@ export class ScheduleService {
 			hour: '2-digit',
 			minute: '2-digit',
 		}).formatToParts(new Date());
-		const get = (type: Intl.DateTimeFormatPartTypes) =>
-			Number(parts.find((p) => p.type === type)?.value ?? 0);
+		const get = (type: Intl.DateTimeFormatPartTypes) => Number(parts.find((p) => p.type === type)?.value ?? 0);
 		return {
 			year: get('year'),
 			month: get('month'),
@@ -75,12 +78,7 @@ export class ScheduleService {
 		}
 	}
 
-	private assertScheduleStartNotPast(input: {
-		year: number;
-		month: number;
-		day: number;
-		startAt: string;
-	}) {
+	private assertScheduleStartNotPast(input: { year: number; month: number; day: number; startAt: string }) {
 		const [h, m] = input.startAt.split(':').map((x) => Number(x));
 		if (!Number.isFinite(h) || !Number.isFinite(m)) {
 			throw new AppError(400, 'INVALID_TIME', '开始时间格式不正确');
@@ -142,8 +140,8 @@ export class ScheduleService {
 					title: `日程提醒：${input.title}`,
 					content: input.description ?? null,
 					payloadJson: payload,
-				}),
-			),
+				})
+			)
 		);
 		await this.db.pruneTaskCardsBySourceTargets({
 			sourceType: 'schedule_at',
@@ -210,7 +208,7 @@ export class ScheduleService {
 	}
 
 	async create(actor: { id: string; role: Role }, body: unknown) {
-        const parsed = createSchema.parse(body);
+		const parsed = createSchema.parse(body);
 		this.assertEndAfterStart(parsed.startAt, parsed.endAt);
 		const startM = this.parseHHmmToMinutes(parsed.startAt)!;
 		const endM = this.parseHHmmToMinutes(parsed.endAt)!;
@@ -240,20 +238,20 @@ export class ScheduleService {
 			participantIds = [actor.id];
 		}
 
-        const schedule = await this.db.createSchedule({
-            title: parsed.title,
+		const schedule = await this.db.createSchedule({
+			title: parsed.title,
 			participantIds,
 			isAll,
-            description: parsed.description ?? null,
-            year: parsed.year,
-            month: parsed.month,
-            day: parsed.day,
-            startAt: parsed.startAt,
-            endAt: parsed.endAt,
-            durationMinutes,
-            location: parsed.location ?? null,
+			description: parsed.description ?? null,
+			year: parsed.year,
+			month: parsed.month,
+			day: parsed.day,
+			startAt: parsed.startAt,
+			endAt: parsed.endAt,
+			durationMinutes,
+			location: parsed.location ?? null,
 			createdBy: actor.id,
-        });
+		});
 		await this.syncScheduleTaskCards({
 			scheduleId: schedule.id,
 			actorId: actor.id,
@@ -267,9 +265,9 @@ export class ScheduleService {
 			endAt: parsed.endAt,
 			participantIds,
 		});
-        const participants = await this.loadParticipantsWithTaskStatus(schedule);
-        return { ...schedule, participants };
-    }
+		const participants = await this.loadParticipantsWithTaskStatus(schedule);
+		return { ...schedule, participants };
+	}
 
 	async listByDay(actor: { id: string; role: Role }, query: unknown) {
 		const { year, month, day } = daySchema.parse(query);
@@ -302,7 +300,7 @@ export class ScheduleService {
 				};
 			})
 		);
-    }
+	}
 
 	async listByWeek(actor: { id: string; role: Role }, query: unknown) {
 		const { start } = weekSchema.parse(query);
@@ -362,19 +360,19 @@ export class ScheduleService {
 		let updated;
 		try {
 			updated = await this.db.updateSchedule(
-			{
-				id: scheduleId,
-				title: parsed.title,
-				description: parsed.description ?? null,
-				location: parsed.location ?? null,
-				year: parsed.year,
-				month: parsed.month,
-				day: parsed.day,
-				startAt: parsed.startAt,
-				endAt: parsed.endAt,
-				durationMinutes,
-			},
-			{ id: actor.id }
+				{
+					id: scheduleId,
+					title: parsed.title,
+					description: parsed.description ?? null,
+					location: parsed.location ?? null,
+					year: parsed.year,
+					month: parsed.month,
+					day: parsed.day,
+					startAt: parsed.startAt,
+					endAt: parsed.endAt,
+					durationMinutes,
+				},
+				{ id: actor.id }
 			);
 		} catch (e) {
 			const msg = e instanceof Error ? e.message : 'UPDATE_FAILED';
@@ -424,7 +422,7 @@ export class ScheduleService {
 		}
 	}
 
-    async searchUsers(query: unknown) {
+	async searchUsers(query: unknown) {
 		const qRaw = z.object({ q: z.string().trim().max(20).optional().default('') }).parse(query).q;
 		const q = this.normalizeKey(qRaw);
 
@@ -468,5 +466,5 @@ export class ScheduleService {
 			role: u.role,
 			avatarUrl: this.toPublicUrl(u.avatarPath),
 		}));
-    }
+	}
 }

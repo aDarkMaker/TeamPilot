@@ -19,7 +19,7 @@ interface QrcodeStatus {
 export class BilibiliService {
 	constructor(
 		private sqlite: Database,
-		private cfg: AppConfig,
+		private cfg: AppConfig
 	) {}
 
 	private getUserCookie(userId: string): string | null {
@@ -55,15 +55,12 @@ export class BilibiliService {
 	}
 
 	async pollQrcode(qrcodeKey: string): Promise<QrcodeStatus> {
-		const res = await fetch(
-			`https://passport.bilibili.com/x/passport-login/web/qrcode/poll?qrcode_key=${encodeURIComponent(qrcodeKey)}`,
-			{
-				headers: {
-					'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
-				},
-				signal: AbortSignal.timeout(10000),
+		const res = await fetch(`https://passport.bilibili.com/x/passport-login/web/qrcode/poll?qrcode_key=${encodeURIComponent(qrcodeKey)}`, {
+			headers: {
+				'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
 			},
-		);
+			signal: AbortSignal.timeout(10000),
+		});
 
 		if (!res.ok) return { code: -1, refreshToken: null, cookies: null, biliUid: null };
 
@@ -90,7 +87,10 @@ export class BilibiliService {
 		if (data.bili_jct) parts.push(`bili_jct=${data.bili_jct}`);
 
 		if (setCookie) {
-			const extra = setCookie.split(',').map((s) => s.trim().split(';')[0]).filter((s): s is string => Boolean(s));
+			const extra = setCookie
+				.split(',')
+				.map((s) => s.trim().split(';')[0])
+				.filter((s): s is string => Boolean(s));
 			for (const e of extra) {
 				const key = e.split('=')[0];
 				if (key && !parts.some((p) => p.startsWith(key + '='))) {
@@ -129,19 +129,21 @@ export class BilibiliService {
 	}
 
 	saveBind(userId: string, refreshToken: string, biliUid: string, cookies: string): void {
-		this.sqlite.run(
-			`UPDATE users SET bilibili_refresh_token = ?, bili_uid = ?, bili_cookie = ? WHERE id = ?`,
-			[refreshToken, biliUid, cookies, Number(userId)],
-		);
+		this.sqlite.run(`UPDATE users SET bilibili_refresh_token = ?, bili_uid = ?, bili_cookie = ? WHERE id = ?`, [
+			refreshToken,
+			biliUid,
+			cookies,
+			Number(userId),
+		]);
 	}
 
 	async getDynamicCookie(): Promise<string | null> {
 		const targetUsername = this.cfg.bili.loginTargetUsername;
 		if (!targetUsername) return null;
 
-		const rows = this.sqlite.query(
-			`SELECT bili_cookie FROM users WHERE username = ? AND bili_cookie IS NOT NULL AND bili_cookie != '' LIMIT 1`,
-		).all(targetUsername) as any[];
+		const rows = this.sqlite
+			.query(`SELECT bili_cookie FROM users WHERE username = ? AND bili_cookie IS NOT NULL AND bili_cookie != '' LIMIT 1`)
+			.all(targetUsername) as any[];
 		return rows[0]?.bili_cookie ?? null;
 	}
 

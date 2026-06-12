@@ -21,24 +21,27 @@ export function useSearchHighlight() {
 		};
 	}, []);
 
-	const highlightText = useCallback((text: string | null | undefined): ReactNode => {
-		if (!text) return text ?? null;
-		if (!highlight) return text;
-		const lower = text.toLowerCase();
-		const lowerHl = highlight.toLowerCase();
-		const idx = lower.indexOf(lowerHl);
-		if (idx === -1) return text;
-		const before = text.slice(0, idx);
-		const match = text.slice(idx, idx + highlight.length);
-		const after = text.slice(idx + highlight.length);
-		return (
-			<>
-				{before}
-				<mark className="search-highlight">{match}</mark>
-				{after}
-			</>
-		);
-	}, [highlight]);
+	const highlightText = useCallback(
+		(text: string | null | undefined): ReactNode => {
+			if (!text) return text ?? null;
+			if (!highlight) return text;
+			const lower = text.toLowerCase();
+			const lowerHl = highlight.toLowerCase();
+			const idx = lower.indexOf(lowerHl);
+			if (idx === -1) return text;
+			const before = text.slice(0, idx);
+			const match = text.slice(idx, idx + highlight.length);
+			const after = text.slice(idx + highlight.length);
+			return (
+				<>
+					{before}
+					<mark className="search-highlight">{match}</mark>
+					{after}
+				</>
+			);
+		},
+		[highlight]
+	);
 
 	return { highlight, highlightText };
 }

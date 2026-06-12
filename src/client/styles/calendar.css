@@ -566,33 +566,65 @@
 }
 
 @keyframes modal-fade-in {
-	from { opacity: 0; }
-	to { opacity: 1; }
+	from {
+		opacity: 0;
+	}
+	to {
+		opacity: 1;
+	}
 }
 
 @keyframes modal-fade-out {
-	from { opacity: 1; }
-	to { opacity: 0; }
+	from {
+		opacity: 1;
+	}
+	to {
+		opacity: 0;
+	}
 }
 
 @keyframes modal-pop-in {
-	from { transform: translateY(8px) scale(0.98); opacity: 0.9; }
-	to { transform: translateY(0) scale(1); opacity: 1; }
+	from {
+		transform: translateY(8px) scale(0.98);
+		opacity: 0.9;
+	}
+	to {
+		transform: translateY(0) scale(1);
+		opacity: 1;
+	}
 }
 
 @keyframes modal-pop-out {
-	from { transform: translateY(0) scale(1); opacity: 1; }
-	to { transform: translateY(8px) scale(0.98); opacity: 0.9; }
+	from {
+		transform: translateY(0) scale(1);
+		opacity: 1;
+	}
+	to {
+		transform: translateY(8px) scale(0.98);
+		opacity: 0.9;
+	}
 }
 
 @keyframes sheet-up-in {
-	from { transform: translateY(18px); opacity: 0.9; }
-	to { transform: translateY(0); opacity: 1; }
+	from {
+		transform: translateY(18px);
+		opacity: 0.9;
+	}
+	to {
+		transform: translateY(0);
+		opacity: 1;
+	}
 }
 
 @keyframes sheet-up-out {
-	from { transform: translateY(0); opacity: 1; }
-	to { transform: translateY(18px); opacity: 0.9; }
+	from {
+		transform: translateY(0);
+		opacity: 1;
+	}
+	to {
+		transform: translateY(18px);
+		opacity: 0.9;
+	}
 }
 
 .calendar-detail-title {
@@ -822,8 +854,7 @@
 @media (min-width: 769px) and (max-width: 1199px) {
 	.calendar-modal {
 		inset: 0;
-		padding: 18px var(--dash-content-pad-x) 18px
-			calc(var(--dash-sidebar-w) + var(--dash-content-pad-x) + var(--dash-modal-sidebar-gap));
+		padding: 18px var(--dash-content-pad-x) 18px calc(var(--dash-sidebar-w) + var(--dash-content-pad-x) + var(--dash-modal-sidebar-gap));
 	}
 
 	.time-picker {
@@ -831,8 +862,7 @@
 		right: 0;
 		top: 84px;
 		bottom: 0;
-		padding: 14px var(--dash-content-pad-x) 14px
-			calc(var(--dash-sidebar-w) + var(--dash-content-pad-x) + var(--dash-modal-sidebar-gap));
+		padding: 14px var(--dash-content-pad-x) 14px calc(var(--dash-sidebar-w) + var(--dash-content-pad-x) + var(--dash-modal-sidebar-gap));
 	}
 }
 
@@ -1028,7 +1058,7 @@
 		margin: 0 0 8px;
 	}
 
-	.calendar-sheet[data-has-items="false"] {
+	.calendar-sheet[data-has-items='false'] {
 		display: block;
 		min-height: 40px;
 	}

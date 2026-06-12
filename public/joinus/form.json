@@ -38,15 +38,7 @@
 			"required": true,
 			"placeholder": "请选择您感兴趣的部门",
 			"icon": "ri-team-line",
-			"options": [
-				"中之人",
-				"视频组",
-				"美术组",
-				"直播组",
-				"文案组",
-				"切片组",
-				"技术组"
-			]
+			"options": ["中之人", "视频组", "美术组", "直播组", "文案组", "切片组", "技术组"]
 		},
 		{
 			"id": "student",
@@ -97,10 +89,7 @@
 			"required": true,
 			"placeholder": "请选择面试时间",
 			"icon": "ri-time-line",
-			"options": [
-				"5月12号上午",
-				"5月12号下午"
-			],
+			"options": ["5月12号上午", "5月12号下午"],
 			"showWhen": {
 				"questionId": "offline_interview",
 				"value": "是"
@@ -125,10 +114,7 @@
 			"required": true,
 			"placeholder": "请选择面试时间",
 			"icon": "ri-time-line",
-			"options": [
-				"3月15号上午",
-				"3月14号下午"
-			],
+			"options": ["3月15号上午", "3月14号下午"],
 			"showWhen": {
 				"questionId": "online_interview",
 				"value": "是"

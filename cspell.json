@@ -34,8 +34,5 @@
 		"wawoff",
 		"wght"
 	],
-	"ignorePaths": [
-		".gitignore",
-		"commit.js"
-	]
+	"ignorePaths": [".gitignore", "commit.js"]
 }

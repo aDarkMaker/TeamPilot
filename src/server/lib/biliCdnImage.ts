@@ -3,12 +3,7 @@ export function isTrustedBiliCdnUrl(url: string): boolean {
 		const u = new URL(url.startsWith('//') ? `https:${url}` : url);
 		if (u.protocol !== 'https:' && u.protocol !== 'http:') return false;
 		const host = u.hostname.toLowerCase();
-		return (
-			host === 'hdslb.com' ||
-			host.endsWith('.hdslb.com') ||
-			host === 'bilibili.com' ||
-			host.endsWith('.bilibili.com')
-		);
+		return host === 'hdslb.com' || host.endsWith('.hdslb.com') || host === 'bilibili.com' || host.endsWith('.bilibili.com');
 	} catch {
 		return false;
 	}

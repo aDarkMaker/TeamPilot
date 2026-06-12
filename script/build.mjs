@@ -31,17 +31,7 @@ function hasBun() {
 
 function zipProject(rootDir, zipPath) {
 	const name = basename(zipPath);
-	const excludePatterns = [
-		name,
-		`*/${name}`,
-		'node_modules/*',
-		'.git/*',
-		'.git',
-		'data/*',
-		'.cursor/*',
-		'.astro/*',
-		'*.zip',
-	];
+	const excludePatterns = [name, `*/${name}`, 'node_modules/*', '.git/*', '.git', 'data/*', '.cursor/*', '.astro/*', '*.zip'];
 	const zipArgs = ['-r', zipPath, '.'];
 	for (const pat of excludePatterns) {
 		zipArgs.push('-x', pat);

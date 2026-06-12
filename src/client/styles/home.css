@@ -120,7 +120,10 @@
 	align-items: center;
 	justify-content: center;
 	cursor: pointer;
-	transition: transform 0.16s ease, filter 0.2s ease, opacity 0.2s ease;
+	transition:
+		transform 0.16s ease,
+		filter 0.2s ease,
+		opacity 0.2s ease;
 }
 
 .home-plus-btn img {

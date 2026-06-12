@@ -30,7 +30,7 @@ export type TodayBirthdayUser = {
 	username: string;
 	nickname: string | null;
 	avatarUrl: string | null;
-}
+};
 
 export type TodayBirthdaysPayload = {
 	ymd: string;

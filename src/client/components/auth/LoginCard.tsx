@@ -38,9 +38,7 @@ export default function LoginCard({ onError, onSuccess, onLoggedIn }: Props) {
 			}
 
 			if (data?.data?.passwordWasResetToDefault) {
-				onSuccess(
-					'当前密码不符合安全规范，已重置为默认密码 HXK135790，请尽快在设置中修改。',
-				);
+				onSuccess('当前密码不符合安全规范，已重置为默认密码 HXK135790，请尽快在设置中修改。');
 			} else {
 				onSuccess('欢迎回来！');
 			}

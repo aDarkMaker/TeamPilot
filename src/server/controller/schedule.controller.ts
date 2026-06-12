@@ -2,12 +2,12 @@ import type { Context } from 'koa';
 import type { ScheduleService } from '../services/schedule.service';
 
 export class ScheduleController {
-    constructor(private service: ScheduleService) {}
+	constructor(private service: ScheduleService) {}
 
-    create = async (ctx: Context) => {
+	create = async (ctx: Context) => {
 		const data = await this.service.create(ctx.state.user!, ctx.request.body);
-        ctx.body = { ok: true, data };
-    };
+		ctx.body = { ok: true, data };
+	};
 
 	update = async (ctx: Context) => {
 		const data = await this.service.update(ctx.state.user!, ctx.params.id, ctx.request.body);
@@ -21,16 +21,16 @@ export class ScheduleController {
 
 	listByDay = async (ctx: Context) => {
 		const data = await this.service.listByDay(ctx.state.user!, ctx.request.query);
-        ctx.body = { ok: true, data };
-    };
+		ctx.body = { ok: true, data };
+	};
 
 	listByWeek = async (ctx: Context) => {
 		const data = await this.service.listByWeek(ctx.state.user!, ctx.request.query);
 		ctx.body = { ok: true, data };
 	};
 
-    searchUsers = async (ctx: Context) => {
-        const data = await this.service.searchUsers(ctx.request.query);
-        ctx.body = { ok: true, data };
-    };
+	searchUsers = async (ctx: Context) => {
+		const data = await this.service.searchUsers(ctx.request.query);
+		ctx.body = { ok: true, data };
+	};
 }

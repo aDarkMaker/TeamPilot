@@ -78,19 +78,11 @@ export function NewcomerDetail({
 				<h3 className="nc-section-title">基本信息</h3>
 				<dl className="nc-meta-grid">
 					<dt>手机</dt>
-					<dd
-						className="nc-meta-copy"
-						title="点击复制"
-						onClick={() => void copyText(application.contact).then(onCopyResult)}
-					>
+					<dd className="nc-meta-copy" title="点击复制" onClick={() => void copyText(application.contact).then(onCopyResult)}>
 						{highlightText(application.contact)}
 					</dd>
 					<dt>QQ</dt>
-					<dd
-						className="nc-meta-copy"
-						title="点击复制"
-						onClick={() => void copyText(application.qq).then(onCopyResult)}
-					>
+					<dd className="nc-meta-copy" title="点击复制" onClick={() => void copyText(application.qq).then(onCopyResult)}>
 						{highlightText(application.qq)}
 					</dd>
 					<dt>在校生</dt>
@@ -126,23 +118,9 @@ export function NewcomerDetail({
 				</dl>
 			</section>
 
-			<TagsSection
-				tags={application.tags}
-				busy={tagsBusy}
-				error={tagsError}
-				me={me}
-				onAdd={onTagAdd}
-				onRemove={onTagRemove}
-			/>
+			<TagsSection tags={application.tags} busy={tagsBusy} error={tagsError} me={me} onAdd={onTagAdd} onRemove={onTagRemove} />
 
-			<RatingSection
-				ratingAverage={ratingAverage}
-				ratingCount={ratingCount}
-				myRating={myRating}
-				busy={ratingBusy}
-				canRate={!!me}
-				onRate={onRate}
-			/>
+			<RatingSection ratingAverage={ratingAverage} ratingCount={ratingCount} myRating={myRating} busy={ratingBusy} canRate={!!me} onRate={onRate} />
 
 			<div className="nc-detail-split">
 				<section className="nc-detail-section nc-detail-section--grow">

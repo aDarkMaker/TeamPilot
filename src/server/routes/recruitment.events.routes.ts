@@ -33,4 +33,3 @@ export function buildRecruitmentEventsRoutes(): Router {
 
 	return router;
 }
-

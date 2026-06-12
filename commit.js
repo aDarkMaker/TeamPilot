@@ -204,10 +204,7 @@ async function run() {
 
 			const inferredScope = inferScopeFromPath(file.path);
 			const scopeChoices = inferredScope
-				? [
-						`${inferredScope} (推荐)`,
-						...SCOPE_CHOICES.filter((c) => c.split(/\s+/)[0] !== inferredScope),
-				  ]
+				? [`${inferredScope} (推荐)`, ...SCOPE_CHOICES.filter((c) => c.split(/\s+/)[0] !== inferredScope)]
 				: SCOPE_CHOICES;
 			const scopeChoice = await selectFromList('Scope (按项目架构):', scopeChoices);
 			const rawScope = scopeChoice.replace(' (推荐)', '');

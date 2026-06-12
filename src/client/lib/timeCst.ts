@@ -45,4 +45,3 @@ export function formatCstMonthDayTime(raw: string | null | undefined, fallback =
 		minute: '2-digit',
 	}).format(d);
 }
-

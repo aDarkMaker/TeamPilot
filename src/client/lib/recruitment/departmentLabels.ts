@@ -1,14 +1,6 @@
 import type { RecruitmentDepartmentSlug } from '../../types/recruitmentUi';
 
-export const DEPARTMENT_ORDER: RecruitmentDepartmentSlug[] = [
-	'tech',
-	'video',
-	'live',
-	'clip',
-	'art',
-	'copywriting',
-	'vup',
-];
+export const DEPARTMENT_ORDER: RecruitmentDepartmentSlug[] = ['tech', 'video', 'live', 'clip', 'art', 'copywriting', 'vup'];
 
 export const DEPARTMENT_LABELS: Record<RecruitmentDepartmentSlug, string> = {
 	vup: '中之人',

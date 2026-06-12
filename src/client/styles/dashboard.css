@@ -253,7 +253,7 @@ html.dashboard-shell body {
 	white-space: nowrap;
 	overflow: hidden;
 	text-overflow: ellipsis;
-    margin-bottom: 0.4rem;
+	margin-bottom: 0.4rem;
 }
 
 .dashboard-user-card .meta .role {
@@ -360,7 +360,9 @@ html.dashboard-shell body {
 	height: 2px;
 	border-radius: 1px;
 	background: #2d3748;
-	transition: transform 0.18s ease, opacity 0.18s ease;
+	transition:
+		transform 0.18s ease,
+		opacity 0.18s ease;
 }
 
 .dashboard-topbar-toast-slot {
@@ -583,7 +585,6 @@ html.dashboard-shell body {
 	.dashboard-topbar-toast-slot {
 		display: none !important;
 	}
-
 }
 
 @media (max-width: 480px) {

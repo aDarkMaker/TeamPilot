@@ -1,10 +1,7 @@
 import { AppError } from '../server/types/api';
 import { DEPT_CN_TO_SLUG } from './departments';
 import type { JoinUsFormConfig } from './formConfigSchema';
-import {
-	INTERVIEW_OFFLINE_FIELD,
-	INTERVIEW_ONLINE_FIELD,
-} from './interviewIntro';
+import { INTERVIEW_OFFLINE_FIELD, INTERVIEW_ONLINE_FIELD } from './interviewIntro';
 
 export const FORM_OUTDATED_CODE = 'FORM_OUTDATED';
 
@@ -53,10 +50,7 @@ function assertValidJoinUsName(fullName: string): void {
 	}
 }
 
-export function validateJoinusSubmitAgainstConfig(
-	config: JoinUsFormConfig,
-	fields: Record<string, unknown>
-): void {
+export function validateJoinusSubmitAgainstConfig(config: JoinUsFormConfig, fields: Record<string, unknown>): void {
 	const fullName = normalizeText(fields.name);
 	const contact = normalizeText(fields.contact);
 	const qq = normalizeText(fields.qq);

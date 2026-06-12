@@ -57,9 +57,7 @@ const MIGRATION_STEPS: Array<(db: Database) => void> = [
 
 function runMigrationSteps(db: Database): void {
 	if (MIGRATION_STEPS.length !== EXPECTED_MIGRATION_STEPS) {
-		throw new Error(
-			`[sqlite] MIGRATION_STEPS.length (${MIGRATION_STEPS.length}) !== EXPECTED_MIGRATION_STEPS (${EXPECTED_MIGRATION_STEPS})`,
-		);
+		throw new Error(`[sqlite] MIGRATION_STEPS.length (${MIGRATION_STEPS.length}) !== EXPECTED_MIGRATION_STEPS (${EXPECTED_MIGRATION_STEPS})`);
 	}
 	let v = getUserVersion(db);
 	while (v < MIGRATION_STEPS.length) {
@@ -194,7 +192,7 @@ function initSchema(db: Database): void {
 	ensureHomeAnnouncementColumn(db, 'is_pinned', 'INTEGER NOT NULL DEFAULT 0 CHECK (is_pinned IN (0, 1))');
 	db.run(`CREATE INDEX IF NOT EXISTS idx_home_announcements_created_at ON home_announcements(created_at DESC)`);
 	db.run(`CREATE INDEX IF NOT EXISTS idx_home_announcements_pinned_created ON home_announcements(is_pinned DESC, created_at DESC)`);
-	
+
 	db.run(`
 		CREATE TABLE IF NOT EXISTS birthday_wishes (
 			id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -207,12 +205,12 @@ function initSchema(db: Database): void {
 			FOREIGN KEY(author_user_id) REFERENCES users(id) ON DELETE CASCADE
 	);
 	`);
-		
+
 	db.run(`
 		CREATE UNIQUE INDEX IF NOT EXISTS idx_birthday_wishes_unique
 		ON birthday_wishes(recipient_user_id, author_user_id, wish_date);
 	`);
-		
+
 	db.run(`
 		CREATE INDEX IF NOT EXISTS idx_birthday_wishes_recipient_date
 		ON birthday_wishes(recipient_user_id, wish_date, created_at);
@@ -321,13 +319,9 @@ function initSchema(db: Database): void {
 	);
 	`);
 
-	db.run(
-		`CREATE INDEX IF NOT EXISTS idx_recruitment_apps_dept_time ON recruitment_applications(department_sort_order, created_at)`,
-	);
+	db.run(`CREATE INDEX IF NOT EXISTS idx_recruitment_apps_dept_time ON recruitment_applications(department_sort_order, created_at)`);
 	db.run(`CREATE INDEX IF NOT EXISTS idx_recruitment_comments_app ON recruitment_comments(application_id, created_at)`);
-	db.run(
-		`CREATE INDEX IF NOT EXISTS idx_recruitment_ratings_app ON recruitment_application_ratings(application_id)`,
-	);
+	db.run(`CREATE INDEX IF NOT EXISTS idx_recruitment_ratings_app ON recruitment_application_ratings(application_id)`);
 
 	ensureRecruitmentContactUniqueIndex(db);
 
@@ -351,9 +345,7 @@ function cleanupExpiredData(db: Database): void {
 
 		db.transaction(() => {
 			const expiredSchedules = db
-				.query(
-					`SELECT id FROM schedules WHERE year < ?1 OR (year = ?1 AND month < ?2) OR (year = ?1 AND month = ?2 AND day < ?3)`,
-				)
+				.query(`SELECT id FROM schedules WHERE year < ?1 OR (year = ?1 AND month < ?2) OR (year = ?1 AND month = ?2 AND day < ?3)`)
 				.all(cutoffY, cutoffM, cutoffD) as { id: number }[];
 
 			scheduleCount = expiredSchedules.length;
@@ -364,19 +356,20 @@ function cleanupExpiredData(db: Database): void {
 				db.run(`DELETE FROM schedules WHERE id = ?`, [s.id]);
 			}
 
-			const doneTasks = db
-				.query(`SELECT id, payload_json FROM task_cards WHERE status IN ('accepted', 'leave')`)
-				.all() as { id: number; payload_json: string | null }[];
+			const doneTasks = db.query(`SELECT id, payload_json FROM task_cards WHERE status IN ('accepted', 'leave')`).all() as {
+				id: number;
+				payload_json: string | null;
+			}[];
 
 			for (const t of doneTasks) {
 				if (!t.payload_json) continue;
 				try {
 					const p = JSON.parse(t.payload_json);
 					if (
-						p.year && p.month && p.day &&
-						(p.year < cutoffY ||
-							(p.year === cutoffY && p.month < cutoffM) ||
-							(p.year === cutoffY && p.month === cutoffM && p.day < cutoffD))
+						p.year &&
+						p.month &&
+						p.day &&
+						(p.year < cutoffY || (p.year === cutoffY && p.month < cutoffM) || (p.year === cutoffY && p.month === cutoffM && p.day < cutoffD))
 					) {
 						const r = db.run(`DELETE FROM task_cards WHERE id = ?`, [t.id]);
 						processedTaskCount += (r as any).changes;
@@ -395,11 +388,7 @@ function cleanupExpiredData(db: Database): void {
 				const wm = Number(parts[1]);
 				const wd = Number(parts[2]);
 				if (!Number.isFinite(wy) || !Number.isFinite(wm) || !Number.isFinite(wd)) continue;
-				if (
-					wy < cutoffY ||
-					(wy === cutoffY && wm < cutoffM) ||
-					(wy === cutoffY && wm === cutoffM && wd < cutoffD)
-				) {
+				if (wy < cutoffY || (wy === cutoffY && wm < cutoffM) || (wy === cutoffY && wm === cutoffM && wd < cutoffD)) {
 					const r = db.run(`DELETE FROM birthday_wishes WHERE id = ?`, [w.id]);
 					wishCount += (r as any).changes;
 				}
@@ -407,9 +396,7 @@ function cleanupExpiredData(db: Database): void {
 		})();
 
 		if (scheduleCount > 0 || scheduleTaskCount > 0 || processedTaskCount > 0 || wishCount > 0) {
-			console.log(
-				`[sqlite] cleanup: ${scheduleCount} schedules + ${scheduleTaskCount} tasks, ${processedTaskCount} done tasks, ${wishCount} wishes`,
-			);
+			console.log(`[sqlite] cleanup: ${scheduleCount} schedules + ${scheduleTaskCount} tasks, ${processedTaskCount} done tasks, ${wishCount} wishes`);
 		}
 	} catch (e) {
 		console.warn('[sqlite] cleanup failed:', e);
@@ -419,14 +406,9 @@ function cleanupExpiredData(db: Database): void {
 /** 同一手机号唯一，配合 INSERT … ON CONFLICT(contact) 在 DB 层串行化「同号覆盖」，避免并发双插。 */
 function ensureRecruitmentContactUniqueIndex(db: Database): void {
 	try {
-		db.run(
-			`CREATE UNIQUE INDEX IF NOT EXISTS idx_recruitment_applications_contact ON recruitment_applications(contact)`,
-		);
+		db.run(`CREATE UNIQUE INDEX IF NOT EXISTS idx_recruitment_applications_contact ON recruitment_applications(contact)`);
 	} catch (e) {
-		console.warn(
-			'[sqlite] Could not create UNIQUE index on recruitment_applications(contact). Clear duplicate contacts or fix DB.',
-			e,
-		);
+		console.warn('[sqlite] Could not create UNIQUE index on recruitment_applications(contact). Clear duplicate contacts or fix DB.', e);
 	}
 }
 

@@ -8,4 +8,3 @@ export type HomeAnnouncement = {
 	createdAt: string;
 	updatedAt: string;
 };
-

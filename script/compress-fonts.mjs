@@ -29,7 +29,7 @@ async function main() {
 		const pct = ((1 - woff2Buf.length / ttfBuf.length) * 100).toFixed(1);
 		console.log(
 			`${file} → ${file.replace(/\.ttf$/i, '.woff2')}  ` +
-			`${(ttfBuf.length / 1024).toFixed(0)} KB → ${(woff2Buf.length / 1024).toFixed(0)} KB  (-${pct}%)`
+				`${(ttfBuf.length / 1024).toFixed(0)} KB → ${(woff2Buf.length / 1024).toFixed(0)} KB  (-${pct}%)`
 		);
 	}
 }

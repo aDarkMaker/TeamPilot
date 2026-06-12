@@ -93,10 +93,7 @@ export const recruitmentApplicationsStore = {
 		return refreshInternal();
 	},
 
-	patchApplicationRating(
-		applicationId: string,
-		patch: { ratingAverage: number | null; ratingCount: number; myRating: number | null },
-	) {
+	patchApplicationRating(applicationId: string, patch: { ratingAverage: number | null; ratingCount: number; myRating: number | null }) {
 		setState({
 			items: state.items.map((a) => (a.id === applicationId ? { ...a, ...patch } : a)),
 			updatedAt: Date.now(),
@@ -109,4 +106,3 @@ export const recruitmentApplicationsStore = {
 		sseStarted = false;
 	},
 };
-

@@ -55,7 +55,9 @@
 }
 
 @keyframes sp-spin {
-	to { transform: rotate(360deg); }
+	to {
+		transform: rotate(360deg);
+	}
 }
 
 .sp-item {
@@ -86,11 +88,21 @@
 	color: #fff;
 }
 
-.sp-type--user { background: #3182ce; }
-.sp-type--task { background: #38a169; }
-.sp-type--newcomer { background: #805ad5; }
-.sp-type--application { background: #ed8936; }
-.sp-type--schedule { background: #e53e3e; }
+.sp-type--user {
+	background: #3182ce;
+}
+.sp-type--task {
+	background: #38a169;
+}
+.sp-type--newcomer {
+	background: #805ad5;
+}
+.sp-type--application {
+	background: #ed8936;
+}
+.sp-type--schedule {
+	background: #e53e3e;
+}
 
 .sp-body {
 	flex: 1;

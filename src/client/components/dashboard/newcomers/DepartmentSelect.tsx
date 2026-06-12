@@ -137,7 +137,7 @@ export function DepartmentSelect({ value, onChange }: Props) {
 					</li>
 				))}
 			</ul>,
-			document.body,
+			document.body
 		) as ReactNode;
 	}
 

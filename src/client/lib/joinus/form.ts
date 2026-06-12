@@ -504,28 +504,16 @@ export function renderForm(container: HTMLElement, config: FormConfig): void {
 
 		requestAnimationFrame(() => {
 			field.classList.add('joinus-field-shake');
-			field.addEventListener(
-				'animationend',
-				() => field.classList.remove('joinus-field-shake'),
-				{ once: true }
-			);
+			field.addEventListener('animationend', () => field.classList.remove('joinus-field-shake'), { once: true });
 		});
 
-		const focusable = field.querySelector<HTMLElement>(
-			'input:not([type="hidden"]), textarea, button.joinus-select-trigger, .joinus-file-wrap'
-		);
+		const focusable = field.querySelector<HTMLElement>('input:not([type="hidden"]), textarea, button.joinus-select-trigger, .joinus-file-wrap');
 		focusable?.focus({ preventScroll: true });
 	}
 
-	function openJoinusModal(
-		html: string,
-		bind: (overlay: HTMLElement, close: () => void) => void,
-		portal = false
-	): void {
+	function openJoinusModal(html: string, bind: (overlay: HTMLElement, close: () => void) => void, portal = false): void {
 		const overlay = document.createElement('div');
-		overlay.className =
-			'joinus-modal-overlay' +
-			(portal ? ' joinus-modal-overlay--portal joinus-form-apply' : '');
+		overlay.className = 'joinus-modal-overlay' + (portal ? ' joinus-modal-overlay--portal joinus-form-apply' : '');
 		overlay.setAttribute('role', 'dialog');
 		overlay.setAttribute('aria-modal', 'true');
 		overlay.innerHTML = html;
@@ -566,8 +554,7 @@ export function renderForm(container: HTMLElement, config: FormConfig): void {
 	}
 
 	function handleSubmitFailure(json: SubmitApiJson): void {
-		const message =
-			typeof json.message === 'string' && json.message.trim() ? json.message : '提交失败';
+		const message = typeof json.message === 'string' && json.message.trim() ? json.message : '提交失败';
 
 		if (json.code === FORM_OUTDATED_CODE) {
 			showFormOutdatedModal(message);

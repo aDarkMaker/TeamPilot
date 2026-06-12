@@ -50,7 +50,7 @@ export function useDashboardToast() {
 				setToast((p) => (p && p.seq === seq ? null : p));
 			}, durationMs + 400);
 		},
-		[clearTimers],
+		[clearTimers]
 	);
 
 	const dismiss = useCallback(() => {
@@ -72,4 +72,3 @@ export function DashboardToast({ toast }: { toast: RenderState }) {
 	);
 	return target ? createPortal(node, target) : node;
 }
-

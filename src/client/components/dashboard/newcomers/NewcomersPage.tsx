@@ -32,13 +32,13 @@ export default function NewcomersPage() {
 		(ok: boolean) => {
 			toast.show({ text: ok ? '已复制到剪贴板' : '复制失败', type: ok ? 'ok' : 'err' });
 		},
-		[toast],
+		[toast]
 	);
 	const { highlightText } = useSearchHighlight();
 	const appsState = useSyncExternalStore(
 		recruitmentApplicationsStore.subscribe,
 		recruitmentApplicationsStore.getSnapshot,
-		recruitmentApplicationsStore.getServerSnapshot,
+		recruitmentApplicationsStore.getServerSnapshot
 	);
 	const applications: NewcomerApplicationView[] = appsState.items;
 	const listLoading = appsState.loading;
@@ -75,14 +75,11 @@ export default function NewcomersPage() {
 		return applications.filter((a) => a.department === deptFilter);
 	}, [applications, deptFilter]);
 
-	const listSelectedId = useMemo(
-		() => filteredApps.find((a) => a.id === selectedId)?.id ?? filteredApps[0]?.id ?? '',
-		[filteredApps, selectedId],
-	);
+	const listSelectedId = useMemo(() => filteredApps.find((a) => a.id === selectedId)?.id ?? filteredApps[0]?.id ?? '', [filteredApps, selectedId]);
 
 	const selected = useMemo(
-		() => (listSelectedId ? applications.find((a) => a.id === listSelectedId) ?? null : null),
-		[applications, listSelectedId],
+		() => (listSelectedId ? (applications.find((a) => a.id === listSelectedId) ?? null) : null),
+		[applications, listSelectedId]
 	);
 
 	const onRate = useCallback(
@@ -102,7 +99,7 @@ export default function NewcomersPage() {
 				setRatingBusy(false);
 			}
 		},
-		[selected, me, toast],
+		[selected, me, toast]
 	);
 
 	useEffect(() => {
@@ -210,9 +207,7 @@ export default function NewcomersPage() {
 			const { liked, likeCount } = await toggleCommentLike(commentId);
 			setCommentsMap((p) => ({
 				...p,
-				[selected.id]: (p[selected.id] ?? []).map((c) =>
-					c.id === commentId ? { ...c, likedByMe: liked, likeCount } : c,
-				),
+				[selected.id]: (p[selected.id] ?? []).map((c) => (c.id === commentId ? { ...c, likedByMe: liked, likeCount } : c)),
 			}));
 		} catch (e) {
 			setCommentError(e instanceof Error ? e.message : '操作失败');
@@ -264,8 +259,7 @@ export default function NewcomersPage() {
 		);
 	}
 
-	const emptyCenterHint =
-		applications.length === 0 ? '暂无报名记录。' : '该组别暂无报名记录。';
+	const emptyCenterHint = applications.length === 0 ? '暂无报名记录。' : '该组别暂无报名记录。';
 
 	return (
 		<div className="nc-page">
@@ -344,11 +338,7 @@ export default function NewcomersPage() {
 				<ul className="nc-list-items">
 					{filteredApps.map((app) => (
 						<li key={app.id}>
-							<button
-								type="button"
-								className={`nc-list-item ${app.id === listSelectedId ? 'is-active' : ''}`}
-								onClick={() => setSelectedId(app.id)}
-							>
+							<button type="button" className={`nc-list-item ${app.id === listSelectedId ? 'is-active' : ''}`} onClick={() => setSelectedId(app.id)}>
 								<span className="nc-list-item-name">{highlightText(app.fullName) as React.ReactNode}</span>
 								{app.ratingCount > 0 ? (
 									<span className="nc-list-item-rating">

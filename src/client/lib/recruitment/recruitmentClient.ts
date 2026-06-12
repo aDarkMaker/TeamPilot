@@ -1,9 +1,6 @@
 import type { NewcomerApplicationView } from '../../types/recruitmentUi';
 
-import {
-	mapRecruitmentApplicationDtoToView,
-	type RecruitmentApplicationDto,
-} from './applicationView';
+import { mapRecruitmentApplicationDtoToView, type RecruitmentApplicationDto } from './applicationView';
 
 export type MeBrief = { id: string; username: string; role: 'user' | 'admin' | 'super_admin' };
 
@@ -127,10 +124,7 @@ export type RecruitmentApplicationRatingDto = {
 	myRating: number;
 };
 
-export async function putApplicationRating(
-	applicationId: string,
-	rating: number,
-): Promise<RecruitmentApplicationRatingDto> {
+export async function putApplicationRating(applicationId: string, rating: number): Promise<RecruitmentApplicationRatingDto> {
 	const res = await fetch(`/api/recruitment/applications/${encodeURIComponent(applicationId)}/rating`, {
 		method: 'PUT',
 		credentials: 'include',

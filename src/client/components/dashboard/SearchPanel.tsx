@@ -51,16 +51,7 @@ function highlightMatch(text: string, keyword: string): ReactNode {
 	);
 }
 
-export default function SearchPanel({
-	id,
-	query,
-	results,
-	loading,
-	selectedIndex,
-	onSelect,
-	onNavigate,
-	onDismiss,
-}: Props) {
+export default function SearchPanel({ id, query, results, loading, selectedIndex, onSelect, onNavigate, onDismiss }: Props) {
 	const panelRef = useRef<HTMLDivElement>(null);
 
 	useEffect(() => {
@@ -99,42 +90,34 @@ export default function SearchPanel({
 	if (!query && results.length === 0) return null;
 
 	return (
-		<div
-			id={id}
-			className="sp-panel"
-			ref={panelRef}
-			role="listbox"
-			aria-label="搜索结果"
-		>
-				{loading && (
-					<div className="sp-loading">
-						<span className="sp-spinner" />
-						搜索中…
-					</div>
-				)}
+		<div id={id} className="sp-panel" ref={panelRef} role="listbox" aria-label="搜索结果">
+			{loading && (
+				<div className="sp-loading">
+					<span className="sp-spinner" />
+					搜索中…
+				</div>
+			)}
 
-				{!loading && results.length === 0 && (
-					<div className="sp-empty">没有找到 "{query}" 相关的结果</div>
-				)}
+			{!loading && results.length === 0 && <div className="sp-empty">没有找到 "{query}" 相关的结果</div>}
 
-				{results.map((item, i) => (
-					<div
-						key={item.id}
-						id={`dashboard-search-option-${i}`}
-						role="option"
-						aria-selected={i === selectedIndex}
-						className={`sp-item ${i === selectedIndex ? 'sp-item--active' : ''}`}
-						onMouseEnter={() => onSelect(i)}
-						onClick={() => onNavigate(item.url)}
-					>
-						<span className={`sp-type sp-type--${item.type}`}>{typeIcon[item.type]}</span>
-						<div className="sp-body">
-							<div className="sp-title">{highlightMatch(item.title, query)}</div>
-							<div className="sp-subtitle">{item.subtitle}</div>
-						</div>
-						<span className="sp-tag">{typeLabel[item.type]}</span>
+			{results.map((item, i) => (
+				<div
+					key={item.id}
+					id={`dashboard-search-option-${i}`}
+					role="option"
+					aria-selected={i === selectedIndex}
+					className={`sp-item ${i === selectedIndex ? 'sp-item--active' : ''}`}
+					onMouseEnter={() => onSelect(i)}
+					onClick={() => onNavigate(item.url)}
+				>
+					<span className={`sp-type sp-type--${item.type}`}>{typeIcon[item.type]}</span>
+					<div className="sp-body">
+						<div className="sp-title">{highlightMatch(item.title, query)}</div>
+						<div className="sp-subtitle">{item.subtitle}</div>
 					</div>
-				))}
+					<span className="sp-tag">{typeLabel[item.type]}</span>
+				</div>
+			))}
 		</div>
 	);
 }

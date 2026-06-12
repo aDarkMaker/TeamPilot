@@ -1,5 +1,5 @@
-import type { Context } from "koa";
-import type { TaskService } from "../services/task.service";
+import type { Context } from 'koa';
+import type { TaskService } from '../services/task.service';
 
 export class TaskController {
 	constructor(private service: TaskService) {}

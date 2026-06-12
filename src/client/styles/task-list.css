@@ -28,7 +28,9 @@
 	font-weight: 700;
 	color: #2d3748;
 	cursor: pointer;
-	transition: background 0.16s ease, border-color 0.16s ease;
+	transition:
+		background 0.16s ease,
+		border-color 0.16s ease;
 }
 
 .task-tab:hover,
@@ -219,4 +221,3 @@
 		padding: 6px 8px;
 	}
 }
-

@@ -1,12 +1,12 @@
 .click-spark-wrapper {
-  width: 100%;
-  height: 100%;
-  position: relative;
+	width: 100%;
+	height: 100%;
+	position: relative;
 }
 
 .click-spark-canvas {
-  position: fixed;
-  inset: 0;
-  z-index: 9999;
-  pointer-events: none;
+	position: fixed;
+	inset: 0;
+	z-index: 9999;
+	pointer-events: none;
 }

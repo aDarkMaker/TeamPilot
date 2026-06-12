@@ -1,10 +1,6 @@
 import { useEffect, useMemo, useState, useSyncExternalStore } from 'react';
 
-import {
-	pendingApplicationsStore,
-	broadcastApplicationsUpdated,
-	type PendingApplication,
-} from '../../lib/pendingApplicationsStore';
+import { pendingApplicationsStore, broadcastApplicationsUpdated, type PendingApplication } from '../../lib/pendingApplicationsStore';
 import { DashboardToast, useDashboardToast } from './DashboardToast';
 import { formatCstDateTime } from '../../lib/timeCst';
 import { useSearchHighlight } from '../../lib/useSearchHighlight';
@@ -52,11 +48,7 @@ export default function UserAdminPage() {
 	const toast = useDashboardToast();
 	const { highlightText } = useSearchHighlight();
 
-	const pendingState = useSyncExternalStore(
-		pendingApplicationsStore.subscribe,
-		pendingApplicationsStore.getSnapshot,
-		() => SERVER_PENDING_SNAPSHOT
-	);
+	const pendingState = useSyncExternalStore(pendingApplicationsStore.subscribe, pendingApplicationsStore.getSnapshot, () => SERVER_PENDING_SNAPSHOT);
 	const pending = pendingState.items;
 
 	const isSuper = me?.role === 'super_admin';
@@ -285,12 +277,7 @@ export default function UserAdminPage() {
 							确定删除「{confirmRemoveTarget.username}」的账号记录？该操作不可撤销。
 						</div>
 						<div className="calendar-modal-head-actions" style={{ justifyContent: 'flex-end' }}>
-							<button
-								type="button"
-								className="users-admin-btn"
-								disabled={busyId === confirmRemoveTarget.id}
-								onClick={closeRemoveConfirm}
-							>
+							<button type="button" className="users-admin-btn" disabled={busyId === confirmRemoveTarget.id} onClick={closeRemoveConfirm}>
 								取消
 							</button>
 							<button
@@ -334,18 +321,10 @@ export default function UserAdminPage() {
 										<td className="users-admin-muted">{fmt(a.createdAt)}</td>
 										<td>
 											<div className="users-admin-actions">
-												<button
-													className="users-admin-btn primary"
-													disabled={busyId === a.id}
-													onClick={() => void approve(a.id)}
-												>
+												<button className="users-admin-btn primary" disabled={busyId === a.id} onClick={() => void approve(a.id)}>
 													通过
 												</button>
-												<button
-													className="users-admin-btn danger"
-													disabled={busyId === a.id}
-													onClick={() => void reject(a.id)}
-												>
+												<button className="users-admin-btn danger" disabled={busyId === a.id} onClick={() => void reject(a.id)}>
 													驳回
 												</button>
 											</div>
@@ -379,47 +358,27 @@ export default function UserAdminPage() {
 								</div>
 								<div className="users-admin-actions">
 									{canAppointAdmin(u) && (
-										<button
-											className="users-admin-btn primary"
-											disabled={busyId === u.id}
-											onClick={() => void appointAdmin(u.id)}
-										>
+										<button className="users-admin-btn primary" disabled={busyId === u.id} onClick={() => void appointAdmin(u.id)}>
 											授予管理员
 										</button>
 									)}
 									{canRevokeAdmin(u) && (
-										<button
-											className="users-admin-btn"
-											disabled={busyId === u.id}
-											onClick={() => void revokeAdmin(u.id)}
-										>
+										<button className="users-admin-btn" disabled={busyId === u.id} onClick={() => void revokeAdmin(u.id)}>
 											撤销管理员
 										</button>
 									)}
 									{canDisable(u) && (
-										<button
-											className="users-admin-btn danger"
-											disabled={busyId === u.id}
-											onClick={() => void disableUser(u.id)}
-										>
+										<button className="users-admin-btn danger" disabled={busyId === u.id} onClick={() => void disableUser(u.id)}>
 											禁用
 										</button>
 									)}
 									{canRestoreOrRemove(u) && (
-										<button
-											className="users-admin-btn primary"
-											disabled={busyId === u.id}
-											onClick={() => void enableUser(u.id)}
-										>
+										<button className="users-admin-btn primary" disabled={busyId === u.id} onClick={() => void enableUser(u.id)}>
 											恢复使用
 										</button>
 									)}
 									{canRestoreOrRemove(u) && (
-										<button
-											className="users-admin-btn danger"
-											disabled={busyId === u.id}
-											onClick={() => openRemoveConfirm(u.id, u.username)}
-										>
+										<button className="users-admin-btn danger" disabled={busyId === u.id} onClick={() => openRemoveConfirm(u.id, u.username)}>
 											移除
 										</button>
 									)}
