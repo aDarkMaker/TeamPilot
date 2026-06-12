@@ -1,6 +1,7 @@
 import { useEffect, useState, useCallback, useRef } from "react";
 import "../../styles/joinus.css";
 import ShuffleTitle from "./ShuffleTitle";
+import Folder from "./Folder";
 import { assetUrl } from "../../lib/assetUrl";
 import IconAu from "../../assets/img/icon/joinus/vup/Icon_Au.webp";
 import IconBili from "../../assets/img/icon/joinus/vup/Icon_Bili.webp";
@@ -345,11 +346,14 @@ export default function JoinUsPage() {
 					className="joinus-section"
 					aria-labelledby="faq-title-heading"
 				>
-					<div className="joinus-section__head">
-						<ShuffleTitle id="faq-title-heading" className="joinus-section__title" text="猜你想搜" />
-						<p className="joinus-section__desc">
-							我为你的求知欲感到喜悦！
-						</p>
+					<div className="joinus-section__head joinus-section__head--with-folder">
+						<div>
+							<ShuffleTitle id="faq-title-heading" className="joinus-section__title" text="猜你想搜" />
+							<p className="joinus-section__desc">
+								我为你的求知欲感到喜悦！
+							</p>
+						</div>
+						<Folder />
 					</div>
 					<ul className="joinus-faq">
 						{FAQ_ITEMS.map((item) => (

@@ -455,6 +455,14 @@ html.joinus-page::-webkit-scrollbar {
 	margin-bottom: 1.75rem;
 }
 
+.joinus-section__head--with-folder {
+	display: flex;
+	align-items: flex-start;
+	justify-content: space-between;
+	gap: 1rem;
+	overflow: visible;
+}
+
 .joinus-section__title {
 	font-family: var(--joinus-font-display);
 	font-size: clamp(1.5rem, 4.5vw, 2.1rem);
