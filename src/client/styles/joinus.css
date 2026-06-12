@@ -360,7 +360,7 @@ html.joinus-page::-webkit-scrollbar {
 
 .joinus-hero__kicker {
 	display: inline-block;
-	font-size: 1.25rem;
+	font-size: 1.4rem;
 	font-weight: 600;
 	text-transform: uppercase;
 	letter-spacing: 0.12em;
@@ -384,14 +384,14 @@ html.joinus-page::-webkit-scrollbar {
 
 .joinus-hero__title-main {
 	font-weight: 700;
-	font-size: clamp(2rem, 8vw, 3.5rem);
+	font-size: clamp(2.25rem, 8.5vw, 3.8rem);
 	line-height: 1.08;
 	letter-spacing: -0.03em;
 }
 
 .joinus-hero__title-sub {
 	font-weight: 600;
-	font-size: clamp(1.05rem, 3.2vw, 1.5rem);
+	font-size: clamp(1.15rem, 3.5vw, 1.65rem);
 	line-height: 1.25;
 	letter-spacing: -0.02em;
 	color: var(--joinus-muted);
@@ -399,7 +399,7 @@ html.joinus-page::-webkit-scrollbar {
 
 .joinus-hero__lead {
 	margin: 0;
-	font-size: 1.05rem;
+	font-size: 1.15rem;
 	color: var(--joinus-muted);
 	max-width: 36rem;
 }
@@ -457,7 +457,7 @@ html.joinus-page::-webkit-scrollbar {
 
 .joinus-section__title {
 	font-family: var(--joinus-font-display);
-	font-size: clamp(1.35rem, 4vw, 1.85rem);
+	font-size: clamp(1.5rem, 4.5vw, 2.1rem);
 	margin: 0 0 0.5rem;
 	letter-spacing: -0.02em;
 }
@@ -465,7 +465,7 @@ html.joinus-page::-webkit-scrollbar {
 .joinus-section__desc {
 	margin: 0;
 	color: var(--joinus-muted);
-	font-size: 0.95rem;
+	font-size: 1.05rem;
 }
 
 .joinus-grid {
@@ -485,21 +485,21 @@ html.joinus-page::-webkit-scrollbar {
 
 .joinus-card h3 {
 	font-family: var(--joinus-font-display);
-	font-size: 1rem;
+	font-size: 1.1rem;
 	font-weight: 700;
 	margin: 0 0 0.4rem;
 }
 
 .joinus-card p {
 	margin: 0;
-	font-size: 13px;
+	font-size: 14px;
 	font-weight: 500;
 	color: var(--joinus-muted);
 }
 
 .joinus-card__tag {
 	display: inline-block;
-	font-size: 0.85rem;
+	font-size: 0.95rem;
 	font-weight: 700;
 	text-transform: uppercase;
 	letter-spacing: 0.08em;
@@ -791,7 +791,7 @@ html.joinus-page::-webkit-scrollbar {
 
 @media (min-width: 1280px) {
 	.joinus-hero__lead {
-		font-size: 1.125rem;
+		font-size: 1.25rem;
 	}
 }
 
