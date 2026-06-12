@@ -207,11 +207,11 @@ export default function JoinUsPage() {
 						<h1 id="joinus-hero-title" className="joinus-hero__title">
 							<span className="joinus-hero__title-main">加入华小科</span>
 							<span className="joinus-hero__title-sub">
-								期待你的选择，我们一起把想法做成作品！
+								期待你的选择，一起把想法做成作品！
 							</span>
 						</h1>
 						<p className="joinus-hero__lead">
-							我们欢迎有热情、愿意长期投入的同学，希望能够共同经营一个大家庭！
+							欢迎有热情、愿意长期投入的同学，希望共同经营一个大家庭！
 						</p>
 						<div className="joinus-hero__actions">
 							<a
