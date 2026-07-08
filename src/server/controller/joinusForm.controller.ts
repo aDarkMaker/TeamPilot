@@ -9,6 +9,10 @@ export class JoinusFormController {
 		ctx.body = { ok: true, data };
 	};
 
+	getFormPublic = async (ctx: Context) => {
+		ctx.body = await this.service.getForm();
+	};
+
 	updateForm = async (ctx: Context) => {
 		const data = await this.service.updateForm(ctx.request.body);
 		ctx.body = { ok: true, data };

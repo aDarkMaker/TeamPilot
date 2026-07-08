@@ -7,6 +7,7 @@ export function buildJoinUsFormRoutes(controller: JoinusFormController): Router 
 
 	router.get('/form', requireLogin, requireAdminOrAbove, controller.getForm);
 	router.put('/form', requireLogin, requireAdminOrAbove, controller.updateForm);
+	router.get('/form-public', controller.getFormPublic);
 
 	return router;
 }

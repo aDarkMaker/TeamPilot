@@ -11,7 +11,7 @@ export default function ApplyPage() {
 		let cancelled = false;
 		(async () => {
 			try {
-				const res = await fetch('/joinus/form.json');
+				const res = await fetch('/api/joinus/form-public');
 				if (!res.ok) throw new Error(`加载表单配置失败 (${res.status})`);
 				const config = (await res.json()) as FormConfig;
 				if (cancelled) return;
