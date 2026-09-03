@@ -4,6 +4,27 @@ export type RecruitmentDepartment = 'vup' | 'video' | 'art' | 'live' | 'copywrit
 
 export type RecruitmentInterviewSlot = 'none';
 
+export type RecruitmentInterviewMode = 'offline' | 'online';
+
+export type InterviewWindow = {
+	id: string;
+	date: string;
+	startMin: number;
+	endMin: number;
+	createdAt: string;
+	updatedAt: string;
+};
+
+export type InterviewSlot = {
+	id: string;
+	windowId: string;
+	date: string;
+	startMin: number;
+	endMin: number;
+};
+
+export type InterviewSlotListItem = InterviewSlot & { booked: boolean };
+
 export type RecruitmentApplication = {
 	id: string;
 	submitterUserId: string;
@@ -17,8 +38,10 @@ export type RecruitmentApplication = {
 	grade: string | null;
 	wantsOfflineInterview: boolean;
 	offlineInterviewSlot: RecruitmentInterviewSlot | null;
+	offlineInterviewSlotId: number | null;
 	wantsOnlineInterview: boolean;
 	onlineInterviewSlot: RecruitmentInterviewSlot | null;
+	onlineInterviewSlotId: number | null;
 	introMarkdown: string;
 	worksMarkdown: string;
 	attachmentPath: string | null;

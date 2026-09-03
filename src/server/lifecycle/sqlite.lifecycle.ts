@@ -19,6 +19,15 @@ function listTableColumnNames(db: Database, table: string): string[] {
 		.map((r: any) => String(r.name));
 }
 
+function tableExists(db: Database, table: string): boolean {
+	try {
+		listTableColumnNames(db, table);
+		return true;
+	} catch {
+		return false;
+	}
+}
+
 export function ensureColumn(db: Database, table: string, column: string, typeSql: string): void {
 	assertIdent(table, 'table');
 	assertIdent(column, 'column');
@@ -83,6 +92,19 @@ function ensureHomeAnnouncementColumn(db: Database, column: string, type: string
 
 function ensureScheduleColumn(db: Database, column: string, type: string): void {
 	ensureColumn(db, 'schedules', column, type);
+}
+
+function ensureRecruitmentApplicationColumn(db: Database, column: string, type: string): void {
+	ensureColumn(db, 'recruitment_applications', column, type);
+}
+
+// 早期版本按线上/线下分 mode 建表；现改为共用一套排期表，检测到旧结构即重建。
+function rebuildSharedInterviewSlotTables(db: Database): void {
+	if (!tableExists(db, 'joinus_interview_windows')) return;
+	if (listTableColumnNames(db, 'joinus_interview_windows').includes('mode')) {
+		db.run(`DROP TABLE IF EXISTS joinus_interview_slots`);
+		db.run(`DROP TABLE IF EXISTS joinus_interview_windows`);
+	}
 }
 
 function initSchema(db: Database): void {
@@ -322,6 +344,44 @@ function initSchema(db: Database): void {
 	db.run(`CREATE INDEX IF NOT EXISTS idx_recruitment_apps_dept_time ON recruitment_applications(department_sort_order, created_at)`);
 	db.run(`CREATE INDEX IF NOT EXISTS idx_recruitment_comments_app ON recruitment_comments(application_id, created_at)`);
 	db.run(`CREATE INDEX IF NOT EXISTS idx_recruitment_ratings_app ON recruitment_application_ratings(application_id)`);
+
+	rebuildSharedInterviewSlotTables(db);
+
+	db.run(`
+	CREATE TABLE IF NOT EXISTS joinus_interview_windows (
+		id INTEGER PRIMARY KEY AUTOINCREMENT,
+		date TEXT NOT NULL,
+		start_min INTEGER NOT NULL CHECK (start_min >= 0 AND start_min < 1440),
+		end_min INTEGER NOT NULL CHECK (end_min > start_min AND end_min <= 1440),
+		created_at TEXT NOT NULL DEFAULT (datetime('now')),
+		updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+	);
+	`);
+
+	db.run(`
+	CREATE TABLE IF NOT EXISTS joinus_interview_slots (
+		id INTEGER PRIMARY KEY AUTOINCREMENT,
+		window_id INTEGER NOT NULL,
+		date TEXT NOT NULL,
+		start_min INTEGER NOT NULL,
+		end_min INTEGER NOT NULL,
+		created_at TEXT NOT NULL DEFAULT (datetime('now')),
+		FOREIGN KEY(window_id) REFERENCES joinus_interview_windows(id) ON DELETE CASCADE
+	);
+	`);
+	db.run(`DROP INDEX IF EXISTS idx_joinus_interview_slots_mode_time`);
+	db.run(`CREATE UNIQUE INDEX IF NOT EXISTS idx_joinus_interview_slots_time ON joinus_interview_slots(date, start_min)`);
+	db.run(`CREATE INDEX IF NOT EXISTS idx_joinus_interview_slots_window ON joinus_interview_slots(window_id)`);
+
+	ensureRecruitmentApplicationColumn(db, 'offline_interview_slot_id', 'INTEGER');
+	ensureRecruitmentApplicationColumn(db, 'online_interview_slot_id', 'INTEGER');
+	db.run(`DROP INDEX IF EXISTS idx_recruitment_apps_offline_slot`);
+	db.run(`DROP INDEX IF EXISTS idx_recruitment_apps_online_slot`);
+	db.run(
+		`CREATE UNIQUE INDEX IF NOT EXISTS idx_recruitment_apps_shared_slot
+			ON recruitment_applications (COALESCE(offline_interview_slot_id, online_interview_slot_id))
+			WHERE offline_interview_slot_id IS NOT NULL OR online_interview_slot_id IS NOT NULL`
+	);
 
 	ensureRecruitmentContactUniqueIndex(db);
 

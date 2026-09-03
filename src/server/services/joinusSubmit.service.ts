@@ -1,11 +1,12 @@
 import type { DB } from '../db';
 import { AppError } from '../types/api';
-import type { RecruitmentInterviewSlot } from '../types/recruitment';
+import type { RecruitmentInterviewMode } from '../types/recruitment';
 import { DEPT_CN_TO_SLUG } from '../../joinus/departments';
 import { readJoinUsFormConfig } from '../../joinus/formConfigIO';
 import { validateJoinusSubmitAgainstConfig } from '../../joinus/validateJoinusSubmit';
 import { departmentOrderFromSlug } from '../recruitment/departmentOrder';
 import { getJoinUsPublicUserId } from '../auth/bootstrapJoinUsPublicUser';
+import { formatSlotLabel } from '../../joinus/interviewSchedule';
 
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
@@ -15,8 +16,6 @@ import { broadcastRecruitmentApplicationsUpdated } from '../recruitment/recruitm
 import { appendInterviewIntroToMarkdown, buildInterviewIntroExtra } from '../../joinus/interviewIntro';
 
 type UploadedFile = { buffer: Buffer; mimetype: string; originalName: string };
-
-const INTERVIEW_SLOT_NONE: RecruitmentInterviewSlot = 'none';
 
 export const JOINUS_DUPLICATE_SUBMIT_CODE = 'DUPLICATE_SUBMIT';
 
@@ -38,6 +37,34 @@ function normalizeText(raw: unknown): string {
 
 function isYes(v: unknown): boolean {
 	return normalizeText(v) === '是';
+}
+
+function interviewSlotIdFromField(raw: unknown, errorCode: string, message: string): number | null {
+	if (raw == null) return null;
+	const text = normalizeText(raw);
+	if (!text) return null;
+	const n = Number(text);
+	if (!Number.isInteger(n) || n <= 0) throw new AppError(400, errorCode, message);
+	return n;
+}
+
+function slotLabelFor(slot: { id: string; date: string; startMin: number; endMin: number } | undefined, mode: RecruitmentInterviewMode, message: string): string {
+	if (!slot) throw new AppError(400, mode === 'offline' ? 'OFFLINE_SLOT_INVALID' : 'ONLINE_SLOT_INVALID', message);
+	return formatSlotLabel(slot.date, slot.startMin, slot.endMin);
+}
+
+function translateSlotError(e: unknown): unknown {
+	if (e instanceof Error) {
+		const map: Record<string, { code: string; message: string }> = {
+			OFFLINE_SLOT_TAKEN: { code: 'OFFLINE_SLOT_TAKEN', message: '这个线下面试时间刚被选走了，换个时间试试～' },
+			ONLINE_SLOT_TAKEN: { code: 'ONLINE_SLOT_TAKEN', message: '这个线上面试时间刚被选走了，换个时间试试～' },
+			OFFLINE_SLOT_NOT_FOUND: { code: 'OFFLINE_SLOT_NOT_FOUND', message: '线下面试时间更新了，重新选一个吧～' },
+			ONLINE_SLOT_NOT_FOUND: { code: 'ONLINE_SLOT_NOT_FOUND', message: '线上面试时间更新了，重新选一个吧～' },
+		};
+		const hit = map[e.message];
+		if (hit) return new AppError(400, hit.code, hit.message);
+	}
+	return e;
 }
 
 function nameToPinyinSlug(rawName: string): string {
@@ -106,15 +133,29 @@ export class JoinUsSubmitService {
 		const grade = isStudent ? normalizeText(fields.grade) || null : null;
 
 		const wantsOfflineInterview = isYes(fields.offline_interview);
-		const offlineInterviewSlot: RecruitmentInterviewSlot | null = wantsOfflineInterview ? INTERVIEW_SLOT_NONE : null;
-
 		const wantsOnlineInterview = isYes(fields.online_interview);
-		const onlineInterviewSlot: RecruitmentInterviewSlot | null = wantsOnlineInterview ? INTERVIEW_SLOT_NONE : null;
+
+		let offlineSlotId: number | null = null;
+		let onlineSlotId: number | null = null;
+		if (wantsOfflineInterview) {
+			offlineSlotId = interviewSlotIdFromField(fields.interview_time_offline, 'INVALID_OFFLINE_TIME', '选一个线下面试时间呗～');
+		}
+		if (wantsOnlineInterview) {
+			onlineSlotId = interviewSlotIdFromField(fields.interview_time_online, 'INVALID_ONLINE_TIME', '选一个线上面试时间呗～');
+		}
+
+		const slotIds = [offlineSlotId, onlineSlotId].filter((x): x is number => x != null);
+		const slotById = new Map((await this.db.findInterviewSlotsByIds(slotIds)).map((s) => [String(s.id), s]));
+
+		const offlineTime =
+			offlineSlotId != null
+				? slotLabelFor(slotById.get(String(offlineSlotId)), 'offline', '线下面试时间更新了，重新选一个吧～')
+				: '';
+		const onlineTime =
+			onlineSlotId != null ? slotLabelFor(slotById.get(String(onlineSlotId)), 'online', '线上面试时间更新了，重新选一个吧～') : '';
 
 		const introRaw = normalizeText(fields.intro);
 		const introBase = introRaw || '（无）';
-		const offlineTime = normalizeText(fields.interview_time_offline);
-		const onlineTime = normalizeText(fields.interview_time_online);
 
 		const extra = buildInterviewIntroExtra({
 			wantsOfflineInterview,
@@ -124,49 +165,6 @@ export class JoinUsSubmitService {
 		});
 		const introMarkdown = appendInterviewIntroToMarkdown(introBase, extra);
 		const worksMarkdown = uploads.length ? `已上传附件：\n${uploads.map((u) => `- ${u.originalName}`).join('\n')}` : '（无）';
-
-		let attachmentPath: string | null = null;
-		if (uploads.length > 0) {
-			const slug = nameToPinyinSlug(fullName);
-			const joinusDir = join(process.cwd(), 'data', 'joinus', slug);
-			mkdirSync(joinusDir, { recursive: true });
-			const relPaths: string[] = [];
-			for (let i = 0; i < uploads.length; i++) {
-				const u = uploads[i];
-				if (u === undefined) continue;
-
-				const ext = extFromMime(u.mimetype) || 'bin';
-				const base = `${randomUUID().slice(0, 8)}_${i}__${sanitizeFileName(u.originalName)}`;
-				const destName = ensureExt(base, ext);
-				const abs = join(joinusDir, destName);
-				writeFileSync(abs, u.buffer);
-
-				relPaths.push(`joinus/${slug}/${destName}`);
-			}
-			attachmentPath = relPaths.join('|');
-		} else {
-			attachmentPath = null;
-		}
-		const submitterUserId = await getJoinUsPublicUserId(this.db);
-		const departmentSortOrder = departmentOrderFromSlug(department);
-		const payload = {
-			submitterUserId,
-			fullName,
-			contact,
-			qq,
-			department,
-			departmentSortOrder,
-			isStudent,
-			schoolCollege,
-			grade,
-			wantsOfflineInterview,
-			offlineInterviewSlot,
-			wantsOnlineInterview,
-			onlineInterviewSlot,
-			introMarkdown,
-			worksMarkdown,
-			attachmentPath,
-		};
 
 		const existing = await this.db.findRecruitmentApplicationByIdentityConflict(fullName, contact, qq);
 		if (existing && !isOverwrite(fields)) {
@@ -178,10 +176,70 @@ export class JoinUsSubmitService {
 			if (contactOwner && contactOwner.id !== existing.id) {
 				throw new AppError(409, JOINUS_DUPLICATE_SUBMIT_CODE, '该手机号已被其他报名使用');
 			}
-			await this.db.updateRecruitmentApplicationById(existing.id, payload);
-		} else {
-			await this.db.createRecruitmentApplication(payload);
 		}
+
+		let attachmentPath: string | null = null;
+		const writtenAbsPaths: string[] = [];
+		try {
+			if (uploads.length > 0) {
+				const slug = nameToPinyinSlug(fullName);
+				const joinusDir = join(process.cwd(), 'data', 'joinus', slug);
+				mkdirSync(joinusDir, { recursive: true });
+				const relPaths: string[] = [];
+				for (let i = 0; i < uploads.length; i++) {
+					const u = uploads[i];
+					if (u === undefined) continue;
+
+					const ext = extFromMime(u.mimetype) || 'bin';
+					const base = `${randomUUID().slice(0, 8)}_${i}__${sanitizeFileName(u.originalName)}`;
+					const destName = ensureExt(base, ext);
+					const abs = join(joinusDir, destName);
+					writeFileSync(abs, u.buffer);
+					writtenAbsPaths.push(abs);
+
+					relPaths.push(`joinus/${slug}/${destName}`);
+				}
+				attachmentPath = relPaths.join('|');
+			}
+
+			const submitterUserId = await getJoinUsPublicUserId(this.db);
+			const departmentSortOrder = departmentOrderFromSlug(department);
+
+			try {
+				await this.db.bookRecruitmentApplication({
+					application: {
+						submitterUserId,
+						fullName,
+						contact,
+						qq,
+						department,
+						departmentSortOrder,
+						isStudent,
+						schoolCollege,
+						grade,
+						wantsOfflineInterview,
+						wantsOnlineInterview,
+						introMarkdown,
+						worksMarkdown,
+						attachmentPath,
+					},
+					existingId: existing?.id ?? null,
+					offlineSlotId,
+					onlineSlotId,
+				});
+			} catch (e) {
+				const translated = translateSlotError(e);
+				if (translated !== e) throw translated;
+				throw e;
+			}
+		} catch (e) {
+			if (writtenAbsPaths.length > 0) {
+				const { rm } = await import('node:fs/promises');
+				for (const p of writtenAbsPaths) await rm(p, { force: true }).catch(() => undefined);
+			}
+			throw e;
+		}
+
 		broadcastRecruitmentApplicationsUpdated();
 	}
 }

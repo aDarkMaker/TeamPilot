@@ -853,3 +853,119 @@ body.joinus-modal-open {
 		font-size: 12px;
 	}
 }
+
+.joinus-select-option-taken {
+	color: var(--joinus-text-muted);
+	opacity: 0.55;
+	pointer-events: none;
+}
+
+.joinus-select-option-taken:hover {
+	background: transparent;
+}
+
+.joinus-select-empty {
+	padding: 10px 14px;
+	font-size: 14px;
+	color: var(--joinus-text-muted);
+	cursor: default;
+}
+
+.joinus-slot-wrap {
+	display: block;
+	padding: 16px;
+	border: 2px solid var(--joinus-border);
+	border-radius: var(--joinus-radius);
+	background: var(--joinus-card-bg);
+	transition: border-color 0.3s ease;
+}
+
+.joinus-slot-wrap.has-value {
+	border-color: var(--joinus-primary);
+}
+
+.joinus-slot-board {
+	display: flex;
+	flex-direction: column;
+	gap: 16px;
+}
+
+.joinus-slot-date {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	margin-bottom: 8px;
+	font-size: 14px;
+	font-weight: 700;
+	color: var(--joinus-text);
+}
+
+.joinus-slot-date::before {
+	content: '';
+	width: 3px;
+	height: 14px;
+	border-radius: 2px;
+	background: var(--joinus-primary);
+	flex: none;
+}
+
+.joinus-slot-group {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+}
+
+.joinus-slot-chip {
+	border: 1.5px solid var(--joinus-border);
+	background: var(--joinus-input-bg);
+	color: var(--joinus-text);
+	border-radius: 10px;
+	padding: 8px 12px;
+	font-size: 14px;
+	font-family: inherit;
+	font-variant-numeric: tabular-nums;
+	cursor: pointer;
+	transition:
+		border-color 0.2s ease,
+		background 0.2s ease,
+		color 0.2s ease,
+		transform 0.1s ease,
+		opacity 0.2s ease;
+}
+
+.joinus-slot-chip:hover:not(:disabled) {
+	border-color: var(--joinus-primary);
+	background: var(--joinus-primary-light);
+}
+
+.joinus-slot-chip:active:not(:disabled) {
+	transform: scale(0.96);
+}
+
+.joinus-slot-chip:focus-visible {
+	outline: none;
+	border-color: var(--joinus-primary);
+	box-shadow: 0 0 0 3px var(--joinus-primary-light);
+}
+
+.joinus-slot-chip.is-selected {
+	border-color: var(--joinus-primary-dark);
+	background: var(--joinus-primary-light);
+	color: var(--joinus-primary-dark);
+	font-weight: 700;
+}
+
+.joinus-slot-chip.is-taken {
+	color: var(--joinus-text-muted);
+	background: rgba(15, 23, 42, 0.04);
+	border-color: rgba(15, 23, 42, 0.08);
+	border-style: dashed;
+	cursor: not-allowed;
+	opacity: 0.72;
+}
+
+.joinus-slot-note {
+	padding: 8px 4px;
+	font-size: 14px;
+	color: var(--joinus-text-muted);
+}

@@ -1,7 +1,6 @@
 import { AppError } from '../server/types/api';
 import { DEPT_CN_TO_SLUG } from './departments';
 import type { JoinUsFormConfig } from './formConfigSchema';
-import { INTERVIEW_OFFLINE_FIELD, INTERVIEW_ONLINE_FIELD } from './interviewIntro';
 
 export const FORM_OUTDATED_CODE = 'FORM_OUTDATED';
 
@@ -13,10 +12,6 @@ function toStr(v: unknown): string {
 
 function normalizeText(raw: unknown): string {
 	return toStr(raw).trim();
-}
-
-function isYes(v: unknown): boolean {
-	return normalizeText(v) === '是';
 }
 
 function questionOptions(config: JoinUsFormConfig, id: string): string[] {
@@ -78,38 +73,5 @@ export function validateJoinusSubmitAgainstConfig(config: JoinUsFormConfig, fiel
 	const deptOpts = questionOptions(config, 'department');
 	if (!deptOpts.includes(departmentCn)) {
 		formOutdated('增删了部门哦，刷新下吧！');
-	}
-
-	const wantsOfflineInterview = isYes(fields.offline_interview);
-	const wantsOnlineInterview = isYes(fields.online_interview);
-	const offlineTime = normalizeText(fields.interview_time_offline);
-	const onlineTime = normalizeText(fields.interview_time_online);
-
-	const offlineOpts = questionOptions(config, INTERVIEW_OFFLINE_FIELD);
-	const onlineOpts = questionOptions(config, INTERVIEW_ONLINE_FIELD);
-
-	if (!wantsOfflineInterview && offlineTime) {
-		formOutdated('改了下时间，请刷新一下！');
-	}
-	if (!wantsOnlineInterview && onlineTime) {
-		formOutdated('改了下时间，刷新下吧！');
-	}
-
-	if (wantsOfflineInterview) {
-		if (!offlineTime) {
-			throw new AppError(400, 'INVALID_OFFLINE_TIME', '选一个呗～');
-		}
-		if (!offlineOpts.includes(offlineTime)) {
-			formOutdated('改了下时间，刷新下吧！');
-		}
-	}
-
-	if (wantsOnlineInterview) {
-		if (!onlineTime) {
-			throw new AppError(400, 'INVALID_ONLINE_TIME', '选一个呗～');
-		}
-		if (!onlineOpts.includes(onlineTime)) {
-			formOutdated('改了下时间，刷新下吧！');
-		}
 	}
 }

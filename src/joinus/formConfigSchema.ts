@@ -19,6 +19,7 @@ export const questionSchema = z.object({
 	rows: z.number().optional(),
 	accept: z.string().optional(),
 	multiple: z.boolean().optional(),
+	interviewMode: z.enum(['offline', 'online']).optional(),
 	showWhen: showWhenSchema.optional(),
 });
 

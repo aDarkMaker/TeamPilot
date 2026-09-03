@@ -6,6 +6,7 @@ import type { ScheduleController } from '../../controller/schedule.controller';
 import type { RecruitmentController } from '../../controller/recruitment.controller';
 import type { JoinusSubmitController } from '../../controller/joinusSubmit.controller';
 import type { JoinusFormController } from '../../controller/joinusForm.controller';
+import type { JoinusInterviewSlotsController } from '../../controller/joinusInterviewSlots.controller';
 import type { HomeController } from '../../controller/home.controller';
 import type { TaskController } from '../../controller/task.controller';
 import type { SearchController } from '../../controller/search.controller';
@@ -20,6 +21,7 @@ export interface ApiRouteDeps {
 	recruitmentController: RecruitmentController;
 	joinusSubmitController: JoinusSubmitController;
 	joinusFormController: JoinusFormController;
+	joinusInterviewSlotsController: JoinusInterviewSlotsController;
 	homeController: HomeController;
 	taskController: TaskController;
 	searchController: SearchController;

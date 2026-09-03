@@ -15,6 +15,7 @@ export interface Question {
 	rows?: number;
 	accept?: string;
 	multiple?: boolean;
+	interviewMode?: 'offline' | 'online';
 	showWhen?: ShowWhen;
 }
 
@@ -73,35 +74,48 @@ function createField(q: Question): HTMLElement {
 		}
 		case 'select': {
 			const wrap = document.createElement('div');
-			wrap.className = 'joinus-input-wrap joinus-select-custom';
-			wrap.dataset.select = '';
 			const hidden = document.createElement('input');
 			hidden.type = 'hidden';
 			hidden.name = q.id;
 			if (required) hidden.required = true;
-			const trigger = document.createElement('button');
-			trigger.type = 'button';
-			trigger.className = 'joinus-select-trigger';
-			trigger.setAttribute('aria-expanded', 'false');
-			trigger.setAttribute('aria-haspopup', 'listbox');
-			trigger.innerHTML = `<i class="${icon} joinus-input-icon"></i>
-				<span class="joinus-select-value placeholder">${ph}</span>
-				<i class="ri-arrow-down-s-line joinus-select-arrow"></i>`;
-			const dropdown = document.createElement('div');
-			dropdown.className = 'joinus-select-dropdown';
-			dropdown.setAttribute('role', 'listbox');
-			const opts = (q.options ?? []).map((o, i) => {
-				const div = document.createElement('div');
-				div.className = 'joinus-select-option';
-				div.setAttribute('data-value', String(i));
-				div.setAttribute('role', 'option');
-				div.textContent = o;
-				return div;
-			});
-			dropdown.append(...opts);
-			wrap.appendChild(hidden);
-			wrap.appendChild(trigger);
-			wrap.appendChild(dropdown);
+
+			if (q.interviewMode) {
+				wrap.className = 'joinus-input-wrap joinus-slot-wrap';
+				wrap.dataset.interviewMode = q.interviewMode;
+				wrap.dataset.placeholder = ph || '请选择面试时间';
+				const board = document.createElement('div');
+				board.className = 'joinus-slot-board';
+				wrap.appendChild(hidden);
+				wrap.appendChild(board);
+				void renderInterviewSlotBoard(wrap);
+			} else {
+				wrap.className = 'joinus-input-wrap joinus-select-custom';
+				wrap.dataset.select = '';
+				const trigger = document.createElement('button');
+				trigger.type = 'button';
+				trigger.className = 'joinus-select-trigger';
+				trigger.setAttribute('aria-expanded', 'false');
+				trigger.setAttribute('aria-haspopup', 'listbox');
+				trigger.innerHTML = `<i class="${icon} joinus-input-icon"></i>
+					<span class="joinus-select-value placeholder">${ph}</span>
+					<i class="ri-arrow-down-s-line joinus-select-arrow"></i>`;
+				const dropdown = document.createElement('div');
+				dropdown.className = 'joinus-select-dropdown';
+				dropdown.setAttribute('role', 'listbox');
+				const opts = (q.options ?? []).map((o, i) => {
+					const div = document.createElement('div');
+					div.className = 'joinus-select-option';
+					div.setAttribute('data-value', String(i));
+					div.setAttribute('data-submit', o);
+					div.setAttribute('role', 'option');
+					div.textContent = o;
+					return div;
+				});
+				dropdown.append(...opts);
+				wrap.appendChild(hidden);
+				wrap.appendChild(trigger);
+				wrap.appendChild(dropdown);
+			}
 			control = wrap;
 			break;
 		}
@@ -129,6 +143,7 @@ function createField(q: Question): HTMLElement {
 				const div = document.createElement('div');
 				div.className = 'joinus-select-option';
 				div.setAttribute('data-value', String(i));
+				div.setAttribute('data-submit', o);
 				div.setAttribute('role', 'option');
 				div.textContent = o;
 				dropdown.appendChild(div);
@@ -183,11 +198,25 @@ function createField(q: Question): HTMLElement {
 	return field;
 }
 
+function bindSelectOption(opt: HTMLElement, wrap: HTMLElement, hidden: HTMLInputElement, valueEl: Element): void {
+	if (opt.classList.contains('joinus-select-option-taken')) return;
+	opt.addEventListener('click', () => {
+		const submit = opt.getAttribute('data-submit') ?? opt.textContent ?? '';
+		const text = opt.textContent ?? '';
+		hidden.value = submit;
+		valueEl.textContent = text;
+		valueEl.classList.remove('placeholder');
+		wrap.classList.add('has-value');
+		wrap.classList.remove('is-open');
+		hidden.dispatchEvent(new Event('change', { bubbles: true }));
+	});
+}
+
 function initSelect(wrap: HTMLElement): void {
 	const trigger = wrap.querySelector('.joinus-select-trigger');
 	const valueEl = wrap.querySelector('.joinus-select-value');
 	const hidden = wrap.querySelector<HTMLInputElement>('input[type="hidden"]');
-	const options = wrap.querySelectorAll('.joinus-select-option');
+	const options = wrap.querySelectorAll<HTMLElement>('.joinus-select-option');
 	const dropdown = wrap.querySelector('.joinus-select-dropdown');
 	if (!trigger || !valueEl || !hidden || !dropdown) return;
 
@@ -196,18 +225,7 @@ function initSelect(wrap: HTMLElement): void {
 		wrap.classList.toggle('is-open');
 	});
 
-	options.forEach((opt) => {
-		opt.addEventListener('click', () => {
-			const v = opt.getAttribute('data-value') ?? '';
-			const text = opt.textContent ?? '';
-			hidden.value = text;
-			valueEl.textContent = text;
-			valueEl.classList.remove('placeholder');
-			wrap.classList.add('has-value');
-			wrap.classList.remove('is-open');
-			hidden.dispatchEvent(new Event('change', { bubbles: true }));
-		});
-	});
+	options.forEach((opt) => bindSelectOption(opt, wrap, hidden, valueEl));
 
 	document.addEventListener('click', (e) => {
 		if (!wrap.contains(e.target as Node)) {
@@ -215,6 +233,119 @@ function initSelect(wrap: HTMLElement): void {
 			(trigger as HTMLElement).blur();
 		}
 	});
+}
+
+type PublicTimeslot = { id: string; date: string; startMin: number; endMin: number; booked: boolean };
+
+const WEEK_CN = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
+
+function pad2(n: number): string {
+	return String(n).padStart(2, '0');
+}
+
+function timeRangeLabel(startMin: number, endMin: number): string {
+	const to = (m: number) => `${pad2(Math.floor(m / 60))}:${pad2(m % 60)}`;
+	return `${to(startMin)}-${to(endMin)}`;
+}
+
+function dateGroupLabel(date: string): string {
+	const [y, m, d] = date.split('-').map(Number);
+	const dt = new Date(Date.UTC(y ?? 1970, (m ?? 1) - 1, d ?? 1));
+	return `${m}月${d}日 ${WEEK_CN[dt.getUTCDay()] ?? ''}`;
+}
+
+function setSlotNote(board: HTMLElement, text: string): void {
+	const note = document.createElement('div');
+	note.className = 'joinus-slot-note';
+	note.textContent = text;
+	board.appendChild(note);
+}
+
+function selectSlotChip(wrap: HTMLElement, chip: HTMLButtonElement): void {
+	const hidden = wrap.querySelector<HTMLInputElement>('input[type="hidden"]');
+	if (!hidden) return;
+	const alreadySelected = chip.classList.contains('is-selected');
+	wrap.querySelectorAll<HTMLElement>('.joinus-slot-chip.is-selected').forEach((c) => c.classList.remove('is-selected'));
+	if (alreadySelected) {
+		hidden.value = '';
+		wrap.classList.remove('has-value');
+	} else {
+		chip.classList.add('is-selected');
+		hidden.value = chip.dataset.slotId ?? '';
+		wrap.classList.add('has-value');
+	}
+	hidden.dispatchEvent(new Event('change', { bubbles: true }));
+}
+
+async function renderInterviewSlotBoard(wrap: HTMLElement): Promise<void> {
+	const hidden = wrap.querySelector<HTMLInputElement>('input[type="hidden"]');
+	const board = wrap.querySelector<HTMLElement>('.joinus-slot-board');
+	if (!hidden || !board) return;
+
+	board.innerHTML = '';
+	setSlotNote(board, '加载面试时段…');
+
+	try {
+		const res = await fetch('/api/joinus/timeslots-public');
+		const json = (await res.json().catch(() => ({}))) as { ok?: boolean; data?: PublicTimeslot[] };
+		const slots = (json.ok ? json.data ?? [] : []).slice().sort((a, b) => {
+			if (a.date !== b.date) return a.date.localeCompare(b.date);
+			if (a.booked !== b.booked) return a.booked ? 1 : -1;
+			return a.startMin - b.startMin;
+		});
+		board.innerHTML = '';
+
+		if (!slots.length) {
+			setSlotNote(board, '暂无可预约的面试时间');
+			return;
+		}
+
+		const previous = hidden.value;
+		let restored = false;
+		let group: HTMLElement | null = null;
+		let currentDate = '';
+
+		for (const s of slots) {
+			if (s.date !== currentDate) {
+				currentDate = s.date;
+				const head = document.createElement('div');
+				head.className = 'joinus-slot-date';
+				head.textContent = dateGroupLabel(s.date);
+				group = document.createElement('div');
+				group.className = 'joinus-slot-group';
+				board.appendChild(head);
+				board.appendChild(group);
+			}
+			if (!group) continue;
+
+			const chip = document.createElement('button');
+			chip.type = 'button';
+			chip.className = 'joinus-slot-chip' + (s.booked ? ' is-taken' : '');
+			chip.dataset.slotId = s.id;
+			chip.textContent = timeRangeLabel(s.startMin, s.endMin);
+			chip.setAttribute('aria-label', `${dateGroupLabel(s.date)} ${timeRangeLabel(s.startMin, s.endMin)}${s.booked ? '（已约）' : ''}`);
+			if (s.booked) {
+				chip.disabled = true;
+				chip.setAttribute('aria-disabled', 'true');
+				chip.title = '该时段已被预约';
+			} else {
+				if (!restored && previous && String(s.id) === previous) {
+					chip.classList.add('is-selected');
+					restored = true;
+				}
+				chip.addEventListener('click', () => selectSlotChip(wrap, chip));
+			}
+			group.appendChild(chip);
+		}
+
+		if (!restored && previous) {
+			hidden.value = '';
+			wrap.classList.remove('has-value');
+		}
+	} catch {
+		board.innerHTML = '';
+		setSlotNote(board, '面试时间加载失败，请稍后重试');
+	}
 }
 
 interface FileWrapEl extends HTMLElement {
@@ -294,12 +425,16 @@ function clearField(field: HTMLElement, q: Question): void {
 	const hidden = field.querySelector<HTMLInputElement>(`input[type="hidden"][name="${name}"]`);
 	if (hidden) {
 		hidden.value = '';
-		const wrap = hidden.closest('.joinus-select-custom');
+		const wrap = hidden.closest<HTMLElement>('.joinus-select-custom, .joinus-slot-wrap');
 		if (wrap) {
-			const valueEl = wrap.querySelector('.joinus-select-value');
-			if (valueEl) {
-				valueEl.textContent = q.placeholder || '请选择';
-				valueEl.classList.add('placeholder');
+			if (wrap.classList.contains('joinus-slot-wrap')) {
+				wrap.querySelectorAll<HTMLElement>('.joinus-slot-chip.is-selected').forEach((c) => c.classList.remove('is-selected'));
+			} else {
+				const valueEl = wrap.querySelector('.joinus-select-value');
+				if (valueEl) {
+					valueEl.textContent = q.placeholder || '请选择';
+					valueEl.classList.add('placeholder');
+				}
 			}
 			wrap.classList.remove('has-value');
 		}
@@ -314,7 +449,7 @@ function clearField(field: HTMLElement, q: Question): void {
 	field.classList.remove('has-value');
 }
 
-function initLogicConditions(form: HTMLFormElement, config: FormConfig): void {
+function initLogicConditions(form: HTMLFormElement, config: FormConfig, onRevealField?: (field: HTMLElement) => void): void {
 	const fields = form.querySelectorAll<HTMLElement>('.joinus-field');
 	config.questions.forEach((q, i) => {
 		if (!q.showWhen) return;
@@ -327,8 +462,10 @@ function initLogicConditions(form: HTMLFormElement, config: FormConfig): void {
 			return el instanceof HTMLInputElement || el instanceof HTMLTextAreaElement ? el.value : '';
 		};
 		const show = (): void => {
+			const wasHidden = field.classList.contains('joinus-field-hidden');
 			field.classList.remove('joinus-field-hidden');
 			setFieldRequired(field, q.id, q.required ?? false);
+			if (wasHidden) onRevealField?.(field);
 		};
 		const hide = (): void => {
 			field.classList.add('joinus-field-hidden');
@@ -387,6 +524,12 @@ const SUBMIT_ERROR_FIELD: Record<string, string> = {
 	INVALID_DEPARTMENT: 'department',
 	INVALID_OFFLINE_TIME: 'interview_time_offline',
 	INVALID_ONLINE_TIME: 'interview_time_online',
+	OFFLINE_SLOT_TAKEN: 'interview_time_offline',
+	ONLINE_SLOT_TAKEN: 'interview_time_online',
+	OFFLINE_SLOT_INVALID: 'interview_time_offline',
+	ONLINE_SLOT_INVALID: 'interview_time_online',
+	OFFLINE_SLOT_NOT_FOUND: 'interview_time_offline',
+	ONLINE_SLOT_NOT_FOUND: 'interview_time_online',
 };
 
 export function renderForm(container: HTMLElement, config: FormConfig): void {
@@ -408,7 +551,12 @@ export function renderForm(container: HTMLElement, config: FormConfig): void {
 		if (fileWrap) initFile(fileWrap);
 	}
 
-	initLogicConditions(form, config);
+	initLogicConditions(form, config, (field) => {
+		const slotWrap = field.querySelector<HTMLElement>('.joinus-slot-wrap[data-interview-mode]');
+		if (slotWrap?.dataset.interviewMode) {
+			void renderInterviewSlotBoard(slotWrap);
+		}
+	});
 
 	const btn = document.createElement('button');
 	btn.type = 'submit';
@@ -507,7 +655,7 @@ export function renderForm(container: HTMLElement, config: FormConfig): void {
 			field.addEventListener('animationend', () => field.classList.remove('joinus-field-shake'), { once: true });
 		});
 
-		const focusable = field.querySelector<HTMLElement>('input:not([type="hidden"]), textarea, button.joinus-select-trigger, .joinus-file-wrap');
+		const focusable = field.querySelector<HTMLElement>('input:not([type="hidden"]), textarea, button.joinus-select-trigger, button.joinus-slot-chip, .joinus-file-wrap');
 		focusable?.focus({ preventScroll: true });
 	}
 
@@ -553,6 +701,14 @@ export function renderForm(container: HTMLElement, config: FormConfig): void {
 		);
 	}
 
+	async function refreshSlotField(questionId: string): Promise<HTMLElement | null> {
+		const field = form.querySelector<HTMLElement>(`.joinus-field[data-question-id="${questionId}"]`);
+		const wrap = field?.querySelector<HTMLElement>('.joinus-slot-wrap[data-interview-mode]');
+		if (!wrap) return null;
+		await renderInterviewSlotBoard(wrap);
+		return field;
+	}
+
 	function handleSubmitFailure(json: SubmitApiJson): void {
 		const message = typeof json.message === 'string' && json.message.trim() ? json.message : '提交失败';
 
@@ -563,6 +719,21 @@ export function renderForm(container: HTMLElement, config: FormConfig): void {
 
 		const questionId = json.code ? SUBMIT_ERROR_FIELD[json.code] : undefined;
 		if (questionId) {
+			const slotCodes = new Set([
+				'OFFLINE_SLOT_TAKEN',
+				'ONLINE_SLOT_TAKEN',
+				'OFFLINE_SLOT_INVALID',
+				'ONLINE_SLOT_INVALID',
+				'OFFLINE_SLOT_NOT_FOUND',
+				'ONLINE_SLOT_NOT_FOUND',
+			]);
+			if (json.code && slotCodes.has(json.code)) {
+				void refreshSlotField(questionId).then((field) => {
+					focusFieldError(questionId, message);
+					field?.scrollIntoView({ block: 'center', behavior: 'smooth' });
+				});
+				return;
+			}
 			focusFieldError(questionId, message);
 			return;
 		}

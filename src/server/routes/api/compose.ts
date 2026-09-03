@@ -9,6 +9,7 @@ import type { ApiRouteDeps } from './types';
 import { buildRecruitmentRoutes } from '../recruitment.routes';
 import { buildJoinUsSubmitRoutes } from '../joinusSubmit.routes';
 import { buildJoinUsFormRoutes } from '../joinusForm.routes';
+import { buildJoinUsInterviewSlotsRoutes } from '../joinusInterviewSlots.routes';
 import { buildRecruitmentEventsRoutes } from '../recruitment.events.routes';
 import { buildHomeRoutes } from '../home.routes';
 import { buildTaskRoutes } from '../task.routes';
@@ -34,6 +35,7 @@ export function composeApiRouter(deps: ApiRouteDeps): Router {
 	mountChildRouter(api, buildRecruitmentEventsRoutes());
 	mountChildRouter(api, buildJoinUsSubmitRoutes(deps.joinusSubmitController));
 	mountChildRouter(api, buildJoinUsFormRoutes(deps.joinusFormController));
+	mountChildRouter(api, buildJoinUsInterviewSlotsRoutes(deps.joinusInterviewSlotsController));
 	mountChildRouter(api, buildHomeRoutes(deps.homeController));
 	mountChildRouter(api, buildTaskRoutes(deps.taskController));
 	mountChildRouter(api, buildSearchRoutes(deps.searchController));

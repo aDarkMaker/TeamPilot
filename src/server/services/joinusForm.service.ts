@@ -1,6 +1,5 @@
 import { z } from 'zod';
 import { AppError } from '../types/api';
-import { INTERVIEW_OFFLINE_FIELD, INTERVIEW_ONLINE_FIELD } from '../../joinus/interviewIntro';
 import { readJoinUsFormConfig, writeJoinUsFormConfig } from '../../joinus/formConfigIO';
 import { assertDepartmentOptions, formConfigSchema, type JoinUsFormConfig } from '../../joinus/formConfigSchema';
 
@@ -19,18 +18,6 @@ const updateBodySchema = z.object({
 	welcome: z.string().max(5000).optional(),
 	questions: z.array(questionPatchSchema).optional(),
 });
-
-function normalizeOptions(raw: string[]): string[] {
-	const seen = new Set<string>();
-	const out: string[] = [];
-	for (const item of raw) {
-		const t = item.trim();
-		if (!t || seen.has(t)) continue;
-		seen.add(t);
-		out.push(t);
-	}
-	return out;
-}
 
 export class JoinUsFormService {
 	async getForm(): Promise<JoinUsFormConfig> {
@@ -66,19 +53,8 @@ export class JoinUsFormService {
 				if (p.label !== undefined) orig.label = p.label;
 				if (p.placeholder !== undefined) orig.placeholder = p.placeholder;
 
-				const isInterviewSlot = p.id === INTERVIEW_OFFLINE_FIELD || p.id === INTERVIEW_ONLINE_FIELD;
 				if (p.options !== undefined) {
-					if (!isInterviewSlot) {
-						throw new AppError(400, 'OPTIONS_NOT_EDITABLE', `${p.id} 的选项不可在此修改`);
-					}
-					if (orig.type !== 'select') {
-						throw new AppError(400, 'INVALID_QUESTION_TYPE', '面试时间题目类型异常');
-					}
-					const opts = normalizeOptions(p.options);
-					if (!opts.length) {
-						throw new AppError(400, 'EMPTY_OPTIONS', '面试时间选项不能为空');
-					}
-					orig.options = opts;
+					throw new AppError(400, 'OPTIONS_NOT_EDITABLE', `${p.id} 的选项不可在此修改`);
 				}
 			}
 
@@ -98,10 +74,8 @@ export class JoinUsFormService {
 			if (JSON.stringify(a.showWhen) !== JSON.stringify(b.showWhen)) {
 				throw new AppError(400, 'SHOW_WHEN_CHANGED', '题目显示条件不可修改');
 			}
-			if (a.id !== INTERVIEW_OFFLINE_FIELD && a.id !== INTERVIEW_ONLINE_FIELD) {
-				if (JSON.stringify(a.options) !== JSON.stringify(b.options)) {
-					throw new AppError(400, 'OPTIONS_CHANGED', `${a.id} 的选项不可修改`);
-				}
+			if (JSON.stringify(a.options) !== JSON.stringify(b.options)) {
+				throw new AppError(400, 'OPTIONS_CHANGED', `${a.id} 的选项不可修改`);
 			}
 		}
 

@@ -21,6 +21,8 @@ import { JoinUsSubmitService } from './services/joinusSubmit.service';
 import { JoinusSubmitController } from './controller/joinusSubmit.controller';
 import { JoinUsFormService } from './services/joinusForm.service';
 import { JoinusFormController } from './controller/joinusForm.controller';
+import { JoinusInterviewSlotsService } from './services/joinusInterviewSlots.service';
+import { JoinusInterviewSlotsController } from './controller/joinusInterviewSlots.controller';
 import { TaskService } from './services/task.service';
 import { TaskController } from './controller/task.controller';
 import { HomeService } from './services/home.service';
@@ -81,6 +83,9 @@ async function main() {
 	const joinusFormService = new JoinUsFormService();
 	const joinusFormController = new JoinusFormController(joinusFormService);
 
+	const joinusInterviewSlotsService = new JoinusInterviewSlotsService(db);
+	const joinusInterviewSlotsController = new JoinusInterviewSlotsController(joinusInterviewSlotsService);
+
 	const bilibiliService = new BilibiliService(sqlite, config);
 	const homeService = new HomeService(db, cache, config, bilibiliService);
 	const homeController = new HomeController(homeService);
@@ -106,6 +111,7 @@ async function main() {
 		recruitmentController,
 		joinusSubmitController,
 		joinusFormController,
+		joinusInterviewSlotsController,
 		homeController,
 		taskController,
 		searchController,
