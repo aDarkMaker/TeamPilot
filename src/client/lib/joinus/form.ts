@@ -39,6 +39,14 @@ export interface FormConfig {
 
 const defaultQuestion: Partial<Question> = { required: false };
 
+const JOINUS_MAX_FILE_BYTES = 50 * 1024 * 1024;
+const JOINUS_FILE_TOO_LARGE_MESSAGE = '附件太大了喵，要比 50MB 小哦～';
+
+function removeFieldError(field: HTMLElement): void {
+	field.classList.remove('joinus-field-error', 'joinus-field-shake');
+	field.querySelector('.joinus-field-error-msg')?.remove();
+}
+
 function createField(q: Question): HTMLElement {
 	const field = document.createElement('div');
 	field.className = 'joinus-field' + (q.showWhen ? ' joinus-field-logic' : '');
@@ -485,7 +493,7 @@ function initLogicConditions(form: HTMLFormElement, config: FormConfig, onReveal
 	});
 }
 
-function initFile(wrap: HTMLElement): void {
+function initFile(wrap: HTMLElement, onTooLarge: (message: string) => void, onFixed: () => void): void {
 	const w = wrap as unknown as FileWrapEl;
 	const input = wrap.querySelector<HTMLInputElement>('input[type="file"]');
 	const files = w._files;
@@ -493,12 +501,21 @@ function initFile(wrap: HTMLElement): void {
 
 	const addFiles = (fileList: FileList | null) => {
 		if (!fileList?.length) return;
-		Array.from(fileList).forEach((f) => files.push(f));
+		const currentSize = files.reduce((sum, f) => sum + f.size, 0);
+		const incoming = Array.from(fileList);
+		if (incoming.some((f) => f.size > JOINUS_MAX_FILE_BYTES) || currentSize + incoming.reduce((sum, f) => sum + f.size, 0) > JOINUS_MAX_FILE_BYTES) {
+			onTooLarge(JOINUS_FILE_TOO_LARGE_MESSAGE);
+			return;
+		}
+		onFixed();
+		incoming.forEach((f) => files.push(f));
 		renderFileList(w);
 		input.value = '';
 	};
 
-	input.addEventListener('change', () => addFiles(input.files));
+	input.addEventListener('change', () => {
+		addFiles(input.files);
+	});
 
 	wrap.addEventListener('dragover', (e) => {
 		e.preventDefault();
@@ -548,7 +565,13 @@ export function renderForm(container: HTMLElement, config: FormConfig): void {
 		if (selectWrap) initSelect(selectWrap);
 
 		const fileWrap = field.querySelector<HTMLElement>('.joinus-file-wrap');
-		if (fileWrap) initFile(fileWrap);
+		if (fileWrap) {
+			initFile(
+				fileWrap,
+				(message) => focusFieldError(q.id, message),
+				() => removeFieldError(field),
+			);
+		}
 	}
 
 	initLogicConditions(form, config, (field) => {
@@ -718,6 +741,11 @@ export function renderForm(container: HTMLElement, config: FormConfig): void {
 		}
 
 		const questionId = json.code ? SUBMIT_ERROR_FIELD[json.code] : undefined;
+		if (json.code === 'FILE_TOO_LARGE') {
+			const fileField = form.querySelector<HTMLElement>('.joinus-file-wrap')?.closest<HTMLElement>('.joinus-field');
+			focusFieldError(fileField?.dataset.questionId ?? 'portfolio', message);
+			return;
+		}
 		if (questionId) {
 			const slotCodes = new Set([
 				'OFFLINE_SLOT_TAKEN',
@@ -756,6 +784,10 @@ export function renderForm(container: HTMLElement, config: FormConfig): void {
 			return 'duplicate';
 		}
 		if (!r.ok || !json.ok) {
+			if (r.status === 413 && json.code !== 'FILE_TOO_LARGE') {
+				json.code = 'FILE_TOO_LARGE';
+				json.message = JOINUS_FILE_TOO_LARGE_MESSAGE;
+			}
 			handleSubmitFailure(json);
 			return 'failed';
 		}
