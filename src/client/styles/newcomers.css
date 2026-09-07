@@ -232,6 +232,13 @@
 	padding: 8px;
 	max-height: calc(100vh - 280px);
 	overflow-y: auto;
+	scrollbar-width: none;
+	-ms-overflow-style: none;
+}
+
+.nc-list-items::-webkit-scrollbar {
+	width: 0;
+	height: 0;
 }
 
 .nc-list-item {
@@ -490,16 +497,26 @@
 	align-items: start;
 }
 
+.nc-detail {
+	container-type: inline-size;
+	container-name: nc-detail;
+}
+
+/* 详情区自身变窄时（侧栏+名单挤占视口）再折成单列，避免简介列被附件 minmax(260px) 挤崩 */
+@container nc-detail (max-width: 620px) {
+	.nc-detail-split {
+		grid-template-columns: 1fr;
+	}
+}
+
 @media (max-width: 1280px) {
 	.nc-page {
 		grid-template-columns: minmax(200px, 240px) minmax(0, 1fr);
-		grid-template-rows: auto auto;
 	}
 
+	/* 非三列时不展示评论，避免附件切换导致评论区上下跳动 */
 	.nc-comments-aside {
-		grid-column: 1 / -1;
-		position: static;
-		max-height: 420px;
+		display: none;
 	}
 }
 
@@ -599,8 +616,20 @@
 		border-radius: 10px;
 	}
 
+	.nc-attach-video-wrap {
+		border-radius: 10px;
+	}
+
 	.nc-attach-frame {
 		height: min(48vh, 400px);
+	}
+
+	.nc-attach-pdf {
+		height: min(48vh, 400px);
+	}
+
+	.nc-attach-video {
+		max-height: min(48vh, 400px);
 	}
 
 	.nc-detail-section--meta {
@@ -666,6 +695,14 @@
 		height: min(40vh, 300px);
 	}
 
+	.nc-attach-pdf {
+		height: min(40vh, 300px);
+	}
+
+	.nc-attach-video {
+		max-height: min(40vh, 300px);
+	}
+
 	.nc-btn {
 		padding: 6px 10px;
 		font-size: 11px;
@@ -678,6 +715,8 @@
 	background: rgba(255, 255, 255, 0.52);
 	border: 1px solid rgba(255, 255, 255, 0.7);
 	min-height: 2em;
+	min-width: 0;
+	box-sizing: border-box;
 }
 
 .nc-markdown-shell--intro {
@@ -1026,6 +1065,45 @@
 	min-width: 0;
 }
 
+.nc-attach-preview-body {
+	animation: nc-preview-in 0.18s ease-out both;
+}
+
+.nc-attach-preview-body.is-leaving {
+	animation: nc-preview-out 0.15s ease-in both;
+}
+
+@keyframes nc-preview-in {
+	from {
+		opacity: 0;
+		transform: translateY(4px);
+	}
+
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
+
+@keyframes nc-preview-out {
+	from {
+		opacity: 1;
+		transform: translateY(0);
+	}
+
+	to {
+		opacity: 0;
+		transform: translateY(-3px);
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.nc-attach-preview-body,
+	.nc-attach-preview-body.is-leaving {
+		animation: none;
+	}
+}
+
 .nc-attach-toolbar {
 	display: flex;
 	flex-wrap: nowrap;
@@ -1114,6 +1192,59 @@
 	display: block;
 }
 
+.nc-attach-pdf {
+	box-sizing: border-box;
+	height: min(58vh, 560px);
+	overflow: auto;
+	overscroll-behavior: contain;
+	background: #525659;
+	scrollbar-width: thin;
+	scrollbar-color: rgba(0, 0, 0, 0.35) transparent;
+}
+
+.nc-attach-pdf::-webkit-scrollbar {
+	width: 8px;
+}
+
+.nc-attach-pdf::-webkit-scrollbar-thumb {
+	border-radius: 999px;
+	background: rgba(0, 0, 0, 0.3);
+}
+
+.nc-attach-pdf::-webkit-scrollbar-track {
+	background: transparent;
+}
+
+.nc-pdf-page {
+	display: flex;
+	justify-content: center;
+	padding: 12px 10px 14px;
+}
+
+.nc-pdf-page + .nc-pdf-page {
+	padding-top: 8px;
+}
+
+.nc-pdf-canvas {
+	margin: 0 auto;
+	max-width: 100%;
+	height: auto;
+	background: #fff;
+	box-shadow: 0 1px 4px rgba(0, 0, 0, 0.28), 0 2px 12px rgba(0, 0, 0, 0.12);
+}
+
+.nc-pdf-hint {
+	margin: 0;
+	padding: 40px 20px;
+	text-align: center;
+	font-size: 13px;
+	color: rgba(255, 255, 255, 0.9);
+}
+
+.nc-pdf-hint.is-error {
+	color: rgba(255, 200, 200, 0.95);
+}
+
 .nc-attach-open {
 	position: absolute;
 	top: 10px;
@@ -1143,6 +1274,21 @@
 	max-height: min(58vh, 560px);
 	border-radius: 12px;
 	border: 1px solid rgba(255, 255, 255, 0.7);
+}
+
+.nc-attach-video-wrap {
+	position: relative;
+	border-radius: 12px;
+	overflow: hidden;
+	border: 1px solid rgba(255, 255, 255, 0.7);
+	background: #000;
+}
+
+.nc-attach-video {
+	display: block;
+	width: 100%;
+	max-height: min(58vh, 560px);
+	background: #000;
 }
 
 .nc-attach-fallback {

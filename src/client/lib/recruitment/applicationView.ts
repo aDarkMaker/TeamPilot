@@ -32,10 +32,31 @@ export type RecruitmentApplicationDto = {
 	myRating: number | null;
 };
 
+const VIDEO_EXT_MIME: Record<string, string> = {
+	mp4: 'video/mp4',
+	m4v: 'video/mp4',
+	webm: 'video/webm',
+	mov: 'video/quicktime',
+	ogv: 'video/ogg',
+	ogg: 'video/ogg',
+};
+
+function normalizeAttachmentFileName(fileName: string): string {
+	const lower = fileName.toLowerCase();
+	if (lower.endsWith('.bin')) {
+		const inner = fileName.slice(0, -4);
+		if (inner.includes('.')) return inner;
+	}
+	return fileName;
+}
+
 function inferAttachmentMeta(fileName: string): { kind: RecruitmentAttachmentKind; mimeType: string } {
 	const lower = fileName.toLowerCase();
 	if (lower.endsWith('.pdf')) return { kind: 'pdf', mimeType: 'application/pdf' };
 	if (/\.(png|jpe?g|gif|webp|bmp|svg)$/i.test(lower)) return { kind: 'image', mimeType: 'image/jpeg' };
+	const m = /\.([a-z0-9]{2,5})$/.exec(lower);
+	const mime = m ? VIDEO_EXT_MIME[m[1]] : undefined;
+	if (mime) return { kind: 'video', mimeType: mime };
 	return { kind: 'other', mimeType: 'application/octet-stream' };
 }
 
@@ -63,7 +84,7 @@ function attachmentsFromPath(attachmentPath: string | null): RecruitmentAttachme
 	return parts
 		.map((raw, i) => {
 			const storedName = raw.split(/[/\\]/).pop() || '附件';
-			const fileName = displayNameFromStoredName(storedName);
+			const fileName = normalizeAttachmentFileName(displayNameFromStoredName(storedName));
 			const url = publicUrlFromStoredPath(raw);
 			const { kind, mimeType } = inferAttachmentMeta(fileName);
 			return { id: String(i), fileName, url, mimeType, kind } as RecruitmentAttachment;
@@ -75,7 +96,6 @@ function displayNameFromStoredName(storedName: string): string {
 	const name = (storedName ?? '').trim();
 	if (!name) return '附件';
 
-	// 新格式：<uuid>_<i>__<original>
 	const idx = name.indexOf('__');
 	const raw = idx >= 0 ? name.slice(idx + 2) : name;
 	try {

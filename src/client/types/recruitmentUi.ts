@@ -3,7 +3,7 @@ export type RecruitmentDepartmentSlug = 'vup' | 'video' | 'art' | 'live' | 'copy
 
 export type RecruitmentInterviewSlotSlug = 'none';
 
-export type RecruitmentAttachmentKind = 'pdf' | 'image' | 'other';
+export type RecruitmentAttachmentKind = 'pdf' | 'image' | 'video' | 'other';
 
 export type RecruitmentAttachment = {
 	id: string;

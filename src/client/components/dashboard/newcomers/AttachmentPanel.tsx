@@ -1,15 +1,32 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 
+import { PdfViewer } from './PdfViewer';
 import type { RecruitmentAttachment } from '../../../types/recruitmentUi';
 
 type Props = {
 	attachments: RecruitmentAttachment[];
 };
 
+const SWAP_MS = 160;
+
 export function AttachmentPanel({ attachments }: Props) {
 	const [activeId, setActiveId] = useState(() => attachments[0]?.id ?? '');
+	const [leaving, setLeaving] = useState(false);
+	const swapTimer = useRef<number | undefined>(undefined);
 
 	const active = useMemo(() => attachments.find((a) => a.id === activeId) ?? attachments[0] ?? null, [attachments, activeId]);
+
+	useEffect(() => () => window.clearTimeout(swapTimer.current), []);
+
+	const selectAttachment = (id: string) => {
+		if (id === activeId || !attachments.some((a) => a.id === id)) return;
+		window.clearTimeout(swapTimer.current);
+		setLeaving(true);
+		swapTimer.current = window.setTimeout(() => {
+			setActiveId(id);
+			setLeaving(false);
+		}, SWAP_MS);
+	};
 
 	if (!attachments.length) {
 		return (
@@ -30,7 +47,7 @@ export function AttachmentPanel({ attachments }: Props) {
 						aria-selected={active?.id === a.id}
 						title={a.fileName}
 						className={`nc-attach-tab ${active?.id === a.id ? 'is-active' : ''}`}
-						onClick={() => setActiveId(a.id)}
+						onClick={() => selectAttachment(a.id)}
 					>
 						<span className="nc-attach-tab-name">{displayBaseName(a.fileName)}</span>
 						<span className="nc-attach-tab-badge">{kindLabel(a.kind)}</span>
@@ -38,7 +55,9 @@ export function AttachmentPanel({ attachments }: Props) {
 				))}
 			</div>
 			<div className="nc-attach-preview" role="tabpanel">
-				{active && <AttachmentPreview attachment={active} />}
+				<div key={active?.id} className={`nc-attach-preview-body ${leaving ? 'is-leaving' : ''}`}>
+					{active && <AttachmentPreview attachment={active} />}
+				</div>
 			</div>
 		</div>
 	);
@@ -50,6 +69,8 @@ function kindLabel(kind: RecruitmentAttachment['kind']): string {
 			return 'PDF';
 		case 'image':
 			return '图片';
+		case 'video':
+			return '视频';
 		default:
 			return '文件';
 	}
@@ -67,7 +88,7 @@ function AttachmentPreview({ attachment }: { attachment: RecruitmentAttachment }
 	if (kind === 'pdf') {
 		return (
 			<div className="nc-attach-frame-wrap">
-				<iframe title={fileName} className="nc-attach-frame" src={url} loading="lazy" />
+				<PdfViewer url={url} fileName={fileName} />
 				<a className="nc-attach-open" href={url} target="_blank" rel="noreferrer">
 					新窗口打开
 				</a>
@@ -81,6 +102,17 @@ function AttachmentPreview({ attachment }: { attachment: RecruitmentAttachment }
 				<img className="nc-attach-image" src={url} alt={fileName} loading="lazy" decoding="async" />
 				<a className="nc-attach-open" href={url} target="_blank" rel="noreferrer">
 					原图
+				</a>
+			</div>
+		);
+	}
+
+	if (kind === 'video') {
+		return (
+			<div className="nc-attach-video-wrap">
+				<video key={url} className="nc-attach-video" src={url} controls playsInline preload="metadata" />
+				<a className="nc-attach-open" href={url} target="_blank" rel="noreferrer">
+					新窗口打开
 				</a>
 			</div>
 		);
