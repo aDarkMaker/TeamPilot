@@ -91,8 +91,20 @@ function extFromMime(mime: string): string | null {
 	if (m === 'image/jpeg') return 'jpg';
 	if (m === 'image/png') return 'png';
 	if (m === 'image/webp') return 'webp';
-	if (m.startsWith('image/')) return m.split('/')[1] || null;
+	if (m === 'video/mp4') return 'mp4';
+	if (m === 'video/webm') return 'webm';
+	if (m === 'video/quicktime') return 'mov';
+	if (m === 'video/x-matroska') return 'mkv';
+	if (m.startsWith('image/') || m.startsWith('video/')) return m.split('/')[1] || null;
 	return null;
+}
+
+function extFromOriginalName(raw: string): string {
+	const name = sanitizeFileName(raw);
+	const i = name.lastIndexOf('.');
+	if (i <= 0 || i >= name.length - 1) return 'bin';
+	const ext = name.slice(i + 1).toLowerCase();
+	return /^[a-z0-9]{1,10}$/.test(ext) ? ext : 'bin';
 }
 
 function sanitizeFileName(raw: string): string {
@@ -190,7 +202,7 @@ export class JoinUsSubmitService {
 					const u = uploads[i];
 					if (u === undefined) continue;
 
-					const ext = extFromMime(u.mimetype) || 'bin';
+					const ext = extFromMime(u.mimetype) ?? extFromOriginalName(u.originalName);
 					const base = `${randomUUID().slice(0, 8)}_${i}__${sanitizeFileName(u.originalName)}`;
 					const destName = ensureExt(base, ext);
 					const abs = join(joinusDir, destName);

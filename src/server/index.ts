@@ -33,7 +33,7 @@ import { BilibiliService } from './services/bilibili.service';
 import { BilibiliController } from './controller/bilibili.controller';
 import serve from 'koa-static';
 import mount from 'koa-mount';
-import { join } from 'node:path';
+import { join, basename } from 'node:path';
 import { mkdirSync } from 'node:fs';
 import { ProfileService } from './services/profile.service';
 import { ProfileController } from './controller/profile.controller';
@@ -48,6 +48,30 @@ function isBenignClientError(err: unknown): boolean {
 	if (code === 'ECONNRESET' || code === 'EPIPE' || code === 'ERR_STREAM_PREMATURE_CLOSE') return true;
 	if (message.includes('Premature close')) return true;
 	return false;
+}
+
+const LEGACY_BIN_EXT_MIME: Record<string, string> = {
+	mp4: 'video/mp4',
+	m4v: 'video/mp4',
+	webm: 'video/webm',
+	mov: 'video/quicktime',
+	ogv: 'video/ogg',
+	ogg: 'video/ogg',
+	pdf: 'application/pdf',
+	jpg: 'image/jpeg',
+	jpeg: 'image/jpeg',
+	png: 'image/png',
+	webp: 'image/webp',
+	gif: 'image/gif',
+};
+
+// 早期版本对未识别 MIME 的文件追加了 .bin，按内部真实扩展名修正 Content-Type 以兼容存量附件
+function setJoinusFileHeaders(res: import('http').ServerResponse, filePath: string): void {
+	const name = basename(filePath);
+	if (!name.toLowerCase().endsWith('.bin')) return;
+	const m = /\.([a-z0-9]{2,5})\.bin$/i.exec(name);
+	const ct = m ? LEGACY_BIN_EXT_MIME[m[1].toLowerCase()] : undefined;
+	if (ct) res.setHeader('Content-Type', ct);
 }
 
 async function main() {
@@ -127,7 +151,7 @@ async function main() {
 
 	const joinusRoot = join(process.cwd(), 'data', 'joinus');
 	mkdirSync(joinusRoot, { recursive: true });
-	app.use(mount('/joinus-files', serve(joinusRoot)));
+	app.use(mount('/joinus-files', serve(joinusRoot, { setHeaders: setJoinusFileHeaders })));
 
 	const server = app.listen(config.port, () => {
 		console.log(`Server running at http://localhost:${config.port}`);
