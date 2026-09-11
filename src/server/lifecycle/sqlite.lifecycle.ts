@@ -107,7 +107,7 @@ function rebuildSharedInterviewSlotTables(db: Database): void {
 	}
 }
 
-function initSchema(db: Database): void {
+function applySchema(db: Database): void {
 	db.run(`
     CREATE TABLE IF NOT EXISTS users (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -386,7 +386,14 @@ function initSchema(db: Database): void {
 	ensureRecruitmentContactUniqueIndex(db);
 
 	runMigrationSteps(db);
+}
 
+// Rolling releases briefly run two stacks against the same SQLite file; an
+// immediate transaction serializes schema creation and migration steps.
+function initSchema(db: Database): void {
+	db.transaction(() => {
+		applySchema(db);
+	}).immediate();
 	cleanupExpiredData(db);
 }
 
@@ -472,11 +479,32 @@ function ensureRecruitmentContactUniqueIndex(db: Database): void {
 	}
 }
 
+// Rolling releases briefly run two stacks against the same SQLite file. The
+// pragmas must be set in this order: busy_timeout first so the ones that need a
+// lock wait instead of failing with SQLITE_BUSY.
+function applyConcurrencyPragmas(db: Database): void {
+	db.exec('PRAGMA busy_timeout = 5000');
+	for (let attempt = 0; attempt < 5; attempt++) {
+		try {
+			db.exec('PRAGMA journal_mode = WAL');
+			break;
+		} catch (err) {
+			if (attempt === 4) {
+				console.warn('[sqlite] could not switch to WAL, continuing in current journal mode:', err);
+			} else {
+				Bun.sleepSync(1000);
+			}
+		}
+	}
+	db.exec('PRAGMA synchronous = NORMAL');
+}
+
 export async function startSQLite(): Promise<Database> {
 	if (!sqlite) {
 		const dbPath = resolve(config.databasePath);
 		mkdirSync(dirname(dbPath), { recursive: true });
 		sqlite = new Database(dbPath, { create: true, strict: true });
+		applyConcurrencyPragmas(sqlite);
 		initSchema(sqlite);
 		sqlite.query('SELECT 1').get();
 	}
