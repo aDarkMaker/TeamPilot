@@ -38,6 +38,8 @@ import { mkdirSync } from 'node:fs';
 import { ProfileService } from './services/profile.service';
 import { ProfileController } from './controller/profile.controller';
 import { webpFallback } from './middleware/webpFallback';
+import { HealthService } from './services/health.service';
+import { HealthController } from './controller/health.controller';
 import type { Socket } from 'node:net';
 
 function isBenignClientError(err: unknown): boolean {
@@ -122,6 +124,9 @@ async function main() {
 
 	const bilibiliController = new BilibiliController(bilibiliService);
 
+	const healthService = new HealthService();
+	const healthController = new HealthController(healthService);
+
 	const app = new Koa();
 	app.proxy = true; // X-forwarded-for 你家不要了
 	applyGlobalMiddleware(app);
@@ -140,6 +145,7 @@ async function main() {
 		taskController,
 		searchController,
 		bilibiliController,
+		healthController,
 	});
 	app.use(apiRouter.routes());
 	app.use(apiRouter.allowedMethods());

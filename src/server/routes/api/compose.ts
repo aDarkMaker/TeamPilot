@@ -24,7 +24,7 @@ function mountChildRouter(parent: Router, child: Router): void {
 export function composeApiRouter(deps: ApiRouteDeps): Router {
 	const api = new Router({ prefix: '/api' });
 
-	registerHealthRoutes(api);
+	registerHealthRoutes(api, deps.healthController);
 
 	mountChildRouter(api, buildAuthRoutes(deps.authController));
 	mountChildRouter(api, buildApplicationRoutes(deps.applicationController));

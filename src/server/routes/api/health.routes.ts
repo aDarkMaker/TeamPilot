@@ -1,7 +1,6 @@
 import type Router from '@koa/router';
+import type { HealthController } from '../../controller/health.controller';
 
-export function registerHealthRoutes(api: Router): void {
-	api.get('/health', (ctx) => {
-		ctx.body = { ok: true, data: { status: 'ok' } };
-	});
+export function registerHealthRoutes(api: Router, controller: HealthController): void {
+	api.get('/health', controller.check);
 }

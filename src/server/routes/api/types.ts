@@ -11,6 +11,7 @@ import type { HomeController } from '../../controller/home.controller';
 import type { TaskController } from '../../controller/task.controller';
 import type { SearchController } from '../../controller/search.controller';
 import type { BilibiliController } from '../../controller/bilibili.controller';
+import type { HealthController } from '../../controller/health.controller';
 
 export interface ApiRouteDeps {
 	authController: AuthController;
@@ -26,4 +27,5 @@ export interface ApiRouteDeps {
 	taskController: TaskController;
 	searchController: SearchController;
 	bilibiliController: BilibiliController;
+	healthController: HealthController;
 }
