@@ -1,0 +1,20 @@
+version: "3.9"
+
+# Local-only stand-in for the host nginx: reloads its upstream to emulate the
+# production traffic switch without touching any server.
+services:
+  edge:
+    image: nginx:alpine
+    container_name: hxktoolbox-edge
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:${EDGE_PORT:-18000}:80"
+    volumes:
+      - ./temp/edge/conf.d:/etc/nginx/conf.d:ro
+    networks:
+      - shared
+
+networks:
+  shared:
+    external: true
+    name: ${SHARED_NETWORK_NAME:-hxktoolbox_shared_local}

@@ -51,10 +51,5 @@ temp/
 # Build Script
 script/build.js
 
-# Nginx
-deploy/nginx.conf
-
-# Docker
-docker-compose.yml
-Dockerfile.backend
-Dockerfile.frontend
+# Deploy state
+.deploy-state

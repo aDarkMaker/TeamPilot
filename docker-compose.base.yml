@@ -1,0 +1,21 @@
+version: "3.9"
+
+# Shared cache for every release stack, kept alive across blue-green switches.
+services:
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    volumes:
+      - redis_data:/data
+    networks:
+      shared:
+        aliases:
+          - redis
+
+volumes:
+  redis_data:
+
+networks:
+  shared:
+    external: true
+    name: ${SHARED_NETWORK_NAME:-hxktoolbox_shared}

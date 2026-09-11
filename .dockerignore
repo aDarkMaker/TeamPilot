@@ -1,0 +1,11 @@
+node_modules
+.git
+data
+dist
+.astro
+temp
+.cursor
+.vscode
+*.zip
+*.log
+.DS_Store
