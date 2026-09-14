@@ -32,7 +32,8 @@
 		"build": "astro build",
 		"start": "astro preview",
 		"release": "bun script/build.mjs",
-		"compress-fonts": "node script/compress-fonts.mjs"
+		"compress-fonts": "node script/compress-fonts.mjs",
+		"subset-fonts": "node script/subset-fonts.mjs"
 	},
 	"peerDependencies": {
 		"typescript": "^5"

@@ -1,0 +1,29 @@
+MiSans — attribution and licence
+=================================
+
+This project embeds a subset of MiSans, the Xiaomi system typeface.
+
+    MiSans is used in this software.
+    Copyright (c) Xiaomi Technology Co., Ltd.
+    https://hyperos.mi.com/font/
+
+The file `misans-sc-var.woff2` in this directory is a subset of the official
+`MiSansVF.ttf` (variable, wght 150-700), produced by `script/subset-fonts.mjs`.
+It is embedded for the console UI type stack only and is not offered for
+download on its own.
+
+Licence: MiSans Font Intellectual Property License Agreement
+Full text: https://hyperos.mi.com/font-download/MiSans%E5%AD%97%E4%BD%93%E7%9F%A5%E8%AF%86%E4%BA%A7%E6%9D%83%E8%AE%B8%E5%8F%AF%E5%8D%8F%E8%AE%AE.pdf
+
+MiSans is a global free commercial-use font. The licence is a non-transferable,
+non-exclusive, royalty-free, revocable, worldwide copyright licence, granted on
+these conditions:
+
+1. You shall specifically indicate in the software that MiSans fonts are used.
+2. You shall not adapt or redevelop MiSans or any of its individual components.
+3. MiSans or its components may not be rented, sublicensed, given, lent,
+   redistributed or sold on a stand-alone basis. This does not restrict works
+   created with MiSans (materials, logos, applications, and so on), which may be
+   distributed or sold freely.
+4. You shall retain the copyright notice and this licence in any copy of the
+   MiSans fonts.
