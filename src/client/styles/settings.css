@@ -44,7 +44,7 @@
 	margin: 0 0 1rem;
 	font-size: 15px;
 	font-weight: 700;
-	color: #2d3748;
+	color: var(--color-espresso);
 }
 
 .settings-field {
@@ -58,7 +58,7 @@
 .settings-field label {
 	display: block;
 	font-size: 0.8rem;
-	color: #718096;
+	color: rgba(58, 36, 24, 0.72);
 	margin-bottom: 0.35rem;
 }
 
@@ -107,7 +107,7 @@
 .settings-username {
 	margin-bottom: 0.85rem;
 	font-size: 0.85rem;
-	color: #718096;
+	color: rgba(58, 36, 24, 0.72);
 }
 
 .settings-avatar-row {
@@ -148,7 +148,7 @@
 	padding: 0.45rem 1rem;
 	border-radius: 10px;
 	border: none;
-	background: #3182ce;
+	background: var(--color-tangerine);
 	color: #fff;
 	font-size: 0.9rem;
 	cursor: pointer;
@@ -161,8 +161,8 @@
 }
 
 .settings-btn.secondary {
-	background: rgba(113, 128, 150, 0.25);
-	color: #2d3748;
+	background: var(--color-hairline-soft);
+	color: var(--color-espresso);
 	width: 100%;
 	margin-top: 4px;
 }
@@ -181,7 +181,7 @@
 	justify-content: center;
 	padding: 0.45rem 1rem;
 	border-radius: 10px;
-	background: #3182ce;
+	background: var(--color-tangerine);
 	color: #fff;
 	font-size: 0.9rem;
 	cursor: pointer;
@@ -241,13 +241,13 @@
 
 .settings-bg-title {
 	font-size: 0.8rem;
-	color: #718096;
+	color: rgba(58, 36, 24, 0.72);
 	margin: 0 0 0.55rem;
 }
 
 .settings-avatar-title {
 	font-size: 0.8rem;
-	color: #718096;
+	color: rgba(58, 36, 24, 0.72);
 	margin: 0 0 0.55rem;
 }
 
@@ -276,7 +276,7 @@
 	padding: 0.45rem 1rem;
 	border-radius: 10px;
 	border: 1px solid rgba(255, 255, 255, 0.25);
-	background: rgba(49, 130, 206, 0.95);
+	background: var(--color-tangerine);
 	color: #fff;
 	font-size: 0.9rem;
 	cursor: pointer;
@@ -481,4 +481,183 @@
 	.settings-actions-inline {
 		min-width: 120px;
 	}
+}
+
+/* ---------------------------------------------------------------------------
+   Tangerine Capital unification
+   --------------------------------------------------------------------------- */
+
+.settings-page {
+	gap: 20px;
+}
+
+.settings-card {
+	padding: 0;
+	gap: 18px;
+}
+
+.settings-top-msg {
+	border-radius: var(--radius-card);
+	border: 1px solid var(--color-hairline);
+	background: var(--color-ivory);
+	backdrop-filter: none;
+	font-family: var(--font-body);
+}
+
+.settings-top-msg.ok,
+.settings-msg.ok,
+.settings-bili-status {
+	color: var(--color-positive);
+}
+
+.settings-top-msg.err,
+.settings-msg.err {
+	color: var(--color-clay);
+}
+
+.settings-section {
+	padding: 20px 22px;
+	border-radius: var(--radius-panel);
+	border: 1px solid var(--color-hairline);
+	background: var(--color-ivory);
+	backdrop-filter: none;
+}
+
+.settings-section h2 {
+	font-family: var(--font-display);
+	font-size: 1.125rem;
+	font-weight: 700;
+	letter-spacing: -0.01em;
+	color: var(--color-ink);
+}
+
+.settings-field label,
+.settings-username,
+.settings-avatar-title,
+.settings-bg-title,
+.settings-bili-qrcode-hint {
+	color: var(--color-espresso);
+}
+
+.settings-field input[type='text'],
+.settings-field input[type='password'],
+.settings-field select,
+.settings-field textarea,
+.settings-input,
+.settings-textarea {
+	border-radius: var(--radius-field);
+	border: 1px solid var(--color-espresso);
+	background: var(--color-ivory);
+	color: var(--color-ink);
+	font-family: var(--font-body);
+}
+
+.settings-field input:focus,
+.settings-field select:focus,
+.settings-field textarea:focus,
+.settings-input:focus,
+.settings-textarea:focus {
+	outline: none;
+	border-color: var(--color-tangerine);
+	box-shadow: 0 0 0 2px var(--color-saffron);
+}
+
+.settings-divider {
+	background: var(--color-hairline);
+}
+
+.settings-birthday-pick {
+	border-radius: var(--radius-field);
+}
+
+.settings-avatar-row {
+	border-radius: var(--radius-card);
+	border: 1px solid var(--color-hairline);
+	background: var(--color-parchment);
+}
+
+.settings-btn {
+	border-radius: var(--radius-pill);
+	border: 1.5px solid var(--color-ink);
+	background: var(--color-ink);
+	color: var(--color-parchment);
+	font-family: var(--font-body);
+	font-weight: 600;
+}
+
+.settings-btn:hover:not(:disabled) {
+	background: var(--color-clay);
+	border-color: var(--color-clay);
+}
+
+.settings-btn:focus-visible,
+.settings-file-btn:focus-visible {
+	outline: none;
+	box-shadow: 0 0 0 2px var(--color-saffron);
+}
+
+.settings-btn.secondary {
+	background: transparent;
+	border: 1.5px solid var(--color-hairline-strong);
+	color: var(--color-espresso);
+}
+
+.settings-btn.secondary:hover:not(:disabled) {
+	background: var(--color-hairline-soft);
+	border-color: var(--color-ink);
+	color: var(--color-ink);
+}
+
+.settings-file-btn {
+	border-radius: var(--radius-pill);
+	background: var(--color-ink);
+	color: var(--color-parchment);
+	font-family: var(--font-body);
+	font-weight: 600;
+}
+
+.settings-file-btn:hover:not(.disabled) {
+	background: var(--color-clay);
+}
+
+.settings-avatar-preview,
+.settings-bili-avatar {
+	border-color: var(--color-hairline);
+	background: var(--color-parchment);
+}
+
+.settings-bg-preview {
+	border-radius: var(--radius-card);
+	border: 1px solid var(--color-hairline);
+	background: var(--color-parchment);
+}
+
+.settings-bg-overlay-btn {
+	border-radius: var(--radius-pill);
+	border: 1px solid var(--color-ink);
+	background: var(--color-ink);
+	color: var(--color-parchment);
+	font-family: var(--font-body);
+	font-weight: 600;
+}
+
+.settings-bg-overlay-btn:hover:not(:disabled) {
+	background: var(--color-clay);
+	border-color: var(--color-clay);
+}
+
+.settings-bg-overlay-btn.secondary {
+	background: var(--color-ivory);
+	border-color: var(--color-ivory);
+	color: var(--color-ink);
+}
+
+.settings-bili-nickname {
+	color: var(--color-ink);
+	font-family: var(--font-display);
+}
+
+.settings-bili-qrcode {
+	border-radius: var(--radius-card);
+	border: 1px solid var(--color-hairline);
 }

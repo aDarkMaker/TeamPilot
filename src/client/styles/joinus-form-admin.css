@@ -77,12 +77,13 @@
 .joinus-form-admin-field textarea:focus,
 .joinus-form-admin-option-row input:focus {
 	outline: none;
-	border-color: rgba(49, 130, 206, 0.55);
-	box-shadow: 0 0 0 3px rgba(49, 130, 206, 0.15);
+	border-color: var(--color-tangerine);
+	box-shadow: 0 0 0 2px var(--color-saffron);
 }
 
 .joinus-form-admin-field textarea {
-	min-height: 88px;
+	min-height: 132px;
+	line-height: 1.5;
 	resize: vertical;
 }
 
@@ -242,7 +243,7 @@
 
 .joinus-select-custom-trigger:focus-visible {
 	outline: none;
-	border-color: rgba(49, 130, 206, 0.55);
+	border-color: var(--color-tangerine);
 }
 
 .joinus-select-custom-value {
@@ -276,34 +277,43 @@
 	left: 0;
 	right: 0;
 	z-index: 40;
+	box-sizing: border-box;
+	display: flex;
+	flex-direction: column;
 	max-height: 240px;
-	overflow-y: auto;
-	overflow-x: hidden;
-	padding: 4px;
+	overflow: hidden;
 	border-radius: 10px;
 	background: rgba(255, 255, 255, 0.98);
 	border: 1px solid rgba(0, 0, 0, 0.1);
 	box-shadow: 0 10px 24px rgba(0, 0, 0, 0.12);
-	scrollbar-width: thin;
-	scrollbar-color: rgba(0, 0, 0, 0.2) transparent;
 	transform-origin: top center;
-	animation: joinus-select-drop-down 0.16s cubic-bezier(0.16, 1, 0.3, 1);
+	animation: joinus-select-drop-down var(--duration-color) var(--ease-editorial) both;
 }
 
-.joinus-select-custom-panel::-webkit-scrollbar {
+.joinus-select-custom-list {
+	flex: 1 1 auto;
+	min-height: 0;
+	padding: 4px;
+	overflow-y: auto;
+	overflow-x: hidden;
+	scrollbar-width: thin;
+	scrollbar-color: rgba(0, 0, 0, 0.2) transparent;
+}
+
+.joinus-select-custom-list::-webkit-scrollbar {
 	width: 5px;
 }
 
-.joinus-select-custom-panel::-webkit-scrollbar-track {
+.joinus-select-custom-list::-webkit-scrollbar-track {
 	background: transparent;
 }
 
-.joinus-select-custom-panel::-webkit-scrollbar-thumb {
+.joinus-select-custom-list::-webkit-scrollbar-thumb {
 	background-color: rgba(0, 0, 0, 0.18);
 	border-radius: 4px;
 }
 
-.joinus-select-custom-panel::-webkit-scrollbar-thumb:hover {
+.joinus-select-custom-list::-webkit-scrollbar-thumb:hover {
 	background-color: rgba(0, 0, 0, 0.32);
 }
 
@@ -316,7 +326,15 @@
 
 .joinus-select-custom-panel.is-up {
 	transform-origin: bottom center;
-	animation: joinus-select-drop-up 0.16s cubic-bezier(0.16, 1, 0.3, 1);
+	animation: joinus-select-drop-up var(--duration-color) var(--ease-editorial) both;
+}
+
+.joinus-select-custom-panel.is-leave {
+	animation: joinus-select-leave-down var(--duration-press) var(--ease-editorial) forwards;
+}
+
+.joinus-select-custom-panel.is-up.is-leave {
+	animation-name: joinus-select-leave-up;
 }
 
 .joinus-select-custom-panel.is-up:not(.is-fixed) {
@@ -346,6 +364,37 @@
 	}
 }
 
+@keyframes joinus-select-leave-down {
+	from {
+		opacity: 1;
+		transform: translateY(0) scale(1);
+	}
+	to {
+		opacity: 0;
+		transform: translateY(-4px) scale(0.98);
+	}
+}
+
+@keyframes joinus-select-leave-up {
+	from {
+		opacity: 1;
+		transform: translateY(0) scale(1);
+	}
+	to {
+		opacity: 0;
+		transform: translateY(4px) scale(0.98);
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.joinus-select-custom-panel,
+	.joinus-select-custom-panel.is-up,
+	.joinus-select-custom-panel.is-leave,
+	.joinus-select-custom-panel.is-up.is-leave {
+		animation: none;
+	}
+}
+
 .joinus-select-custom-item {
 	display: block;
 	width: 100%;
@@ -365,11 +414,16 @@
 }
 
 .joinus-select-custom-item:hover {
-	background: rgba(49, 130, 206, 0.08);
+	background: var(--color-tangerine-tint);
+}
+
+.joinus-select-custom-item:focus-visible {
+	outline: none;
+	box-shadow: 0 0 0 2px var(--color-saffron);
 }
 
 .joinus-select-custom-item.is-active {
-	background: rgba(49, 130, 206, 0.14);
+	background: var(--color-tangerine-tint);
 	font-weight: 700;
 }
 
@@ -415,7 +469,7 @@
 	height: 8px;
 	border-radius: 50%;
 	flex: none;
-	background: #3182ce;
+	background: var(--color-tangerine);
 }
 
 .joinus-schedule-mode-trigger {
@@ -439,4 +493,177 @@
 	.joinus-schedule-mode {
 		padding: 10px;
 	}
+}
+
+/* ---------------------------------------------------------------------------
+   Tangerine Capital unification
+   --------------------------------------------------------------------------- */
+
+.joinus-form-admin {
+	gap: 20px;
+}
+
+.joinus-form-admin-forbidden {
+	color: var(--color-espresso);
+}
+
+.joinus-form-admin-card {
+	padding: 20px 22px;
+	border-radius: var(--radius-panel);
+	border: 1px solid var(--color-hairline);
+	background: var(--color-ivory);
+	backdrop-filter: none;
+}
+
+.joinus-form-admin-card-head {
+	margin-bottom: 16px;
+	padding-bottom: 12px;
+	border-bottom: 1px solid var(--color-hairline-soft);
+}
+
+.joinus-form-admin-card-head h2 {
+	font-family: var(--font-display);
+	font-size: 1.125rem;
+	font-weight: 700;
+	letter-spacing: -0.01em;
+	color: var(--color-ink);
+}
+
+.joinus-form-admin-field label,
+.joinus-form-admin-options-label {
+	color: var(--color-espresso);
+}
+
+.joinus-form-admin-field input,
+.joinus-form-admin-field textarea,
+.joinus-form-admin-option-row input,
+.joinus-select-custom-trigger {
+	border-radius: var(--radius-field);
+	border: 1px solid var(--color-espresso);
+	background: var(--color-ivory);
+	color: var(--color-ink);
+	font-family: var(--font-body);
+}
+
+.joinus-form-admin-field input:focus,
+.joinus-form-admin-field textarea:focus,
+.joinus-form-admin-option-row input:focus,
+.joinus-select-custom-trigger:focus-visible {
+	outline: none;
+	border-color: var(--color-tangerine);
+	box-shadow: 0 0 0 2px var(--color-saffron);
+}
+
+.joinus-form-admin-question {
+	border-top: 1px solid var(--color-hairline-soft);
+}
+
+.joinus-form-admin-question-meta,
+.joinus-schedule-empty,
+.joinus-schedule-add-hint,
+.joinus-schedule-window-count,
+.joinus-select-custom-value.is-placeholder {
+	font-family: var(--font-mono);
+	color: var(--color-espresso);
+}
+
+.joinus-form-admin-btn {
+	border-radius: var(--radius-pill);
+	border: 1.5px solid var(--color-hairline-strong);
+	background: transparent;
+	color: var(--color-espresso);
+	font-family: var(--font-body);
+	font-weight: 600;
+}
+
+.joinus-form-admin-btn:hover:not(:disabled) {
+	background: var(--color-hairline-soft);
+	border-color: var(--color-ink);
+	color: var(--color-ink);
+}
+
+.joinus-form-admin-btn:focus-visible {
+	outline: none;
+	box-shadow: 0 0 0 2px var(--color-saffron);
+}
+
+.joinus-form-admin-btn.primary {
+	background: var(--color-ink);
+	border-color: var(--color-ink);
+	color: var(--color-parchment);
+}
+
+.joinus-form-admin-btn.primary:hover:not(:disabled) {
+	background: var(--color-clay);
+	border-color: var(--color-clay);
+}
+
+.joinus-form-admin-btn.danger {
+	border-color: var(--color-clay);
+	background: transparent;
+	color: var(--color-clay);
+}
+
+.joinus-form-admin-btn.danger:hover:not(:disabled) {
+	background: var(--color-clay-tint);
+}
+
+.joinus-schedule-window {
+	border-radius: var(--radius-card);
+	background: var(--color-parchment);
+	border: 1px solid var(--color-hairline);
+}
+
+.joinus-schedule-mode {
+	border-radius: var(--radius-card);
+	background: var(--color-parchment);
+	border: 1px solid var(--color-hairline);
+}
+
+.joinus-schedule-mode-head h3 {
+	font-family: var(--font-display);
+	font-weight: 700;
+	color: var(--color-ink);
+}
+
+.joinus-schedule-mode-dot {
+	background: var(--color-tangerine);
+}
+
+.joinus-schedule-mode-trigger {
+	color: var(--color-espresso);
+}
+
+.joinus-schedule-window-count.is-booked,
+.joinus-schedule-add-hint.is-error {
+	color: var(--color-clay);
+}
+
+.joinus-select-custom-panel {
+	border-radius: var(--radius-card);
+	background: var(--color-ivory);
+	border: 1px solid var(--color-hairline);
+	box-shadow: var(--shadow-panel);
+}
+
+.joinus-select-custom-list {
+	scrollbar-color: var(--color-hairline-strong) transparent;
+}
+
+.joinus-select-custom-list::-webkit-scrollbar-thumb {
+	background-color: var(--color-hairline-strong);
+}
+
+.joinus-select-custom-item {
+	border-radius: var(--radius-chip);
+	color: var(--color-ink);
+}
+
+.joinus-select-custom-item:hover {
+	background: var(--color-tangerine-tint);
+}
+
+.joinus-select-custom-item.is-active {
+	background: var(--color-tangerine-tint);
+	color: var(--color-clay);
 }

@@ -211,16 +211,22 @@ export default function HomePage() {
 	}, [error?.seq, fatalError, toast]);
 
 	if (loading) {
-		return <div className="home-empty">加载中…</div>;
+		return <div className="tc-empty home-empty">加载中…</div>;
 	}
 
 	if (fatalError) {
-		return <div className="home-empty">{error?.text}</div>;
+		return <div className="tc-empty home-empty">{error?.text}</div>;
 	}
 
 	return (
-		<div className="home-page">
+		<div className="tc-page home-page">
 			<DashboardToast toast={toast.toast} />
+			<div className="tc-page-head">
+				<div className="tc-page-head__text">
+					<span className="tc-eyebrow">公告板</span>
+					<h1 className="tc-page-title">工作主页</h1>
+				</div>
+			</div>
 			<div className="home-grid">
 				<section className="home-card">
 					<div className="home-card-head">

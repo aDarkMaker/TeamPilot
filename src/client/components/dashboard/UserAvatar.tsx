@@ -51,7 +51,7 @@ export default function UserAvatar({ username, avatarUrl, size = 40 }: Props) {
 			className="avatar-letter"
 			style={{
 				...avatarBaseStyle,
-				background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+				background: 'linear-gradient(135deg, #e0521a 0%, #b33a0e 100%)',
 			}}
 		>
 			{letter}

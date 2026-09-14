@@ -121,8 +121,15 @@ export default function TaskListPage() {
 	};
 
 	return (
-		<div className="task-page">
+		<div className="tc-page task-page">
 			<DashboardToast toast={toast.toast} />
+
+			<div className="tc-page-head">
+				<div className="tc-page-head__text">
+					<span className="tc-eyebrow">任务</span>
+					<h1 className="tc-page-title">任务列表</h1>
+				</div>
+			</div>
 
 			<div className="task-head">
 				<div className="task-tabs">
@@ -144,8 +151,8 @@ export default function TaskListPage() {
 				</button>
 			</div>
 
-			{loading && items.length === 0 ? <div className="task-empty">加载中…</div> : null}
-			{!loading && list.length === 0 ? <div className="task-empty">暂无任务</div> : null}
+			{loading && items.length === 0 ? <div className="tc-empty task-empty">加载中…</div> : null}
+			{!loading && list.length === 0 ? <div className="tc-empty task-empty">暂无任务</div> : null}
 
 			<div className="task-list">
 				{list.map((task) => {

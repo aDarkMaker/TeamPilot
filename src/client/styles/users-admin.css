@@ -118,13 +118,13 @@
 	letter-spacing: 0.01em;
 	border: 1px solid rgba(0, 0, 0, 0.06);
 	background: rgba(255, 255, 255, 0.6);
-	color: #2d3748;
+	color: var(--color-espresso);
 }
 
 .users-admin-tag.role-user {
-	background: rgba(49, 130, 206, 0.12);
-	border-color: rgba(49, 130, 206, 0.18);
-	color: #2b6cb0;
+	background: var(--color-tangerine-tint);
+	border-color: var(--color-tangerine-line);
+	color: var(--color-clay);
 }
 
 .users-admin-tag.role-admin {
@@ -134,9 +134,9 @@
 }
 
 .users-admin-tag.role-super {
-	background: rgba(128, 90, 213, 0.14);
-	border-color: rgba(128, 90, 213, 0.2);
-	color: #553c9a;
+	background: var(--color-clay-tint);
+	border-color: rgba(179, 58, 14, 0.3);
+	color: var(--color-clay);
 }
 
 .users-admin-tag.status-active {
@@ -180,7 +180,7 @@
 .users-admin-btn {
 	border: 1px solid rgba(0, 0, 0, 0.08);
 	background: rgba(255, 255, 255, 0.65);
-	color: #2d3748;
+	color: var(--color-espresso);
 	border-radius: 10px;
 	padding: 7px 11px;
 	font-size: 12px;
@@ -208,13 +208,13 @@
 }
 
 .users-admin-btn.primary {
-	background: rgba(49, 130, 206, 0.92);
-	border-color: rgba(49, 130, 206, 0.25);
+	background: var(--color-tangerine);
+	border-color: var(--color-tangerine);
 	color: #fff;
 }
 
 .users-admin-btn.primary:hover {
-	background: rgba(49, 130, 206, 1);
+	background: var(--color-tangerine);
 }
 
 .users-admin-btn.danger {
@@ -396,4 +396,263 @@
 		font-size: 11px;
 		border-radius: 8px;
 	}
+}
+
+/* ---------------------------------------------------------------------------
+   Tangerine Capital unification
+   --------------------------------------------------------------------------- */
+
+.users-admin {
+	gap: 20px;
+}
+
+.users-admin-msg {
+	border-radius: var(--radius-card);
+	border: 1px solid var(--color-hairline);
+	background: var(--color-ivory);
+	backdrop-filter: none;
+	font-family: var(--font-body);
+}
+
+.users-admin-msg.err {
+	color: var(--color-clay);
+}
+
+.users-admin-card {
+	padding: 20px 22px;
+	border-radius: var(--radius-panel);
+	border: 1px solid var(--color-hairline);
+	background: var(--color-ivory);
+	backdrop-filter: none;
+}
+
+.users-admin-card-head {
+	margin-bottom: 16px;
+	padding-bottom: 12px;
+	border-bottom: 1px solid var(--color-hairline-soft);
+}
+
+.users-admin-card h2 {
+	font-family: var(--font-display);
+	font-size: 1.125rem;
+	font-weight: 700;
+	letter-spacing: -0.01em;
+	color: var(--color-ink);
+}
+
+.users-admin-card-sub,
+.users-admin-muted,
+.users-admin-empty {
+	font-family: var(--font-mono);
+	color: var(--color-espresso);
+}
+
+.users-admin-user-card {
+	border-radius: var(--radius-card);
+	border: 1px solid var(--color-hairline);
+	background: var(--color-parchment);
+}
+
+.users-admin-user-name,
+.users-admin-strong {
+	font-family: var(--font-display);
+	color: var(--color-ink);
+}
+
+.users-admin-tag {
+	border-radius: var(--radius-pill);
+	border: 1px solid transparent;
+	background: var(--color-hairline-soft);
+	color: var(--color-espresso);
+	font-family: var(--font-mono);
+	letter-spacing: 0.04em;
+	text-transform: uppercase;
+}
+
+.users-admin-tag.role-user {
+	background: var(--color-tangerine-tint);
+	border-color: var(--color-tangerine-line);
+	color: var(--color-clay);
+}
+
+.users-admin-tag.role-admin {
+	background: var(--color-saffron-tint);
+	border-color: rgba(242, 197, 69, 0.45);
+	color: var(--color-clay);
+}
+
+.users-admin-tag.role-super {
+	background: var(--color-ink);
+	border-color: var(--color-ink);
+	color: var(--color-parchment);
+}
+
+.users-admin-tag.status-active {
+	background: var(--color-positive-tint);
+	border-color: var(--color-positive-line);
+	color: var(--color-positive);
+}
+
+.users-admin-tag.status-disabled {
+	background: var(--color-clay-tint);
+	border-color: rgba(179, 58, 14, 0.3);
+	color: var(--color-clay);
+}
+
+.users-admin-user-foot {
+	border-top: 1px solid var(--color-hairline);
+}
+
+.users-admin-btn {
+	border: 1.5px solid var(--color-espresso);
+	background: transparent;
+	border-color: var(--color-espresso);
+	border-radius: var(--radius-pill);
+	font-family: var(--font-body);
+	font-weight: 600;
+	transition:
+		background var(--duration-color) var(--ease-editorial),
+		border-color var(--duration-color) var(--ease-editorial),
+		color var(--duration-color) var(--ease-editorial);
+}
+
+.users-admin-btn:hover:not(:disabled) {
+	background: var(--color-hairline-soft);
+	border-color: var(--color-espresso);
+	color: var(--color-espresso);
+}
+
+.users-admin-btn:focus-visible,
+.users-admin-modal-close:focus-visible {
+	outline: none;
+	box-shadow: 0 0 0 2px var(--color-saffron);
+}
+
+.users-admin-btn.primary {
+	background: var(--color-ink);
+	border-color: var(--color-ink);
+	color: var(--color-parchment);
+}
+
+.users-admin-btn.primary:hover:not(:disabled) {
+	background: var(--color-clay);
+	border-color: var(--color-clay);
+}
+
+.users-admin-btn.danger {
+	background: transparent;
+	border-color: var(--color-clay);
+	color: var(--color-clay);
+}
+
+.users-admin-btn.danger:hover:not(:disabled) {
+	background: var(--color-clay-tint);
+	border-color: var(--color-clay);
+}
+
+/* Disabled buttons keep the resting look and never pick up a hover flash,
+   including the legacy blue/red hovers still declared earlier in this file. */
+.users-admin-btn:disabled,
+.users-admin-btn:disabled:hover {
+	background: transparent;
+	border-color: var(--color-hairline);
+	color: var(--color-espresso);
+	cursor: not-allowed;
+}
+
+.users-admin-btn.primary:disabled,
+.users-admin-btn.primary:disabled:hover {
+	background: var(--color-ink);
+	border-color: var(--color-ink);
+	color: var(--color-parchment);
+}
+
+.users-admin-btn.danger:disabled,
+.users-admin-btn.danger:disabled:hover {
+	background: transparent;
+	border-color: var(--color-clay);
+	color: var(--color-clay);
+}
+
+.users-admin-modal-close {
+	border-radius: var(--radius-chip);
+	color: var(--color-clay);
+}
+
+.users-admin-modal-close:hover:not(:disabled) {
+	background: var(--color-clay-tint);
+}
+
+.users-admin-table-wrap {
+	border-radius: var(--radius-card);
+	border: 1px solid var(--color-hairline);
+	background: var(--color-ivory);
+}
+
+.users-admin-table th,
+.users-admin-table td {
+	border-bottom: 1px solid var(--color-hairline-soft);
+}
+
+.users-admin-table th {
+	background: var(--color-parchment);
+	backdrop-filter: none;
+	font-family: var(--font-mono);
+	color: var(--color-espresso);
+	letter-spacing: 0.05em;
+	text-transform: uppercase;
+}
+
+.users-admin-reason {
+	color: var(--color-espresso);
+}
+
+/* Confirm dialog, no longer borrowing the calendar modal classes. */
+
+.users-admin-modal {
+	position: fixed;
+	inset: 0;
+	z-index: 3000;
+	display: grid;
+	place-items: center;
+	padding: 20px;
+	background: rgba(26, 14, 8, 0.45);
+	backdrop-filter: blur(4px);
+}
+
+.users-admin-modal-card {
+	width: min(440px, 100%);
+	padding: 22px 24px;
+	border: 1px solid var(--color-hairline);
+	border-radius: var(--radius-panel);
+	background: var(--color-ivory);
+	box-shadow: var(--shadow-panel);
+	color: var(--color-ink);
+	font-family: var(--font-body);
+}
+
+.users-admin-modal-head {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 12px;
+	margin-bottom: 12px;
+}
+
+.users-admin-modal-title {
+	font-family: var(--font-display);
+	font-size: 1.125rem;
+	font-weight: 700;
+	letter-spacing: -0.01em;
+	color: var(--color-ink);
+}
+
+.users-admin-modal-actions {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+}
+
+.users-admin-modal-actions--end {
+	justify-content: flex-end;
 }

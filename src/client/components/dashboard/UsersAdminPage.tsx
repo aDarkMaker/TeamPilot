@@ -254,14 +254,20 @@ export default function UserAdminPage() {
 	}, [err, toast]);
 
 	return (
-		<div className="users-admin">
+		<div className="tc-page users-admin">
 			<DashboardToast toast={toast.toast} />
+			<div className="tc-page-head">
+				<div className="tc-page-head__text">
+					<span className="tc-eyebrow">成员</span>
+					<h1 className="tc-page-title">成员管理</h1>
+				</div>
+			</div>
 			{confirmRemoveOpen && confirmRemoveTarget ? (
-				<div className="calendar-modal" role="dialog" aria-modal="true" onClick={closeRemoveConfirm}>
-					<div className="calendar-modal-card" onClick={(e) => e.stopPropagation()}>
-						<div className="calendar-modal-head">
-							<div className="calendar-modal-title">确认移除账号</div>
-							<div className="calendar-modal-head-actions">
+				<div className="users-admin-modal" role="dialog" aria-modal="true" onClick={closeRemoveConfirm}>
+					<div className="users-admin-modal-card" onClick={(e) => e.stopPropagation()}>
+						<div className="users-admin-modal-head">
+							<div className="users-admin-modal-title">确认移除账号</div>
+							<div className="users-admin-modal-actions">
 								<button
 									type="button"
 									className="users-admin-modal-close"
@@ -276,7 +282,7 @@ export default function UserAdminPage() {
 						<div className="users-admin-msg err" style={{ marginBottom: 12 }}>
 							确定删除「{confirmRemoveTarget.username}」的账号记录？该操作不可撤销。
 						</div>
-						<div className="calendar-modal-head-actions" style={{ justifyContent: 'flex-end' }}>
+						<div className="users-admin-modal-actions users-admin-modal-actions--end">
 							<button type="button" className="users-admin-btn" disabled={busyId === confirmRemoveTarget.id} onClick={closeRemoveConfirm}>
 								取消
 							</button>

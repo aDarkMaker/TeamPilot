@@ -157,9 +157,15 @@ export default function DashboardSidebar({ initialPath }: Props) {
 					}}
 				>
 					<OptimizedImage src={assetUrl(iconLogo)} alt="" width={40} height={40} critical />
-					<span>小科·OFFICIAL</span>
+					<span className="dashboard-logo-text">
+						<span className="dashboard-logo-name">小科·OFFICIAL</span>
+						<span className="dashboard-logo-tag">TOOLBOX</span>
+					</span>
 				</a>
 				<ul className="dashboard-nav">
+					<li className="dashboard-nav-eyebrow" aria-hidden="true">
+						主要
+					</li>
 					<li>
 						<a className={linkClass('/dashboard')} href="/dashboard" onClick={closeSidebar}>
 							<OptimizedImage src={assetUrl(iconDashboard)} alt="" width={24} height={24} />
@@ -172,6 +178,11 @@ export default function DashboardSidebar({ initialPath }: Props) {
 							<span>任务列表</span>
 						</a>
 					</li>
+					{isStaff(me?.role) && (
+						<li className="dashboard-nav-eyebrow dashboard-nav-eyebrow--group" aria-hidden="true">
+							管理
+						</li>
+					)}
 					<li className={isStaff(me?.role) ? undefined : 'dashboard-nav-item--hidden'} aria-hidden={!isStaff(me?.role)}>
 						<a className={linkClass('/dashboard/users')} href="/dashboard/users" onClick={closeSidebar}>
 							<OptimizedImage src={assetUrl(iconUser)} alt="" width={24} height={24} />

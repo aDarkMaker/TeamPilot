@@ -257,19 +257,25 @@ export default function JoinUsFormAdminPage() {
 	};
 
 	if (me && !staff) {
-		return <p className="joinus-form-admin-forbidden">这里没有管理员权限哦</p>;
+		return <div className="tc-empty joinus-form-admin-forbidden">这里没有管理员权限哦</div>;
 	}
 
 	if (!form) {
-		return <p className="joinus-form-admin-forbidden">{me ? '加载中…' : '加载中…'}</p>;
+		return <div className="tc-empty joinus-form-admin-forbidden">{me ? '加载中…' : '加载中…'}</div>;
 	}
 
 	const draftEnd = draftEndMin(draft);
 	const conflict = draftConflict();
 
 	return (
-		<div className="joinus-form-admin">
+		<div className="tc-page joinus-form-admin">
 			<DashboardToast toast={toast.toast} />
+			<div className="tc-page-head">
+				<div className="tc-page-head__text">
+					<span className="tc-eyebrow">报名</span>
+					<h1 className="tc-page-title">报名修改</h1>
+				</div>
+			</div>
 
 			<section className="joinus-form-admin-card">
 				<div className="joinus-form-admin-card-head">

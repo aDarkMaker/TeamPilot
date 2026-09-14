@@ -30,7 +30,7 @@
 }
 
 .dash-toast--info {
-	color: #1a202c;
+	color: var(--color-espresso);
 }
 
 @keyframes dash-toast-in {

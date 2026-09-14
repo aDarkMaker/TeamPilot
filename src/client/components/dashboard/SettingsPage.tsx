@@ -555,12 +555,18 @@ export default function SettingsPage() {
 	}, []);
 
 	if (loading) {
-		return <p className="settings-page">加载中……</p>;
+		return <div className="tc-empty settings-page">加载中……</div>;
 	}
 
 	return (
-		<div className="settings-page">
+		<div className="tc-page settings-page">
 			<DashboardToast toast={toast.toast} />
+			<div className="tc-page-head">
+				<div className="tc-page-head__text">
+					<span className="tc-eyebrow">账号</span>
+					<h1 className="tc-page-title">个性设置</h1>
+				</div>
+			</div>
 			<div className="settings-card">
 				<section className="settings-section">
 					<h2>基本资料</h2>

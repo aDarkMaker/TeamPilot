@@ -148,7 +148,10 @@ export default function DashboardTopBar({ title, notifyVariant = 'read' }: Props
 				<span className="sidebar-hamburger-line" />
 				<span className="sidebar-hamburger-line" />
 			</button>
-			<h1>{title}</h1>
+			<div className="dashboard-topbar-title">
+				<span className="tc-eyebrow dashboard-topbar-eyebrow">HXK · CONSOLE</span>
+				<h1>{title}</h1>
+			</div>
 			<div id="dashboard-topbar-toast-slot" className="dashboard-topbar-toast-slot" aria-live="polite" />
 			<div className="dashboard-topbar-tools">
 				<div className="dashboard-search" ref={searchWrapRef}>

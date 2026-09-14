@@ -1,21 +1,22 @@
 /* Dashboard shell */
 
 :root {
-	--dash-text: #1a202c;
-	--dash-muted: #718096;
-	--dash-accent: #3182ce;
-	--dash-glass: rgba(255, 255, 255, 0.55);
-	--dash-glass-border: rgba(255, 255, 255, 0.45);
+	--dash-text: var(--color-ink);
+	--dash-muted: var(--color-espresso);
+	--dash-accent: var(--color-tangerine);
+	--dash-glass: var(--color-ivory);
+	--dash-glass-border: var(--color-hairline);
 	--dash-sidebar-w: 220px;
 	--dash-content-pad-x: 28px;
 	--dash-modal-sidebar-gap: 24px;
-	--dash-nav-ease: cubic-bezier(0.22, 1, 0.36, 1);
-	--dash-nav-spring: cubic-bezier(0.34, 1.2, 0.64, 1);
+	--dash-nav-ease: var(--ease-editorial);
+	--dash-nav-spring: var(--ease-editorial);
 }
 
 html.dashboard-shell {
 	height: 100%;
 	overflow: hidden;
+	font-family: var(--font-body);
 }
 
 html.dashboard-shell body {
@@ -34,13 +35,15 @@ html.dashboard-shell body {
 	overflow: hidden;
 	isolation: isolate;
 	color: var(--dash-text);
+	background: linear-gradient(180deg, #fdfaf3 0%, #f7efe0 100%);
 }
 
+/* User-supplied profile background, tinted by the wash below. */
 .dashboard-root::before {
 	content: '';
 	position: absolute;
 	inset: 0;
-	background-image: var(--dash-bg-image, url('../assets/img/image/bg-dashboard.webp'));
+	background-image: var(--dash-bg-image, none);
 	background-size: cover;
 	background-position: center;
 	background-repeat: no-repeat;
@@ -52,13 +55,7 @@ html.dashboard-shell body {
 	content: '';
 	position: absolute;
 	inset: 0;
-	background: linear-gradient(
-		125deg,
-		rgba(232, 224, 245, 0.88) 0%,
-		rgba(252, 228, 236, 0.75) 35%,
-		rgba(214, 232, 252, 0.8) 70%,
-		rgba(237, 231, 246, 0.85) 100%
-	);
+	background-image: var(--wash-tint), linear-gradient(180deg, rgba(253, 250, 243, 0.86) 0%, rgba(247, 239, 224, 0.92) 100%);
 	z-index: 0;
 	pointer-events: none;
 }
@@ -69,7 +66,12 @@ html.dashboard-shell body {
 	z-index: 1;
 }
 
+/* Dark espresso rail: cream type on the deep warm rail, with a soft falloff
+   into the parchment content instead of a hard seam. */
 .dashboard-sidebar {
+	--rail-fg: #fff8ec;
+	--rail-fg-muted: rgba(255, 248, 236, 0.82);
+	--rail-hover: rgba(251, 246, 234, 0.16);
 	width: var(--dash-sidebar-w);
 	flex-shrink: 0;
 	display: flex;
@@ -77,10 +79,10 @@ html.dashboard-shell body {
 	padding: 16px 12px;
 	min-height: 0;
 	overflow: hidden;
-	border-right: 1px solid var(--dash-glass-border);
-	background: var(--dash-glass);
-	backdrop-filter: blur(16px);
-	-webkit-backdrop-filter: blur(16px);
+	/* Soft falloff into the parchment content instead of a hard seam. */
+	box-shadow: 8px 0 28px rgba(26, 14, 8, 0.28);
+	background: linear-gradient(165deg, var(--color-espresso) 0%, var(--color-ink) 100%);
+	color: var(--rail-fg);
 	z-index: 20;
 	contain: layout style;
 }
@@ -104,12 +106,31 @@ html.dashboard-shell body {
 	height: 40px;
 	border-radius: 10px;
 	object-fit: cover;
+	border: 1px solid rgba(251, 246, 234, 0.35);
 }
 
-.dashboard-logo span {
+.dashboard-logo-text {
+	display: grid;
+	gap: 2px;
+	min-width: 0;
+}
+
+.dashboard-logo-name {
+	font-family: var(--font-display);
 	font-weight: 700;
 	font-size: 16px;
-	letter-spacing: 0.02em;
+	letter-spacing: -0.01em;
+	color: var(--rail-fg);
+	white-space: nowrap;
+}
+
+.dashboard-logo-tag {
+	font-family: var(--font-mono);
+	font-weight: 600;
+	font-size: 9px;
+	letter-spacing: 0.16em;
+	text-transform: uppercase;
+	color: var(--rail-fg-muted);
 }
 
 .dashboard-nav {
@@ -120,6 +141,25 @@ html.dashboard-shell body {
 	flex-direction: column;
 	gap: 6px;
 	flex: 1;
+	overflow-y: auto;
+	scrollbar-width: none;
+}
+
+.dashboard-nav-eyebrow {
+	list-style: none;
+	padding: 10px 12px 4px;
+	font-family: var(--font-mono);
+	font-size: 0.625rem;
+	font-weight: 600;
+	letter-spacing: 0.18em;
+	text-transform: uppercase;
+	color: rgba(244, 236, 216, 0.5);
+}
+
+.dashboard-nav-eyebrow--group {
+	margin-top: 8px;
+	padding-top: 14px;
+	border-top: 1px solid rgba(251, 246, 234, 0.16);
 }
 
 .dashboard-nav a {
@@ -128,9 +168,9 @@ html.dashboard-shell body {
 	gap: 10px;
 	padding: 10px 12px;
 	padding-left: 9px;
-	border-radius: 12px;
+	border-radius: var(--radius-pill);
 	text-decoration: none;
-	color: #4a5568;
+	color: var(--rail-fg-muted);
 	font-weight: 500;
 	font-size: 14px;
 	transition:
@@ -141,11 +181,13 @@ html.dashboard-shell body {
 		transform 0.32s var(--dash-nav-spring);
 }
 
+/* Navbar icons ship as flat black artwork; invert them on the rail. */
 .dashboard-nav a img {
 	width: 21px;
 	height: 21px;
 	object-fit: contain;
 	flex-shrink: 0;
+	filter: brightness(0) invert(1);
 	opacity: 0.82;
 	transition:
 		opacity 0.28s var(--dash-nav-ease),
@@ -154,9 +196,8 @@ html.dashboard-shell body {
 }
 
 .dashboard-nav a:hover {
-	background: rgba(255, 255, 255, 0.55);
-	color: var(--dash-accent);
-	transform: translateX(3px);
+	background: var(--rail-hover);
+	color: var(--color-ivory);
 }
 
 .dashboard-nav a:hover img {
@@ -165,17 +206,16 @@ html.dashboard-shell body {
 }
 
 .dashboard-nav a.active {
-	background: linear-gradient(90deg, rgba(66, 153, 225, 0.22) 0%, rgba(66, 153, 225, 0.05) 100%);
-	color: var(--dash-accent);
+	background: var(--color-ivory);
+	color: var(--color-ink);
 	font-weight: 600;
-	box-shadow: 0 6px 8px rgba(49, 130, 206, 0.12);
-	transform: translateX(0);
+	box-shadow: var(--shadow-card);
 }
 
 .dashboard-nav a.active img {
+	filter: brightness(0);
 	opacity: 1;
 	transform: scale(1.06);
-	filter: drop-shadow(0 1px 2px rgba(49, 130, 206, 0.2));
 }
 
 .dashboard-nav a.active:active {
@@ -183,7 +223,7 @@ html.dashboard-shell body {
 }
 
 .dashboard-nav a:active:not(.active) {
-	transform: translateX(2px) scale(0.98);
+	transform: scale(0.98);
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -201,18 +241,14 @@ html.dashboard-shell body {
 	.dashboard-nav a.active:active {
 		transform: none;
 	}
-
-	.dashboard-nav a.active img {
-		filter: none;
-	}
 }
 
 .dashboard-user-card {
 	margin-top: auto;
 	padding: 14px;
-	border-radius: 14px;
-	background: rgba(255, 255, 255, 0.45);
-	border: 1px solid rgba(255, 255, 255, 0.5);
+	border-radius: var(--radius-card);
+	background: rgba(26, 14, 8, 0.18);
+	border: 1px solid rgba(251, 246, 234, 0.24);
 	display: flex;
 	align-items: center;
 	gap: 10px;
@@ -224,15 +260,15 @@ html.dashboard-shell body {
 	border-radius: 50%;
 	object-fit: cover;
 	flex-shrink: 0;
-	border: 2px solid rgba(255, 255, 255, 0.65);
+	border: 2px solid rgba(251, 246, 234, 0.7);
 }
 
 .dashboard-user-card .avatar-letter {
 	width: 40px;
 	height: 40px;
 	border-radius: 50%;
-	background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-	color: #fff;
+	background: var(--color-saffron);
+	color: var(--color-ink);
 	display: flex;
 	align-items: center;
 	justify-content: center;
@@ -249,7 +285,7 @@ html.dashboard-shell body {
 .dashboard-user-card .meta .name {
 	font-size: 14px;
 	font-weight: 600;
-	color: var(--dash-text);
+	color: var(--color-ivory);
 	white-space: nowrap;
 	overflow: hidden;
 	text-overflow: ellipsis;
@@ -257,15 +293,18 @@ html.dashboard-shell body {
 }
 
 .dashboard-user-card .meta .role {
-	font-size: 12px;
-	color: var(--dash-muted);
+	font-family: var(--font-mono);
+	font-size: 11px;
+	letter-spacing: 0.06em;
+	text-transform: uppercase;
+	color: var(--rail-fg-muted);
 }
 
 .user-card-signature {
 	margin-top: 4px;
 	font-size: 11px;
 	line-height: 1.35;
-	color: var(--dash-muted);
+	color: var(--rail-fg-muted);
 	display: -webkit-box;
 	-webkit-box-orient: vertical;
 	overflow: hidden;
@@ -280,15 +319,27 @@ html.dashboard-shell body {
 	cursor: pointer;
 	border-radius: 8px;
 	line-height: 0;
+	transition: background var(--duration-color) var(--ease-editorial);
 }
 
 .dashboard-logout:hover {
-	background: rgba(229, 62, 62, 0.12);
+	background: rgba(26, 14, 8, 0.28);
 }
 
 .dashboard-logout img {
 	width: 22px;
 	height: 22px;
+	filter: brightness(0) invert(1);
+	opacity: 0.82;
+}
+
+.dashboard-logout:hover img {
+	opacity: 1;
+}
+
+.dashboard-logout:focus-visible {
+	outline: none;
+	box-shadow: 0 0 0 2px var(--color-saffron);
 }
 
 .dashboard-nav-item--hidden {
@@ -317,9 +368,10 @@ html.dashboard-shell body {
 	justify-content: space-between;
 	gap: 16px;
 	padding: 16px 28px;
-	border-bottom: 1px solid var(--dash-glass-border);
-	background: rgba(255, 255, 255, 0.35);
+	border-bottom: 1px solid var(--color-hairline);
+	background: rgba(251, 246, 234, 0.82);
 	backdrop-filter: blur(12px);
+	-webkit-backdrop-filter: blur(12px);
 	position: sticky;
 	top: 0;
 	z-index: 10;
@@ -328,10 +380,23 @@ html.dashboard-shell body {
 	contain: layout style;
 }
 
+.dashboard-topbar-title {
+	display: grid;
+	gap: 2px;
+	min-width: 0;
+}
+
+.dashboard-topbar-eyebrow {
+	color: var(--color-espresso);
+}
+
 .dashboard-topbar h1 {
 	margin: 0;
+	font-family: var(--font-display);
 	font-size: 22px;
-	font-weight: 700;
+	font-weight: 800;
+	letter-spacing: -0.02em;
+	color: var(--color-ink);
 }
 
 .sidebar-hamburger {
@@ -339,9 +404,9 @@ html.dashboard-shell body {
 	width: 36px;
 	height: 36px;
 	padding: 8px 6px;
-	border: 1px solid rgba(255, 255, 255, 0.55);
-	border-radius: 10px;
-	background: rgba(255, 255, 255, 0.5);
+	border: 1px solid var(--color-hairline);
+	border-radius: var(--radius-chip);
+	background: var(--color-ivory);
 	cursor: pointer;
 	flex-direction: column;
 	align-items: center;
@@ -351,7 +416,12 @@ html.dashboard-shell body {
 }
 
 .sidebar-hamburger:hover {
-	background: rgba(255, 255, 255, 0.75);
+	background: var(--color-tangerine-tint);
+}
+
+.sidebar-hamburger:focus-visible {
+	outline: none;
+	box-shadow: 0 0 0 2px var(--color-saffron);
 }
 
 .sidebar-hamburger-line {
@@ -359,7 +429,7 @@ html.dashboard-shell body {
 	width: 18px;
 	height: 2px;
 	border-radius: 1px;
-	background: #2d3748;
+	background: var(--color-ink);
 	transition:
 		transform 0.18s ease,
 		opacity 0.18s ease;
@@ -401,28 +471,44 @@ html.dashboard-shell body {
 	width: 260px;
 	max-width: 40vw;
 	padding: 10px 14px 10px 40px;
-	border-radius: 12px;
-	border: 1px solid rgba(255, 255, 255, 0.6);
-	background: rgba(255, 255, 255, 0.5);
+	border-radius: var(--radius-pill);
+	border: 1px solid var(--color-espresso);
+	background: var(--color-ivory);
+	font-family: var(--font-body);
 	font-size: 14px;
-	color: var(--dash-text);
+	color: var(--color-ink);
+	transition:
+		border-color var(--duration-color) var(--ease-editorial),
+		box-shadow var(--duration-color) var(--ease-editorial);
+}
+
+.dashboard-search input:focus {
+	outline: none;
+	border-color: var(--color-tangerine);
+	box-shadow: 0 0 0 2px var(--color-saffron);
 }
 
 .dashboard-search input::placeholder {
-	color: var(--dash-muted);
+	color: var(--color-placeholder);
 }
 
 .dashboard-notify-btn {
-	background: rgba(255, 255, 255, 0.5);
-	border: 1px solid rgba(255, 255, 255, 0.55);
-	border-radius: 12px;
+	background: var(--color-ivory);
+	border: 1px solid var(--color-hairline);
+	border-radius: var(--radius-pill);
 	padding: 8px 10px;
 	cursor: pointer;
 	line-height: 0;
+	transition: background var(--duration-color) var(--ease-editorial);
 }
 
 .dashboard-notify-btn:hover {
-	background: rgba(255, 255, 255, 0.75);
+	background: var(--color-tangerine-tint);
+}
+
+.dashboard-notify-btn:focus-visible {
+	outline: none;
+	box-shadow: 0 0 0 2px var(--color-saffron);
 }
 
 .dashboard-notify-btn img {
@@ -451,6 +537,21 @@ html.dashboard-shell body {
 	height: 0;
 }
 
+/* Name watermark, Feishu style: tiled, non-interactive, non-selectable. It sits
+   at z-index 0 inside .dashboard-main, so the topbar (z 10) and the fixed page
+   modals (z 80+) still paint above it while page content scrolls underneath. */
+.dash-watermark {
+	position: absolute;
+	inset: 0;
+	z-index: 0;
+	pointer-events: none;
+	user-select: none;
+	-webkit-user-select: none;
+	background-repeat: repeat;
+	background-position: 0 0;
+	opacity: 0.06;
+}
+
 @media (max-width: 768px) {
 	.dashboard-sidebar {
 		position: fixed;
@@ -461,19 +562,19 @@ html.dashboard-shell body {
 		transform: translateX(-100%);
 		transition: transform 0.32s var(--dash-nav-ease);
 		z-index: 30;
+		box-shadow: none;
 	}
 
 	.dashboard-sidebar.is-open {
 		transform: translateX(0);
-		box-shadow: 4px 0 24px rgba(0, 0, 0, 0.18);
+		box-shadow: var(--shadow-panel);
 		border-radius: 0 16px 16px 0;
-		border-right: 1px solid var(--dash-glass-border);
 	}
 
 	.dashboard-sidebar-overlay {
 		position: fixed;
 		inset: 0;
-		background: rgba(0, 0, 0, 0.35);
+		background: rgba(26, 14, 8, 0.42);
 		backdrop-filter: blur(4px);
 		z-index: 29;
 		opacity: 0;
@@ -511,10 +612,10 @@ html.dashboard-shell body {
 		padding: 16px 12px;
 	}
 
-	.dashboard-sidebar.is-open .dashboard-logo span,
+	.dashboard-sidebar.is-open .dashboard-logo-text,
 	.dashboard-sidebar.is-open .dashboard-nav a span,
 	.dashboard-sidebar.is-open .dashboard-user-card .meta {
-		display: block;
+		display: grid;
 	}
 
 	.dashboard-sidebar.is-open .dashboard-nav a {
@@ -530,9 +631,9 @@ html.dashboard-shell body {
 	.dashboard-sidebar.is-open .dashboard-user-card {
 		justify-content: flex-start;
 		padding: 14px;
-		border-radius: 14px;
-		background: rgba(255, 255, 255, 0.45);
-		border: 1px solid rgba(255, 255, 255, 0.5);
+		border-radius: var(--radius-card);
+		background: rgba(26, 14, 8, 0.18);
+		border: 1px solid rgba(251, 246, 234, 0.24);
 	}
 
 	.dashboard-sidebar.is-open .dashboard-logout {
@@ -556,8 +657,9 @@ html.dashboard-shell body {
 		display: none;
 	}
 
-	.dashboard-logo span,
+	.dashboard-logo-text,
 	.dashboard-nav a span,
+	.dashboard-nav-eyebrow,
 	.dashboard-user-card .meta {
 		display: none;
 	}
@@ -572,6 +674,10 @@ html.dashboard-shell body {
 		overflow: hidden;
 		text-overflow: ellipsis;
 		white-space: nowrap;
+	}
+
+	.dashboard-topbar-eyebrow {
+		display: none;
 	}
 
 	.home-ann-actions {

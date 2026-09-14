@@ -264,6 +264,12 @@ export default function NewcomersPage() {
 	return (
 		<div className="nc-page">
 			<DashboardToast toast={toast.toast} />
+			<div className="tc-page-head nc-page-head">
+				<div className="tc-page-head__text">
+					<span className="tc-eyebrow">招新</span>
+					<h1 className="tc-page-title">新人详情</h1>
+				</div>
+			</div>
 			{confirmDeleteOpen && confirmDeleteTarget ? (
 				<div
 					className="calendar-modal"
