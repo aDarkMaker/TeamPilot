@@ -1,4 +1,15 @@
-import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react';
+import {
+	useEffect,
+	useLayoutEffect,
+	useMemo,
+	useRef,
+	useState,
+	useSyncExternalStore,
+	type CSSProperties,
+	type KeyboardEvent as ReactKeyboardEvent,
+	type ReactNode,
+} from 'react';
+import { createPortal } from 'react-dom';
 
 import { dayKey, scheduleStore, broadcastScheduleUpdated, type Role, type ScheduleDayItem } from '../../lib/scheduleStore';
 import { useSearchHighlight } from '../../lib/useSearchHighlight';
@@ -144,7 +155,9 @@ export default function Calendar() {
 	const { highlightText } = useSearchHighlight();
 	const descRef = useRef<HTMLTextAreaElement | null>(null);
 	const memberInputRef = useRef<HTMLInputElement | null>(null);
+	const membersChipsRef = useRef<HTMLDivElement | null>(null);
 	const avatarLoadedRef = useRef<Map<string, string>>(new Map());
+	const [mentionRect, setMentionRect] = useState<{ left: number; top: number; width: number; maxHeight: number } | null>(null);
 	const [, forceAvatarTick] = useState(0);
 	const [me, setMe] = useState<Me | null>(null);
 
@@ -153,6 +166,7 @@ export default function Calendar() {
 	const [location, setLocation] = useState('');
 	const [anchorDate, setAnchorDate] = useState(() => new Date(now));
 	const [selectedYmd, setSelectedYmd] = useState(() => toYmd(now));
+	const [weekDir, setWeekDir] = useState<'prev' | 'next' | null>(null);
 	const [startAt, setStartAt] = useState('09:00');
 	const [endAt, setEndAt] = useState('10:00');
 
@@ -160,7 +174,11 @@ export default function Calendar() {
 	const [scope, setScope] = useState<'self' | 'all' | 'custom'>('self');
 	const [mentionUsers, setMentionUsers] = useState<MentionUser[]>([]);
 	const [mentionOpen, setMentionOpen] = useState(false);
+	const [mentionLeaving, setMentionLeaving] = useState(false);
+	const [mentionHi, setMentionHi] = useState(0);
 	const [memberQuery, setMemberQuery] = useState('');
+	const mentionListRef = useRef<HTMLDivElement | null>(null);
+	const mentionCloseToken = useRef(0);
 
 	const [msg, setMsg] = useState<string | null>(null);
 	const [err, setErr] = useState<string | null>(null);
@@ -173,6 +191,9 @@ export default function Calendar() {
 	const [editId, setEditId] = useState<string | null>(null);
 	const [closing, setClosing] = useState<{ create: boolean; time: boolean; detail: boolean }>({ create: false, time: false, detail: false });
 	const [draftRange, setDraftRange] = useState<DraftRange | null>(null);
+	const dayBtnRefs = useRef<(HTMLButtonElement | null)[]>([]);
+	const weekHeadRef = useRef<HTMLDivElement | null>(null);
+	const [dayPill, setDayPill] = useState<{ left: number; top: number; width: number; height: number } | null>(null);
 
 	useEffect(() => {
 		if (!timePicker.open) return;
@@ -200,6 +221,10 @@ export default function Calendar() {
 		[weekDays]
 	);
 	const storeState = useSyncExternalStore(scheduleStore.subscribe, scheduleStore.getSnapshot, () => SERVER_SCHEDULE_SNAPSHOT);
+	const activeDayIdx = useMemo(
+		() => dayKeys.findIndex((d) => d.ymd.year === selectedYmd.year && d.ymd.month === selectedYmd.month && d.ymd.day === selectedYmd.day),
+		[dayKeys, selectedYmd]
+	);
 	const rowsByDay = useMemo(() => {
 		const out: Record<string, ScheduleDayItem[]> = {};
 		for (const d of dayKeys) out[d.key] = storeState.byDay[d.key]?.items ?? [];
@@ -235,6 +260,65 @@ export default function Calendar() {
 		for (let m = start; m <= end; m += STEP_MINUTES) out.push(fmtHHmm(m));
 		return out;
 	}, []);
+
+	const mentionCandidates = useMemo(() => mentionUsers.filter((u) => !participants.some((p) => p.id === u.id)), [mentionUsers, participants]);
+
+	const showMentionList = scope === 'custom' && ((mentionOpen && mentionCandidates.length > 0) || mentionLeaving);
+
+	function prefersReducedMotion(): boolean {
+		return typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+	}
+
+	function closeMentionPanel() {
+		setMentionOpen(false);
+		const el = mentionListRef.current;
+		if (!el || prefersReducedMotion()) {
+			mentionCloseToken.current += 1;
+			setMentionLeaving(false);
+			setMentionRect(null);
+			return;
+		}
+		if (mentionLeaving) return;
+		const token = (mentionCloseToken.current += 1);
+		setMentionLeaving(true);
+		const onEnd = (e: AnimationEvent) => {
+			if (e.target !== el) return;
+			el.removeEventListener('animationend', onEnd);
+			el.removeEventListener('animationcancel', onEnd);
+			if (mentionCloseToken.current !== token) return;
+			setMentionLeaving(false);
+			setMentionRect(null);
+		};
+		el.addEventListener('animationend', onEnd);
+		el.addEventListener('animationcancel', onEnd);
+	}
+
+	useLayoutEffect(() => {
+		if (!showMentionList) {
+			if (!mentionLeaving) setMentionRect(null);
+			return;
+		}
+		const el = membersChipsRef.current;
+		if (!el) return;
+		const sync = () => {
+			const r = el.getBoundingClientRect();
+			const gap = 6;
+			const spaceBelow = window.innerHeight - r.bottom - 8;
+			setMentionRect({
+				left: r.left,
+				top: r.bottom + gap,
+				width: r.width,
+				maxHeight: Math.min(220, Math.max(120, spaceBelow)),
+			});
+		};
+		sync();
+		window.addEventListener('resize', sync);
+		window.addEventListener('scroll', sync, true);
+		return () => {
+			window.removeEventListener('resize', sync);
+			window.removeEventListener('scroll', sync, true);
+		};
+	}, [showMentionList, mentionCandidates.length, mentionLeaving]);
 
 	function minuteFromClientY(sheetEl: HTMLElement, clientY: number) {
 		const rect = sheetEl.getBoundingClientRect();
@@ -394,44 +478,61 @@ export default function Calendar() {
 	}
 
 	async function searchMention(keyword: string) {
-		if (!keyword) {
-			// still show list when only '@'
-			try {
-				const users = await api<MentionUser[]>(`/api/schedule/users/search?q=`);
-				setMentionUsers(users);
-				setMentionOpen(true);
-			} catch {
-				setMentionOpen(false);
-			}
-			return;
-		}
 		try {
-			const users = await api<MentionUser[]>(`/api/schedule/users/search?q=${encodeURIComponent(keyword)}`);
+			const users = await api<MentionUser[]>(`/api/schedule/users/search?q=${encodeURIComponent(keyword.trim())}`);
 			setMentionUsers(users);
+			const available = users.filter((u) => !participants.some((p) => p.id === u.id));
+			if (available.length === 0) {
+				closeMentionPanel();
+				return;
+			}
+			mentionCloseToken.current += 1;
+			setMentionLeaving(false);
 			setMentionOpen(true);
+			setMentionHi(0);
 		} catch {
-			setMentionOpen(false);
+			closeMentionPanel();
 		}
 	}
 
-	function onMemberQueryChange(v: string, cursorPos: number | null) {
+	function onMemberQueryChange(v: string) {
 		setMemberQuery(v);
-		if (cursorPos == null) return;
-		const before = v.slice(0, cursorPos);
-		const m = before.match(/@([\u4e00-\u9fa5_a-zA-Z0-9]{0,20})$/);
-		if (m) void searchMention(m[1] ?? '');
-		else setMentionOpen(false);
+		void searchMention(v);
 	}
 
 	function pickMention(u: MentionUser) {
 		setParticipants((prev) => (prev.some((x) => x.id === u.id) ? prev : [...prev, u]));
-		setMentionOpen(false);
+		closeMentionPanel();
 		setMemberQuery('');
 		queueMicrotask(() => memberInputRef.current?.focus());
 	}
 
 	function removeParticipant(userId: string) {
 		setParticipants((prev) => prev.filter((p) => p.id !== userId));
+	}
+
+	function onMemberKeyDown(e: ReactKeyboardEvent<HTMLInputElement>) {
+		if (e.key === 'Escape') {
+			closeMentionPanel();
+			return;
+		}
+		if (e.key === 'Backspace' && !memberQuery && participants.length) {
+			e.preventDefault();
+			removeParticipant(participants[participants.length - 1]!.id);
+			return;
+		}
+		if (!mentionOpen || mentionCandidates.length === 0) return;
+		if (e.key === 'ArrowDown') {
+			e.preventDefault();
+			setMentionHi((i) => (i + 1) % mentionCandidates.length);
+		} else if (e.key === 'ArrowUp') {
+			e.preventDefault();
+			setMentionHi((i) => (i - 1 + mentionCandidates.length) % mentionCandidates.length);
+		} else if (e.key === 'Enter') {
+			e.preventDefault();
+			const u = mentionCandidates[mentionHi];
+			if (u) pickMention(u);
+		}
 	}
 
 	function closeCreate() {
@@ -494,6 +595,28 @@ export default function Calendar() {
 		};
 	}, [draftRange?.active]);
 
+	useLayoutEffect(() => {
+		const head = weekHeadRef.current;
+		const el = activeDayIdx >= 0 ? dayBtnRefs.current[activeDayIdx] : null;
+		if (!head || !el) {
+			setDayPill(null);
+			return;
+		}
+		const sync = () => {
+			const hr = head.getBoundingClientRect();
+			const er = el.getBoundingClientRect();
+			setDayPill({
+				left: er.left - hr.left - head.clientLeft,
+				top: er.top - hr.top - head.clientTop,
+				width: er.width,
+				height: er.height,
+			});
+		};
+		sync();
+		window.addEventListener('resize', sync);
+		return () => window.removeEventListener('resize', sync);
+	}, [activeDayIdx, dayKeys]);
+
 	useEffect(() => {
 		if (!err && !msg) return;
 		toast.show({ text: err ?? msg ?? '', type: err ? 'err' : 'ok', durationMs: 3000 });
@@ -501,17 +624,38 @@ export default function Calendar() {
 		setMsg(null);
 	}, [err, msg, toast]);
 
+	const shiftWeek = (delta: number) => {
+		setWeekDir(delta > 0 ? 'next' : 'prev');
+		setAnchorDate((d) => addDays(d, delta));
+	};
+
+	const changeScope = (next: 'self' | 'all' | 'custom') => {
+		if (next === scope) return;
+		setScope(next);
+		if (next !== 'custom') closeMentionPanel();
+	};
+
 	return (
-		<div className="calendar-page">
+		<div className="tc-page calendar-page">
 			<DashboardToast toast={toast.toast} />
+			<div className="tc-page-head">
+				<div className="tc-page-head__text">
+					<span className="tc-eyebrow">排期</span>
+					<h1 className="tc-page-title">日程安排</h1>
+				</div>
+			</div>
 			<div className="calendar-head">
 				<div className="calendar-head-title">
-					<button type="button" className="calendar-date-btn" onClick={() => setAnchorDate((d) => addDays(d, -7))}>
-						‹
+					<button type="button" className="calendar-date-btn" aria-label="上一周" onClick={() => shiftWeek(-7)}>
+						<svg viewBox="0 0 24 24" focusable="false" aria-hidden>
+							<path d="M15 5l-7 7 7 7" />
+						</svg>
 					</button>
 					<span>{dateLabel}</span>
-					<button type="button" className="calendar-date-btn" onClick={() => setAnchorDate((d) => addDays(d, 7))}>
-						›
+					<button type="button" className="calendar-date-btn" aria-label="下一周" onClick={() => shiftWeek(7)}>
+						<svg viewBox="0 0 24 24" focusable="false" aria-hidden>
+							<path d="M9 5l7 7-7 7" />
+						</svg>
 					</button>
 				</div>
 				<div className="calendar-head-actions">
@@ -521,6 +665,7 @@ export default function Calendar() {
 							className="calendar-btn"
 							onClick={() => {
 								const t = new Date();
+								setWeekDir(null);
 								setAnchorDate(t);
 								setSelectedYmd(toYmd(t));
 							}}
@@ -539,13 +684,28 @@ export default function Calendar() {
 					<h2>日程</h2>
 					<div className="calendar-sub">{dayKeys.reduce((sum, d) => sum + (rowsByDay[d.key]?.length ?? 0), 0)} 条</div>
 				</div>
-				<div className="calendar-week">
-					<div className="calendar-week-head">
+				<div className="calendar-week" data-dir={weekDir ?? undefined}>
+					<div className="calendar-week-head" ref={weekHeadRef}>
+						{dayPill ? (
+							<span
+								className="calendar-week-pill"
+								aria-hidden
+								style={{
+									width: dayPill.width,
+									height: dayPill.height,
+									transform: `translate3d(${dayPill.left}px, ${dayPill.top}px, 0)`,
+								}}
+							/>
+						) : null}
 						<div className="calendar-week-head-left" />
-						{dayKeys.map((d) => (
+						{dayKeys.map((d, i) => (
 							<button
 								key={d.key}
+								ref={(el) => {
+									dayBtnRefs.current[i] = el;
+								}}
 								type="button"
+								style={{ '--cal-i': i } as CSSProperties}
 								className={`calendar-week-day ${d.ymd.year === selectedYmd.year && d.ymd.month === selectedYmd.month && d.ymd.day === selectedYmd.day ? 'active' : ''}`}
 								onClick={() => setSelectedYmd(d.ymd)}
 							>
@@ -652,68 +812,126 @@ export default function Calendar() {
 						{createErr && <div className="calendar-inline-msg err">{createErr}</div>}
 						<form onSubmit={onSubmit} className="calendar-form">
 							{me && me.role !== 'user' && (
-								<div className="calendar-field">
+								<div className="calendar-field calendar-field--sticky">
 									<label>范围</label>
 									<div className="calendar-scope">
-										<button type="button" className={`calendar-scope-btn ${scope === 'all' ? 'active' : ''}`} onClick={() => setScope('all')}>
+										<button type="button" className={`calendar-scope-btn ${scope === 'all' ? 'active' : ''}`} onClick={() => changeScope('all')}>
 											全体
 										</button>
-										<button type="button" className={`calendar-scope-btn ${scope === 'custom' ? 'active' : ''}`} onClick={() => setScope('custom')}>
+										<button
+											type="button"
+											className={`calendar-scope-btn ${scope === 'custom' ? 'active' : ''}`}
+											onClick={() => changeScope('custom')}
+										>
 											指定
 										</button>
-										<button type="button" className={`calendar-scope-btn ${scope === 'self' ? 'active' : ''}`} onClick={() => setScope('self')}>
+										<button type="button" className={`calendar-scope-btn ${scope === 'self' ? 'active' : ''}`} onClick={() => changeScope('self')}>
 											自己
 										</button>
 									</div>
 								</div>
 							)}
 
-							<div className="calendar-field">
-								<label htmlFor="cal-title">标题</label>
-								<input id="cal-title" value={title} onChange={(e) => setTitle(e.target.value)} required />
-							</div>
-
-							{me && me.role !== 'user' && scope === 'custom' && (
+							<div className="calendar-form-pane">
 								<div className="calendar-field">
-									<label htmlFor="cal-members">成员</label>
-									<div className="calendar-members">
-										<div className="calendar-members-chips">
-											{participants.map((p) => (
-												<button key={p.id} type="button" className="calendar-chip" onClick={() => removeParticipant(p.id)} title="移除">
-													{(p.nickname && p.nickname.trim()) || p.username}
-												</button>
-											))}
-											<input
-												ref={memberInputRef}
-												id="cal-members"
-												className="calendar-members-input"
-												value={memberQuery}
-												onChange={(e) => onMemberQueryChange(e.target.value, e.currentTarget.selectionStart)}
-												onKeyDown={(e) => {
-													if (e.key === 'Backspace' && !memberQuery.trim() && participants.length) {
-														removeParticipant(participants[participants.length - 1]!.id);
-													}
-												}}
-												placeholder="@ 搜索成员"
-												autoComplete="off"
-												autoCorrect="off"
-												autoCapitalize="off"
-												spellCheck={false}
-												inputMode="text"
-												onFocus={() => {
-													if (memberQuery.includes('@')) void searchMention('');
-												}}
-											/>
+									<label htmlFor="cal-title">标题</label>
+									<input id="cal-title" value={title} onChange={(e) => setTitle(e.target.value)} required />
+								</div>
+
+								{me && me.role !== 'user' && (
+									<div className={`calendar-members-slot${scope === 'custom' ? ' is-open' : ''}`} aria-hidden={scope !== 'custom'}>
+										<div className="calendar-members-slot-inner">
+											<div className="calendar-field">
+												<label htmlFor="cal-members">成员</label>
+												<div className="calendar-members">
+													<div ref={membersChipsRef} className="calendar-members-chips" onClick={() => memberInputRef.current?.focus()}>
+														{participants.map((p) => {
+															const name = (p.nickname && p.nickname.trim()) || p.username;
+															const url = p.avatarUrl ?? null;
+															return (
+																<span key={p.id} className="calendar-chip">
+																	<span className="calendar-chip-avatar" aria-hidden>
+																		{url ? (
+																			<img src={url} alt="" decoding="async" loading="lazy" width={20} height={20} />
+																		) : (
+																			<span>{name.slice(0, 1)}</span>
+																		)}
+																	</span>
+																	<span className="calendar-chip-name">{name}</span>
+																	<button
+																		type="button"
+																		className="calendar-chip-remove"
+																		aria-label={`移除 ${name}`}
+																		onClick={(e) => {
+																			e.stopPropagation();
+																			removeParticipant(p.id);
+																		}}
+																	>
+																		×
+																	</button>
+																</span>
+															);
+														})}
+														<input
+															ref={memberInputRef}
+															id="cal-members"
+															className="calendar-members-input"
+															value={memberQuery}
+															onChange={(e) => onMemberQueryChange(e.target.value)}
+															onKeyDown={onMemberKeyDown}
+															placeholder={participants.length ? '继续搜索' : '搜索成员'}
+															autoComplete="off"
+															autoCorrect="off"
+															autoCapitalize="off"
+															spellCheck={false}
+															inputMode="text"
+															tabIndex={scope === 'custom' ? 0 : -1}
+															onFocus={() => {
+																void searchMention(memberQuery);
+															}}
+															onBlur={() => {
+																window.setTimeout(() => closeMentionPanel(), 150);
+															}}
+														/>
+													</div>
+												</div>
+											</div>
 										</div>
-										{mentionOpen && mentionUsers.length > 0 && (
-											<div className="calendar-mention-list">
-												{mentionUsers.map((u) => {
+									</div>
+								)}
+
+								{showMentionList && mentionRect && typeof document !== 'undefined'
+									? (createPortal(
+											<div
+												ref={mentionListRef}
+												className={`calendar-mention-list is-fixed${mentionLeaving ? ' is-leave' : ''}`}
+												role="listbox"
+												style={{
+													position: 'fixed',
+													left: mentionRect.left,
+													top: mentionRect.top,
+													width: mentionRect.width,
+													maxHeight: mentionRect.maxHeight,
+													zIndex: 3100,
+												}}
+											>
+												{mentionCandidates.map((u, i) => {
 													const url = u.avatarUrl ?? null;
 													const prev = avatarLoadedRef.current.get(u.id);
 													const loaded = !!(prev && url && prev === url);
 													if (prev && url && prev !== url) avatarLoadedRef.current.delete(u.id);
+													const name = (u.nickname && u.nickname.trim()) || u.username;
 													return (
-														<button key={u.id} type="button" className="calendar-mention-row" onClick={() => pickMention(u)}>
+														<button
+															key={u.id}
+															type="button"
+															role="option"
+															aria-selected={i === mentionHi}
+															className={`calendar-mention-row${i === mentionHi ? ' is-active' : ''}`}
+															onMouseDown={(e) => e.preventDefault()}
+															onClick={() => pickMention(u)}
+															onMouseEnter={() => setMentionHi(i)}
+														>
 															<span className="avatar">
 																{url ? (
 																	<img
@@ -731,51 +949,51 @@ export default function Calendar() {
 																) : null}
 																<span className="avatar-fallback">{u.username.slice(0, 1)}</span>
 															</span>
-															<span className="name">{(u.nickname && u.nickname.trim()) || u.username}</span>
+															<span className="name">{name}</span>
 															<span className={`role ${u.role ?? 'user'}`}>
 																{u.role === 'super_admin' ? '超管' : u.role === 'admin' ? '管理员' : '成员'}
 															</span>
 														</button>
 													);
 												})}
-											</div>
-										)}
+											</div>,
+											document.body
+										) as ReactNode)
+									: null}
+
+								<div className="calendar-field">
+									<label htmlFor="cal-desc2">描述</label>
+									<textarea id="cal-desc2" value={description} onChange={(e) => setDescription(e.target.value)} rows={4} />
+								</div>
+
+								<div className="calendar-field">
+									<label htmlFor="cal-loc">位置</label>
+									<input id="cal-loc" value={location} onChange={(e) => setLocation(e.target.value)} />
+								</div>
+
+								<div className="calendar-row">
+									<div className="calendar-field">
+										<label htmlFor="cal-start">开始</label>
+										<button id="cal-start" type="button" className="calendar-time-btn" onClick={() => setTimePicker({ open: true, field: 'start' })}>
+											{startAt}
+										</button>
+									</div>
+									<div className="calendar-field">
+										<label htmlFor="cal-end">结束</label>
+										<button id="cal-end" type="button" className="calendar-time-btn" onClick={() => setTimePicker({ open: true, field: 'end' })}>
+											{endAt}
+										</button>
+									</div>
+									<div className="calendar-field">
+										<label htmlFor="cal-dur">时长</label>
+										<input id="cal-dur" type="text" value={`${durationMinutes} 分钟`} readOnly />
 									</div>
 								</div>
-							)}
 
-							<div className="calendar-field">
-								<label htmlFor="cal-desc2">描述</label>
-								<textarea id="cal-desc2" value={description} onChange={(e) => setDescription(e.target.value)} rows={4} />
+								<button type="submit" className="calendar-btn primary calendar-form-submit" disabled={loading}>
+									{loading ? '提交中…' : '创建'}
+								</button>
 							</div>
-
-							<div className="calendar-field">
-								<label htmlFor="cal-loc">位置</label>
-								<input id="cal-loc" value={location} onChange={(e) => setLocation(e.target.value)} />
-							</div>
-
-							<div className="calendar-row">
-								<div className="calendar-field">
-									<label htmlFor="cal-start">开始</label>
-									<button id="cal-start" type="button" className="calendar-time-btn" onClick={() => setTimePicker({ open: true, field: 'start' })}>
-										{startAt}
-									</button>
-								</div>
-								<div className="calendar-field">
-									<label htmlFor="cal-end">结束</label>
-									<button id="cal-end" type="button" className="calendar-time-btn" onClick={() => setTimePicker({ open: true, field: 'end' })}>
-										{endAt}
-									</button>
-								</div>
-								<div className="calendar-field">
-									<label htmlFor="cal-dur">时长</label>
-									<input id="cal-dur" type="text" value={`${durationMinutes} 分钟`} readOnly />
-								</div>
-							</div>
-
-							<button type="submit" className="calendar-btn primary calendar-form-submit" disabled={loading}>
-								{loading ? '提交中…' : '创建'}
-							</button>
 						</form>
 					</div>
 				</div>

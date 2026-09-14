@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
 
 export type JoinUsSelectOption<T extends string | number> = { value: T; label: string };
@@ -13,7 +13,7 @@ type Props<T extends string | number> = {
 
 type PanelRect = {
 	left: number;
-	minWidth: number;
+	width: number;
 	maxHeight: number;
 	placement: 'down' | 'up';
 	top: number | 'auto';
@@ -25,6 +25,10 @@ const VIEWPORT_PAD = 8;
 const DEFAULT_MAX_HEIGHT = 240;
 const MIN_PANEL = 120;
 
+function prefersReducedMotion(): boolean {
+	return typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+}
+
 function measurePanel(trigger: HTMLElement): PanelRect {
 	const r = trigger.getBoundingClientRect();
 	const spaceBelow = window.innerHeight - r.bottom - VIEWPORT_PAD;
@@ -34,7 +38,7 @@ function measurePanel(trigger: HTMLElement): PanelRect {
 	if (preferUp) {
 		return {
 			left: r.left,
-			minWidth: r.width,
+			width: r.width,
 			maxHeight: Math.min(DEFAULT_MAX_HEIGHT, Math.max(MIN_PANEL, spaceAbove - PANEL_GAP)),
 			placement: 'up',
 			top: 'auto',
@@ -44,7 +48,7 @@ function measurePanel(trigger: HTMLElement): PanelRect {
 
 	return {
 		left: r.left,
-		minWidth: r.width,
+		width: r.width,
 		maxHeight: Math.min(DEFAULT_MAX_HEIGHT, Math.max(MIN_PANEL, spaceBelow - PANEL_GAP)),
 		placement: 'down',
 		top: r.bottom + PANEL_GAP,
@@ -59,12 +63,40 @@ export default function JoinUsSelect<T extends string | number>(props: Props<T>)
 	const rootRef = useRef<HTMLDivElement>(null);
 	const triggerRef = useRef<HTMLButtonElement>(null);
 	const panelRef = useRef<HTMLDivElement>(null);
+	const closeTokenRef = useRef(0);
 
-	useLayoutEffect(() => {
-		if (!open) {
+	const requestClose = useCallback(() => {
+		setOpen(false);
+		const el = panelRef.current;
+		if (!el || prefersReducedMotion()) {
+			closeTokenRef.current += 1;
+			el?.classList.remove('is-leave');
 			setPanel(null);
 			return;
 		}
+		if (el.classList.contains('is-leave')) return;
+		const token = (closeTokenRef.current += 1);
+		el.classList.add('is-leave');
+		const onAnimationEnd = (e: AnimationEvent) => {
+			if (e.target !== el) return;
+			el.removeEventListener('animationend', onAnimationEnd);
+			el.removeEventListener('animationcancel', onAnimationEnd);
+			if (closeTokenRef.current !== token) return;
+			el.classList.remove('is-leave');
+			setPanel(null);
+		};
+		el.addEventListener('animationend', onAnimationEnd);
+		el.addEventListener('animationcancel', onAnimationEnd);
+	}, []);
+
+	const openMenu = useCallback(() => {
+		closeTokenRef.current += 1;
+		panelRef.current?.classList.remove('is-leave');
+		setOpen(true);
+	}, []);
+
+	useLayoutEffect(() => {
+		if (!open) return;
 		const trigger = triggerRef.current;
 		if (!trigger) return;
 		const sync = () => setPanel(measurePanel(trigger));
@@ -82,10 +114,10 @@ export default function JoinUsSelect<T extends string | number>(props: Props<T>)
 		const onDocMouseDown = (e: MouseEvent) => {
 			const t = e.target as Node;
 			if (rootRef.current?.contains(t) || panelRef.current?.contains(t)) return;
-			setOpen(false);
+			requestClose();
 		};
 		const onKey = (e: KeyboardEvent) => {
-			if (e.key === 'Escape') setOpen(false);
+			if (e.key === 'Escape') requestClose();
 		};
 		document.addEventListener('mousedown', onDocMouseDown);
 		document.addEventListener('keydown', onKey);
@@ -93,7 +125,7 @@ export default function JoinUsSelect<T extends string | number>(props: Props<T>)
 			document.removeEventListener('mousedown', onDocMouseDown);
 			document.removeEventListener('keydown', onKey);
 		};
-	}, [open]);
+	}, [open, requestClose]);
 
 	const current = options.find((o) => o.value === value);
 
@@ -104,39 +136,36 @@ export default function JoinUsSelect<T extends string | number>(props: Props<T>)
 				bottom: panel.bottom,
 				left: panel.left,
 				right: 'auto',
-				minWidth: panel.minWidth,
+				width: panel.width,
 				maxHeight: panel.maxHeight,
 				zIndex: 3000,
 			}
 		: undefined;
 
 	const portal =
-		open && panel && typeof document !== 'undefined'
-			? createPortal(
-					<div
-						className={`joinus-select-custom-panel is-fixed ${panel.placement === 'up' ? 'is-up' : ''}`}
-						style={panelStyle}
-						ref={panelRef}
-						role="listbox"
-					>
-						{options.map((o) => (
-							<button
-								type="button"
-								role="option"
-								aria-selected={o.value === value}
-								key={o.value}
-								className={`joinus-select-custom-item ${o.value === value ? 'is-active' : ''}`}
-								onClick={() => {
-									onChange(o.value);
-									setOpen(false);
-								}}
-							>
-								{o.label}
-							</button>
-						))}
+		panel && typeof document !== 'undefined'
+			? (createPortal(
+					<div className={`joinus-select-custom-panel is-fixed ${panel.placement === 'up' ? 'is-up' : ''}`} style={panelStyle} ref={panelRef}>
+						<div className="joinus-select-custom-list" role="listbox">
+							{options.map((o) => (
+								<button
+									type="button"
+									role="option"
+									aria-selected={o.value === value}
+									key={o.value}
+									className={`joinus-select-custom-item ${o.value === value ? 'is-active' : ''}`}
+									onClick={() => {
+										onChange(o.value);
+										requestClose();
+									}}
+								>
+									{o.label}
+								</button>
+							))}
+						</div>
 					</div>,
 					document.body
-				)
+				) as ReactNode)
 			: null;
 
 	return (
@@ -146,7 +175,10 @@ export default function JoinUsSelect<T extends string | number>(props: Props<T>)
 				ref={triggerRef}
 				className="joinus-select-custom-trigger"
 				disabled={disabled}
-				onClick={() => setOpen((v) => !v)}
+				onClick={() => {
+					if (open) requestClose();
+					else openMenu();
+				}}
 				aria-haspopup="listbox"
 				aria-expanded={open}
 			>
