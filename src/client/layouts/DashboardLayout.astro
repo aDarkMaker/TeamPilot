@@ -7,13 +7,18 @@ import '../styles/joinus-form-admin.css';
 import '../styles/calendar.css';
 import '../styles/global.css';
 import '../styles/search-panel.css';
+import '../styles/tangerine-fonts.css';
+import '../styles/tangerine.css';
 import { assetUrl } from '../lib/assetUrl';
 import favicon from '../assets/img/icon/icon-hxk.webp';
-import fontHxk from '../assets/fonts/fonts.ttf';
+import fontBody from '../assets/fonts/tangerine/inter-var.woff2';
+import fontDisplay from '../assets/fonts/tangerine/bricolage-grotesque-700.woff2';
+import fontCjk from '../assets/fonts/tangerine/misans-sc-var.woff2';
 import DashboardSidebar from '../components/dashboard/DashboardSidebar';
 import DashboardTopBar from '../components/dashboard/DashboardTopBar';
 import DashboardBackground from '../components/dashboard/DashboardBackground';
 import DashboardAuthGuard from '../components/dashboard/DashboardAuthGuard';
+import UserNameWatermark from '../components/dashboard/UserNameWatermark';
 
 interface Props {
     title?: string;
@@ -30,7 +35,9 @@ const { title = '工作主页', notifyVariant = 'read' }: Props = Astro.props;
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" type="image/png" href={assetUrl(favicon)} />
-        <link rel="preload" href={assetUrl(fontHxk)} as="font" type="font/ttf" crossorigin />
+        <link rel="preload" href={assetUrl(fontBody)} as="font" type="font/woff2" crossorigin />
+        <link rel="preload" href={assetUrl(fontDisplay)} as="font" type="font/woff2" crossorigin />
+        <link rel="preload" href={assetUrl(fontCjk)} as="font" type="font/woff2" crossorigin />
         <link rel="preconnect" href="https://upos-sz-mirrorcos.bilivideo.com" />
         <link rel="preconnect" href="https://i0.hdslb.com" />
         <title>{title} · HXK</title>
@@ -58,6 +65,7 @@ const { title = '工作主页', notifyVariant = 'read' }: Props = Astro.props;
             />
             <DashboardBackground client:load transition:persist="dashboard-bg" transition:animate="none" />
             <div class="dashboard-main">
+                <UserNameWatermark client:load transition:persist="dashboard-watermark" transition:animate="none" />
                 <DashboardTopBar client:load transition:persist="dashboard-topbar" transition:animate="none" title={title} notifyVariant={notifyVariant} />
                 <main class="content-wrapper" transition:animate={fade({ duration: '0.12s' })}>
                     <slot />

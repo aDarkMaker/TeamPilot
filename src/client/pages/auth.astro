@@ -1,9 +1,14 @@
 ---
+import '../styles/tangerine-fonts.css';
+import '../styles/tangerine.css';
 import '../styles/auth.css';
 import '../styles/global.css';
 import { assetUrl } from '../lib/assetUrl';
 import favicon from '../assets/img/icon/icon-hxk.webp';
-import fontHxk from '../assets/fonts/fonts.ttf';
+import fontBody from '../assets/fonts/tangerine/inter-var.woff2';
+import fontDisplay from '../assets/fonts/tangerine/bricolage-grotesque-700.woff2';
+import fontCjk from '../assets/fonts/tangerine/misans-sc-var.woff2';
+import fontIntimate from '../assets/fonts/tangerine/hf-intimate.woff2';
 import AuthTabs from '../components/auth/AuthTabs';
 ---
 
@@ -12,7 +17,10 @@ import AuthTabs from '../components/auth/AuthTabs';
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <link rel="icon" type="image/webp" href={assetUrl(favicon)} />
-        <link rel="preload" href={assetUrl(fontHxk)} as="font" type="font/ttf" crossorigin />
+        <link rel="preload" href={assetUrl(fontBody)} as="font" type="font/woff2" crossorigin />
+        <link rel="preload" href={assetUrl(fontDisplay)} as="font" type="font/woff2" crossorigin />
+        <link rel="preload" href={assetUrl(fontCjk)} as="font" type="font/woff2" crossorigin />
+        <link rel="preload" href={assetUrl(fontIntimate)} as="font" type="font/woff2" crossorigin />
     </head>
     <body class="auth-page">
         <main class="auth-container">
