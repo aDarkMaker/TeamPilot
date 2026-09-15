@@ -72,7 +72,8 @@ function setJoinusFileHeaders(res: import('http').ServerResponse, filePath: stri
 	const name = basename(filePath);
 	if (!name.toLowerCase().endsWith('.bin')) return;
 	const m = /\.([a-z0-9]{2,5})\.bin$/i.exec(name);
-	const ct = m ? LEGACY_BIN_EXT_MIME[m[1].toLowerCase()] : undefined;
+	const ext = m?.[1]?.toLowerCase();
+	const ct = ext ? LEGACY_BIN_EXT_MIME[ext] : undefined;
 	if (ct) res.setHeader('Content-Type', ct);
 }
 
