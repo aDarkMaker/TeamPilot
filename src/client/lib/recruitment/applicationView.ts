@@ -55,7 +55,8 @@ function inferAttachmentMeta(fileName: string): { kind: RecruitmentAttachmentKin
 	if (lower.endsWith('.pdf')) return { kind: 'pdf', mimeType: 'application/pdf' };
 	if (/\.(png|jpe?g|gif|webp|bmp|svg)$/i.test(lower)) return { kind: 'image', mimeType: 'image/jpeg' };
 	const m = /\.([a-z0-9]{2,5})$/.exec(lower);
-	const mime = m ? VIDEO_EXT_MIME[m[1]] : undefined;
+	const ext = m?.[1];
+	const mime = ext ? VIDEO_EXT_MIME[ext] : undefined;
 	if (mime) return { kind: 'video', mimeType: mime };
 	return { kind: 'other', mimeType: 'application/octet-stream' };
 }
