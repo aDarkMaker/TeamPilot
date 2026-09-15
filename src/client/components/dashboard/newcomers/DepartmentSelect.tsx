@@ -142,14 +142,14 @@ export function DepartmentSelect({ value, onChange }: Props) {
 	}
 
 	return (
-		<div className="nc-dept-dd" ref={rootRef}>
-			<span className="nc-dept-dd-label" id={`${listId}-label`}>
+		<div className="nc-dept-dd nc-coolfield" ref={rootRef}>
+			<span className="nc-coolfield-label" id={`${listId}-label`}>
 				组别
 			</span>
 			<button
 				ref={triggerRef}
 				type="button"
-				className={`nc-dept-dd-trigger ${expanded ? 'is-open' : ''}`}
+				className={`nc-dept-dd-trigger nc-coolfield-control ${expanded ? 'is-open' : ''}`}
 				aria-haspopup="listbox"
 				aria-expanded={expanded}
 				aria-labelledby={`${listId}-label`}

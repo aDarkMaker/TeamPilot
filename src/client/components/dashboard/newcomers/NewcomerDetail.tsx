@@ -9,6 +9,7 @@ import type { NewcomerApplicationView } from '../../../types/recruitmentUi';
 import { formatCstDateTime } from '../../../lib/timeCst';
 import { useSearchHighlight } from '../../../lib/useSearchHighlight';
 import { copyText } from '../../../lib/copyToClipboard';
+import { getQqAvatarUrl } from '../../../lib/recruitment/qqAvatar';
 import { parseInterviewFromIntro } from '../../../../joinus/interviewIntro';
 
 type Props = {
@@ -75,7 +76,24 @@ export function NewcomerDetail({
 			</header>
 
 			<section className="nc-detail-section nc-detail-section--meta">
-				<h3 className="nc-section-title">基本信息</h3>
+				<div className="nc-section-title-row">
+					<h3 className="nc-section-title">基本信息</h3>
+					{application.qq ? (
+						<img
+							className="nc-qq-avatar"
+							src={getQqAvatarUrl(application.qq)}
+							alt=""
+							draggable={false}
+							loading="lazy"
+							decoding="async"
+							width={30}
+							height={30}
+							onError={(e) => {
+								e.currentTarget.style.visibility = 'hidden';
+							}}
+						/>
+					) : null}
+				</div>
 				<dl className="nc-meta-grid">
 					<dt>手机</dt>
 					<dd className="nc-meta-copy" title="点击复制" onClick={() => void copyText(application.contact).then(onCopyResult)}>

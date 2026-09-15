@@ -23,6 +23,7 @@ import {
 } from '../../../lib/recruitment/recruitmentClient';
 import type { NewcomerApplicationView, RecruitmentDepartmentSlug } from '../../../types/recruitmentUi';
 import { recruitmentApplicationsStore } from '../../../lib/recruitment/recruitmentApplicationsStore';
+import { matchesName } from '../../../lib/recruitment/nameMatch';
 
 export default function NewcomersPage() {
 	const toast = useDashboardToast();
@@ -44,6 +45,8 @@ export default function NewcomersPage() {
 	const listLoading = appsState.loading;
 	const listError = appsState.error;
 	const [deptFilter, setDeptFilter] = useState<RecruitmentDepartmentSlug | 'all'>('all');
+	const [attachOnly, setAttachOnly] = useState(false);
+	const [nameQuery, setNameQuery] = useState('');
 	const [selectedId, setSelectedId] = useState('');
 	const [commentsMap, setCommentsMap] = useState<Record<string, RecruitmentCommentDto[]>>({});
 
@@ -71,9 +74,14 @@ export default function NewcomersPage() {
 	}, [applications, selectedId]);
 
 	const filteredApps = useMemo(() => {
-		if (deptFilter === 'all') return applications;
-		return applications.filter((a) => a.department === deptFilter);
-	}, [applications, deptFilter]);
+		const query = nameQuery.trim();
+		return applications.filter((a) => {
+			if (deptFilter !== 'all' && a.department !== deptFilter) return false;
+			if (attachOnly && a.attachments.length === 0) return false;
+			if (query && !matchesName(a.fullName, query)) return false;
+			return true;
+		});
+	}, [applications, deptFilter, attachOnly, nameQuery]);
 
 	const listSelectedId = useMemo(() => filteredApps.find((a) => a.id === selectedId)?.id ?? filteredApps[0]?.id ?? '', [filteredApps, selectedId]);
 
@@ -259,7 +267,8 @@ export default function NewcomersPage() {
 		);
 	}
 
-	const emptyCenterHint = applications.length === 0 ? '暂无报名记录。' : '该组别暂无报名记录。';
+	const emptyCenterHint = applications.length === 0 ? '暂无报名记录。' : '没有符合筛选条件的报名记录。';
+	const emptyListHint = applications.length === 0 ? '暂无报名记录。' : '没有符合筛选条件的记录。';
 
 	return (
 		<div className="nc-page">
@@ -272,7 +281,7 @@ export default function NewcomersPage() {
 			</div>
 			{confirmDeleteOpen && confirmDeleteTarget ? (
 				<div
-					className="calendar-modal"
+					className="users-admin-modal"
 					role="dialog"
 					aria-modal="true"
 					onClick={() => {
@@ -282,13 +291,13 @@ export default function NewcomersPage() {
 						}
 					}}
 				>
-					<div className="calendar-modal-card" onClick={(e) => e.stopPropagation()}>
-						<div className="calendar-modal-head">
-							<div className="calendar-modal-title">确认删除报名</div>
-							<div className="calendar-modal-head-actions">
+					<div className="users-admin-modal-card" onClick={(e) => e.stopPropagation()}>
+						<div className="users-admin-modal-head">
+							<div className="users-admin-modal-title">确认删除报名</div>
+							<div className="users-admin-modal-actions">
 								<button
 									type="button"
-									className="nc-btn nc-btn--text nc-btn--danger"
+									className="users-admin-modal-close"
 									disabled={deleteBusy}
 									onClick={() => {
 										if (!deleteBusy) {
@@ -305,7 +314,7 @@ export default function NewcomersPage() {
 						<div className="users-admin-msg err" style={{ marginBottom: 12 }}>
 							确定删除「{confirmDeleteTarget.fullName}」的报名记录？该操作不可撤销。
 						</div>
-						<div className="calendar-modal-head-actions" style={{ justifyContent: 'flex-end' }}>
+						<div className="users-admin-modal-actions users-admin-modal-actions--end">
 							<button
 								type="button"
 								className="users-admin-btn"
@@ -338,10 +347,48 @@ export default function NewcomersPage() {
 					<span className="nc-list-title">报名列表</span>
 					<span className="nc-list-count">{filteredApps.length}</span>
 				</div>
-				<div className="nc-dept-filter">
-					<DepartmentSelect value={deptFilter} onChange={setDeptFilter} />
+				<div className="nc-list-tools">
+					<div className="nc-filter-row">
+						<DepartmentSelect value={deptFilter} onChange={setDeptFilter} />
+						<div className="nc-coolfield">
+							<label className="nc-coolfield-label" htmlFor="nc-name-search">
+								姓名
+							</label>
+							<input
+								id="nc-name-search"
+								type="search"
+								className="nc-coolfield-control nc-coolfield-input"
+								value={nameQuery}
+								onChange={(e) => setNameQuery(e.target.value)}
+								placeholder="搜索姓名"
+							/>
+						</div>
+					</div>
+					<div className="nc-attach-check">
+						<input
+							type="checkbox"
+							id="nc-attach-only"
+							className="nc-attach-check-input"
+							checked={attachOnly}
+							onChange={(e) => setAttachOnly(e.target.checked)}
+						/>
+						<label className="nc-attach-check-label" htmlFor="nc-attach-only">
+							<svg className="nc-attach-check-svg" viewBox="0 0 95 95" focusable="false" aria-hidden>
+								<rect className="nc-attach-check-box" x={30} y={20} width={50} height={50} fill="none" />
+								<g transform="translate(0,-952.36222)">
+									<path
+										className="nc-attach-check-path"
+										d="m 56,963 c -102,122 6,9 7,9 17,-5 -66,69 -38,52 122,-77 -7,14 18,4 29,-11 45,-43 23,-4"
+										fill="none"
+									/>
+								</g>
+							</svg>
+							<span>仅看有附件</span>
+						</label>
+					</div>
 				</div>
 				<ul className="nc-list-items">
+					{filteredApps.length === 0 ? <li className="nc-list-empty">{emptyListHint}</li> : null}
 					{filteredApps.map((app) => (
 						<li key={app.id}>
 							<button type="button" className={`nc-list-item ${app.id === listSelectedId ? 'is-active' : ''}`} onClick={() => setSelectedId(app.id)}>

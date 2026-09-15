@@ -35,25 +35,17 @@
 	background: rgba(255, 255, 255, 0.55);
 	padding: 2px 8px;
 	border-radius: 999px;
-}
-
-.nc-dept-filter {
-	padding: 12px 12px 10px;
-	border-bottom: 1px solid rgba(255, 255, 255, 0.45);
+	/* Fixed metrics so the badge does not resize as the count grows. */
+	box-sizing: border-box;
+	min-width: 28px;
+	text-align: center;
+	font-variant-numeric: tabular-nums;
 }
 
 .nc-dept-dd {
 	position: relative;
 	display: flex;
 	flex-direction: column;
-	gap: 8px;
-}
-
-.nc-dept-dd-label {
-	font-size: 11px;
-	font-weight: 800;
-	color: var(--dash-muted);
-	letter-spacing: 0.04em;
 }
 
 .nc-dept-dd-trigger {
@@ -63,24 +55,12 @@
 	align-items: center;
 	justify-content: space-between;
 	gap: 8px;
-	padding: 10px 12px;
-	border-radius: 12px;
-	border: 1px solid rgba(255, 255, 255, 0.7);
-	background: rgba(255, 255, 255, 0.55);
-	font: inherit;
-	font-size: 13px;
-	font-weight: 750;
-	color: var(--dash-text);
 	cursor: pointer;
 	text-align: left;
 	transition:
 		background 0.2s ease,
 		border-color 0.2s ease,
 		box-shadow 0.2s ease;
-}
-
-.nc-dept-dd-trigger:hover {
-	background: rgba(255, 255, 255, 0.75);
 }
 
 .nc-dept-dd-trigger:focus {
@@ -91,7 +71,7 @@
 
 .nc-dept-dd-trigger.is-open {
 	border-color: var(--color-tangerine-line);
-	background: rgba(255, 255, 255, 0.82);
+	background: var(--color-ivory);
 }
 
 .nc-dept-dd-trigger-text {
@@ -230,7 +210,7 @@
 	list-style: none;
 	margin: 0;
 	padding: 8px;
-	max-height: calc(100vh - 280px);
+	max-height: calc(100vh - 320px);
 	overflow-y: auto;
 	scrollbar-width: none;
 	-ms-overflow-style: none;
@@ -305,7 +285,6 @@
 	color: var(--dash-muted);
 	font-size: 14px;
 }
-
 .nc-detail-head {
 	margin-bottom: 20px;
 	padding-bottom: 16px;
@@ -322,15 +301,15 @@
 
 .nc-detail-delete {
 	margin-left: auto;
-	padding: 2px 10px;
-	font-size: 18px;
+	padding: 2px 8px;
+	font-size: 20px;
 	line-height: 1;
-	border: 1px solid rgba(197, 48, 48, 0.35);
-	background: rgba(255, 255, 255, 0.92);
-	border-radius: 10px;
+	border: none;
+	background: transparent;
+	color: var(--color-clay);
 	transition:
-		background 0.18s ease,
-		border-color 0.18s ease,
+		color 0.18s ease,
+		opacity 0.18s ease,
 		transform 0.15s ease;
 	position: relative;
 	z-index: 5;
@@ -339,8 +318,8 @@
 }
 
 .nc-detail-delete:hover:not(:disabled) {
-	background: rgba(255, 255, 255, 1);
-	border-color: rgba(197, 48, 48, 0.6);
+	background: transparent;
+	color: var(--color-tangerine);
 }
 
 .nc-detail-delete:active:not(:disabled) {
@@ -386,6 +365,37 @@
 	color: var(--dash-text);
 	padding-bottom: 8px;
 	border-bottom: 1px solid var(--color-hairline);
+}
+
+.nc-section-title-row {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	min-width: 0;
+	margin: 0 0 12px;
+	padding-bottom: 8px;
+	border-bottom: 1px solid var(--color-hairline);
+}
+
+.nc-section-title-row .nc-section-title {
+	margin: 0;
+	padding-bottom: 0;
+	border-bottom: none;
+}
+
+.nc-qq-avatar {
+	width: 30px;
+	height: 30px;
+	flex-shrink: 0;
+	box-sizing: border-box;
+	border: 2px solid var(--color-ivory);
+	border-radius: 50%;
+	object-fit: cover;
+	background: var(--color-parchment);
+	pointer-events: none;
+	user-select: none;
+	-webkit-user-select: none;
+	-webkit-user-drag: none;
 }
 
 .nc-section-title--spaced {
@@ -554,8 +564,8 @@
 		font-size: 13px;
 	}
 
-	.nc-dept-filter {
-		padding: 8px;
+	.nc-list-tools {
+		padding: 10px;
 	}
 
 	.nc-list-items {
@@ -857,7 +867,6 @@
 
 .nc-comments--empty {
 	padding: 24px;
-	justify-content: center;
 }
 
 .nc-comments-head {
@@ -883,6 +892,11 @@
 	background: rgba(255, 255, 255, 0.55);
 	padding: 2px 8px;
 	border-radius: 999px;
+	/* Fixed metrics so the badge does not resize as the count grows. */
+	box-sizing: border-box;
+	min-width: 28px;
+	text-align: center;
+	font-variant-numeric: tabular-nums;
 }
 
 .nc-comments-list {
@@ -1609,9 +1623,6 @@
 }
 
 .nc-dept-dd-trigger {
-	border-radius: var(--radius-field);
-	border: 1px solid var(--color-espresso);
-	background: var(--color-ivory);
 	color: var(--color-ink);
 }
 
@@ -1624,10 +1635,6 @@
 	outline: none;
 	border-color: var(--color-tangerine);
 	box-shadow: 0 0 0 2px var(--color-saffron);
-}
-
-.nc-dept-dd-label {
-	color: var(--color-espresso);
 }
 
 .nc-dept-dd-menu {
@@ -1686,6 +1693,244 @@
 	border-radius: var(--radius-card);
 	background: var(--color-parchment);
 	color: var(--color-espresso);
+}
+
+/* Unmatched filters show a short top-aligned hint, not a centered placard. */
+.nc-center .nc-empty {
+	padding: 14px 16px;
+	text-align: start;
+	align-self: start;
+}
+
+/* Name search plus attachment filter under the department select. */
+.nc-list-tools {
+	display: flex;
+	flex-direction: column;
+	gap: 10px;
+	padding: 12px 12px 10px;
+	border-bottom: 1px solid var(--color-hairline-soft);
+}
+
+.nc-filter-row {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+	gap: 8px;
+}
+
+/* Label rides on the field's top border, both columns share one height. */
+.nc-coolfield {
+	position: relative;
+	display: flex;
+	flex-direction: column;
+	min-width: 0;
+}
+
+.nc-coolfield-label {
+	position: relative;
+	top: 0.5rem;
+	z-index: 1;
+	width: fit-content;
+	margin: 0 0 0 7px;
+	padding: 0 3px;
+	background: var(--color-ivory);
+	font-size: 11px;
+	font-weight: 800;
+	color: var(--color-espresso);
+	letter-spacing: 0.04em;
+}
+
+.nc-coolfield-control {
+	width: 100%;
+	box-sizing: border-box;
+	appearance: none;
+	-webkit-appearance: none;
+	padding: 10px 12px;
+	border-radius: var(--radius-field);
+	border: 1.5px solid var(--color-espresso);
+	background: var(--color-ivory);
+	color: var(--color-ink);
+	font-family: var(--font-body);
+	font-size: 13px;
+	font-weight: 750;
+}
+
+.nc-coolfield-input::placeholder {
+	color: var(--color-placeholder);
+}
+
+.nc-coolfield-input::-webkit-search-cancel-button {
+	appearance: none;
+	-webkit-appearance: none;
+}
+
+.nc-coolfield-control:hover {
+	border-color: var(--color-tangerine);
+}
+
+.nc-coolfield-control:focus,
+.nc-coolfield-control:focus-visible {
+	outline: none;
+	border-color: var(--color-tangerine);
+	box-shadow: 0 0 0 2px var(--color-saffron);
+}
+
+.nc-attach-check {
+	position: relative;
+	display: inline-flex;
+	align-items: center;
+	align-self: flex-start;
+	font-size: 12px;
+	font-weight: 700;
+	color: var(--color-espresso);
+}
+
+.nc-attach-check *,
+.nc-attach-check *::before,
+.nc-attach-check *::after {
+	box-sizing: border-box;
+}
+
+/* Covers only the glyph, so the keyboard ring never wraps the whole row. */
+.nc-attach-check-input {
+	position: absolute;
+	left: 0;
+	top: 50%;
+	width: 26px;
+	height: 26px;
+	margin: 0;
+	transform: translateY(-50%);
+	opacity: 0;
+	cursor: pointer;
+}
+
+.nc-attach-check-label {
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+	cursor: pointer;
+	user-select: none;
+	-webkit-user-select: none;
+}
+
+.nc-attach-check-svg {
+	display: block;
+	width: 26px;
+	height: 26px;
+	flex-shrink: 0;
+	overflow: visible;
+}
+
+.nc-attach-check-box {
+	stroke: var(--color-espresso);
+	stroke-width: 5;
+	transition: stroke 0.2s ease;
+}
+
+.nc-attach-check-path {
+	stroke: var(--color-tangerine);
+	stroke-width: 5;
+	stroke-linecap: round;
+	stroke-linejoin: round;
+	stroke-dasharray: 400;
+	stroke-dashoffset: 400;
+	opacity: 0;
+	transition: stroke-dashoffset 0.42s cubic-bezier(0.33, 1, 0.68, 1);
+}
+
+.nc-attach-check-input:checked + .nc-attach-check-label .nc-attach-check-path {
+	stroke-dashoffset: 0;
+	opacity: 1;
+}
+
+.nc-attach-check-input:checked + .nc-attach-check-label .nc-attach-check-box {
+	stroke: var(--color-tangerine);
+}
+
+.nc-attach-check-input:focus-visible + .nc-attach-check-label .nc-attach-check-box {
+	stroke: var(--color-saffron);
+}
+
+.nc-list-empty {
+	padding: 14px 8px;
+	text-align: start;
+	font-size: 13px;
+	color: var(--color-espresso);
+	list-style: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.nc-attach-check-path,
+	.nc-attach-check-box {
+		transition: none;
+	}
+}
+
+@media (max-width: 768px) {
+	.nc-coolfield-control {
+		padding: 9px 10px;
+		font-size: 12.5px;
+	}
+}
+
+/* Like, edit and delete read as one row of matching chips. */
+.nc-comment-actions .nc-btn {
+	padding: 4px 10px;
+	border-radius: 8px;
+	border: 1px solid var(--color-hairline);
+	background: var(--color-ivory);
+	font-size: 12px;
+	font-weight: 800;
+	color: var(--color-espresso);
+}
+
+.nc-comment-actions .nc-btn:hover:not(:disabled) {
+	background: var(--color-hairline-soft);
+	border-color: var(--color-espresso);
+	color: var(--color-ink);
+}
+
+.nc-comment-actions .nc-btn--danger {
+	border-color: var(--color-clay-tint);
+	color: var(--color-clay);
+}
+
+.nc-comment-actions .nc-btn--danger:hover:not(:disabled) {
+	background: var(--color-clay-tint);
+	border-color: var(--color-clay);
+	color: var(--color-clay);
+}
+
+.nc-comment-actions .nc-btn:focus-visible {
+	outline: none;
+	box-shadow: 0 0 0 2px var(--color-saffron);
+}
+
+.nc-like {
+	border-color: var(--color-hairline);
+	background: var(--color-ivory);
+	color: var(--color-espresso);
+	font-family: var(--font-body);
+	font-variant-numeric: tabular-nums;
+	transition:
+		background var(--duration-color) var(--ease-editorial),
+		border-color var(--duration-color) var(--ease-editorial),
+		color var(--duration-color) var(--ease-editorial);
+}
+
+.nc-like:hover:not(:disabled):not(.is-on) {
+	background: var(--color-hairline-soft);
+	border-color: var(--color-espresso);
+	color: var(--color-ink);
+}
+
+.nc-like:focus-visible {
+	outline: none;
+	box-shadow: 0 0 0 2px var(--color-saffron);
+}
+
+.nc-like:disabled {
+	cursor: not-allowed;
+	opacity: 0.5;
 }
 
 .nc-detail-name {
@@ -1763,16 +2008,6 @@
 	box-shadow: 0 0 0 2px var(--color-saffron);
 }
 
-.nc-detail-delete {
-	border-radius: var(--radius-pill);
-	border: 1px solid var(--color-clay);
-	color: var(--color-clay);
-}
-
-.nc-detail-delete:hover:not(:disabled) {
-	background: var(--color-clay-tint);
-}
-
 .nc-btn {
 	border-radius: var(--radius-pill);
 	border: 1.5px solid var(--color-ink);
@@ -1823,6 +2058,22 @@
 
 .nc-btn--danger:hover:not(:disabled) {
 	background: var(--color-clay-tint);
+}
+
+/* Bare glyph: the kit's pill button frame is stripped here. */
+.nc-btn.nc-detail-delete {
+	padding: 2px 8px;
+	border: none;
+	border-radius: 0;
+	background: transparent;
+	color: var(--color-clay);
+	font-size: 20px;
+}
+
+.nc-btn.nc-detail-delete:hover:not(:disabled),
+.nc-btn.nc-detail-delete:focus-visible {
+	background: transparent;
+	color: var(--color-tangerine);
 }
 
 .nc-btn--primary {
