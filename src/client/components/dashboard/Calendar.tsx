@@ -15,6 +15,8 @@ import { dayKey, scheduleStore, broadcastScheduleUpdated, type Role, type Schedu
 import { useSearchHighlight } from '../../lib/useSearchHighlight';
 import { DashboardToast, useDashboardToast } from './DashboardToast';
 
+const useIsoLayoutEffect = typeof document !== 'undefined' ? useLayoutEffect : useEffect;
+
 type MentionUser = {
 	id: string;
 	username: string;
@@ -293,7 +295,7 @@ export default function Calendar() {
 		el.addEventListener('animationcancel', onEnd);
 	}
 
-	useLayoutEffect(() => {
+	useIsoLayoutEffect(() => {
 		if (!showMentionList) {
 			if (!mentionLeaving) setMentionRect(null);
 			return;
@@ -595,21 +597,21 @@ export default function Calendar() {
 		};
 	}, [draftRange?.active]);
 
-	useLayoutEffect(() => {
+	useIsoLayoutEffect(() => {
 		const head = weekHeadRef.current;
 		const el = activeDayIdx >= 0 ? dayBtnRefs.current[activeDayIdx] : null;
 		if (!head || !el) {
 			setDayPill(null);
 			return;
 		}
+		// offsetLeft/offsetTop are layout values and ignore CSS transforms, so the
+		// week-entry animation on the buttons cannot skew the measurement.
 		const sync = () => {
-			const hr = head.getBoundingClientRect();
-			const er = el.getBoundingClientRect();
 			setDayPill({
-				left: er.left - hr.left - head.clientLeft,
-				top: er.top - hr.top - head.clientTop,
-				width: er.width,
-				height: er.height,
+				left: el.offsetLeft,
+				top: el.offsetTop,
+				width: el.offsetWidth,
+				height: el.offsetHeight,
 			});
 		};
 		sync();
