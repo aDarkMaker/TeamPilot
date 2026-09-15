@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
 
+const useIsoLayoutEffect = typeof document !== 'undefined' ? useLayoutEffect : useEffect;
+
 export type JoinUsSelectOption<T extends string | number> = { value: T; label: string };
 
 type Props<T extends string | number> = {
@@ -95,7 +97,7 @@ export default function JoinUsSelect<T extends string | number>(props: Props<T>)
 		setOpen(true);
 	}, []);
 
-	useLayoutEffect(() => {
+	useIsoLayoutEffect(() => {
 		if (!open) return;
 		const trigger = triggerRef.current;
 		if (!trigger) return;

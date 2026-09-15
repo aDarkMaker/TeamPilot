@@ -1,10 +1,12 @@
-import { useLayoutEffect, useRef, useState } from 'react';
+import { useLayoutEffect, useEffect, useRef, useState } from 'react';
 
 import { MarkdownBlock } from './MarkdownBlock';
 
 import type { MeBrief, RecruitmentCommentDto } from '../../../lib/recruitment/recruitmentClient';
 import { canShowDeleteRecruitmentComment } from '../../../lib/recruitment/recruitmentClient';
 import { formatCstMonthDayTime } from '../../../lib/timeCst';
+
+const useIsoLayoutEffect = typeof document !== 'undefined' ? useLayoutEffect : useEffect;
 
 type Props = {
 	me: MeBrief | null;
@@ -26,7 +28,7 @@ export function CommentsPanel({ me, comments, busy, error, onAdd, onEdit, onDele
 	const listRef = useRef<HTMLDivElement>(null);
 	const [listMaxHeightPx, setListMaxHeightPx] = useState<number | null>(null);
 
-	useLayoutEffect(() => {
+	useIsoLayoutEffect(() => {
 		const list = listRef.current;
 		if (!list) return;
 
