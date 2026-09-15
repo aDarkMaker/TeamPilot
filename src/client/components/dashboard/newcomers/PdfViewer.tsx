@@ -47,13 +47,11 @@ export function PdfViewer({ url }: Props) {
 				host.appendChild(wrap);
 				if (disposed) return;
 				try {
-					await page
-						.render({
-							canvasContext: canvas.getContext('2d', { alpha: false }) as CanvasRenderingContext2D,
-							viewport,
-							transform: dpr !== 1 ? [dpr, 0, 0, dpr, 0, 0] : undefined,
-						})
-						.promise;
+					await page.render({
+						canvas,
+						viewport,
+						transform: dpr !== 1 ? [dpr, 0, 0, dpr, 0, 0] : undefined,
+					}).promise;
 				} catch {
 					// 单页渲染失败不影响后续页
 				}
@@ -72,7 +70,7 @@ export function PdfViewer({ url }: Props) {
 			try {
 				pdf = await import('pdfjs-dist');
 				pdf.GlobalWorkerOptions.workerSrc = new URL('pdfjs-dist/build/pdf.worker.min.mjs', import.meta.url).toString();
-				task = pdf.getDocument({ url, isEvalSupported: false });
+				task = pdf.getDocument({ url });
 				await task.promise;
 				if (disposed) return;
 				setStatus('ready');
