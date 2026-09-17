@@ -1,10 +1,20 @@
 export const INTERVIEW_SLOT_MINUTES = 15;
 
+const shanghaiParts = new Intl.DateTimeFormat('en-CA', {
+	timeZone: 'Asia/Shanghai',
+	year: 'numeric',
+	month: '2-digit',
+	day: '2-digit',
+	hour: '2-digit',
+	minute: '2-digit',
+	hour12: false,
+});
+
 function pad2(n: number): string {
 	return String(n).padStart(2, '0');
 }
 
-export function minutesToLabel(minutes: number): string {
+function minutesToLabel(minutes: number): string {
 	return `${pad2(Math.floor(minutes / 60))}:${pad2(minutes % 60)}`;
 }
 
@@ -15,24 +25,8 @@ export function formatSlotLabel(date: string, startMin: number, endMin: number):
 	return `${month}月${day}日 ${minutesToLabel(startMin)}-${minutesToLabel(endMin)}`;
 }
 
-export function expandWindowToSlots(startMin: number, endMin: number): number[] {
-	const out: number[] = [];
-	for (let m = startMin; m < endMin; m += INTERVIEW_SLOT_MINUTES) {
-		out.push(m);
-	}
-	return out;
-}
-
 export function getShanghaiNow(): { date: string; minutes: number } {
-	const parts = new Intl.DateTimeFormat('en-CA', {
-		timeZone: 'Asia/Shanghai',
-		year: 'numeric',
-		month: '2-digit',
-		day: '2-digit',
-		hour: '2-digit',
-		minute: '2-digit',
-		hour12: false,
-	}).formatToParts(new Date());
+	const parts = shanghaiParts.formatToParts(new Date());
 	const get = (type: string): string => parts.find((p) => p.type === type)?.value ?? '';
 	const date = `${get('year')}-${get('month')}-${get('day')}`;
 	let hour = Number(get('hour'));

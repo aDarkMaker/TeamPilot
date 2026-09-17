@@ -1,13 +1,16 @@
 import { z } from 'zod';
 import { AppError } from '../server/types/api';
 import { DEPARTMENT_OPTIONS } from './departments';
+import type { JoinUsFormConfig, JoinUsQuestion } from './formConfigTypes';
+
+export type { JoinUsFormConfig, JoinUsQuestion } from './formConfigTypes';
 
 const showWhenSchema = z.object({
 	questionId: z.string(),
 	value: z.union([z.string(), z.array(z.string())]),
 });
 
-export const questionSchema = z.object({
+export const questionSchema: z.ZodType<JoinUsQuestion> = z.object({
 	id: z.string(),
 	type: z.enum(['input', 'select', 'textarea', 'file', 'boolean']),
 	label: z.string(),
@@ -18,22 +21,19 @@ export const questionSchema = z.object({
 	options: z.array(z.string()).optional(),
 	rows: z.number().optional(),
 	accept: z.string().optional(),
-	multiple: z.boolean().optional(),
 	interviewMode: z.enum(['offline', 'online']).optional(),
 	showWhen: showWhenSchema.optional(),
 });
 
-export const formConfigSchema = z.object({
+export const formConfigSchema: z.ZodType<JoinUsFormConfig> = z.object({
 	title: z.string().trim().min(1).max(80),
 	subtitle: z.string().max(80).optional(),
 	welcome: z.string().max(5000).optional(),
-	theme: z.string().max(40).optional(),
 	questions: z.array(questionSchema).min(1),
 	submit: z
 		.object({
 			label: z.string().optional(),
 			url: z.string().optional(),
-			successMessage: z.string().optional(),
 			successTitle: z.string().optional(),
 			successSubtitle: z.string().optional(),
 			successNote: z.string().optional(),
@@ -42,9 +42,6 @@ export const formConfigSchema = z.object({
 		})
 		.optional(),
 });
-
-export type JoinUsFormConfig = z.infer<typeof formConfigSchema>;
-export type JoinUsQuestion = z.infer<typeof questionSchema>;
 
 export function assertDepartmentOptions(q: JoinUsQuestion): void {
 	if (q.id !== 'department') return;

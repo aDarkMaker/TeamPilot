@@ -2,7 +2,7 @@ import { AppError } from '../server/types/api';
 import { DEPT_CN_TO_SLUG } from './departments';
 import type { JoinUsFormConfig } from './formConfigSchema';
 
-export const FORM_OUTDATED_CODE = 'FORM_OUTDATED';
+const FORM_OUTDATED_CODE = 'FORM_OUTDATED';
 
 function toStr(v: unknown): string {
 	if (v == null) return '';
