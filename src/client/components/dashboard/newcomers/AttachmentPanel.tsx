@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 
 import { PdfViewer } from './PdfViewer';
-import type { RecruitmentAttachment } from '../../../types/recruitmentUi';
+import type { RecruitmentAttachment } from '@/lib/recruitment/types';
 
 type Props = {
 	attachments: RecruitmentAttachment[];

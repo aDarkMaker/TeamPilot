@@ -4,7 +4,7 @@ import type {
 	RecruitmentAttachmentKind,
 	RecruitmentDepartmentSlug,
 	RecruitmentInterviewSlotSlug,
-} from '../../types/recruitmentUi';
+} from './types';
 
 export type RecruitmentApplicationDto = {
 	id: string;

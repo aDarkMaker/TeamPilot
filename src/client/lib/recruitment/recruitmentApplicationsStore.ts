@@ -1,4 +1,4 @@
-import type { NewcomerApplicationView } from '../../types/recruitmentUi';
+import type { NewcomerApplicationView } from './types';
 import { fetchApplications } from './recruitmentClient';
 
 type State = {

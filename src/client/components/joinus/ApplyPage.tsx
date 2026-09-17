@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
-import '../../styles/joinus.css';
-import { renderForm, type FormConfig } from '../../lib/joinus/form';
+import '@/styles/pages/joinus/joinus.css';
+import { renderForm } from '@/lib/joinus/form';
+import type { JoinUsFormConfig } from '@shared/formConfigTypes';
 
 export default function ApplyPage() {
 	const formMountRef = useRef<HTMLDivElement>(null);
@@ -13,7 +14,7 @@ export default function ApplyPage() {
 			try {
 				const res = await fetch('/api/joinus/form-public');
 				if (!res.ok) throw new Error(`加载表单配置失败 (${res.status})`);
-				const config = (await res.json()) as FormConfig;
+				const config = (await res.json()) as JoinUsFormConfig;
 				if (cancelled) return;
 				setHero({
 					title: config.title,
@@ -49,7 +50,7 @@ export default function ApplyPage() {
 							<p
 								id="joinus-welcome"
 								className="joinus-welcome"
-								// eslint-disable-next-line react/no-danger
+								// TODO: sanitize config.welcome before rendering; the schema only length-limits it.
 								dangerouslySetInnerHTML={{ __html: hero.welcomeHtml }}
 							/>
 						)}

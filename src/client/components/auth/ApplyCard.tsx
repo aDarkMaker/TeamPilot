@@ -1,7 +1,7 @@
 import { useState } from 'react';
 
-import { broadcastApplicationsUpdated } from '../../lib/pendingApplicationsStore';
-import { isPasswordPolicyCompliant, PASSWORD_POLICY_HINT } from '../../lib/passwordPolicy';
+import { broadcastApplicationsUpdated } from '@/lib/pendingApplicationsStore';
+import { isPasswordPolicyCompliant, PASSWORD_POLICY_HINT } from '@/lib/passwordPolicy';
 
 type Props = {
 	onError: (msg: string | null) => void;

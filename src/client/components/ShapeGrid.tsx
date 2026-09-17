@@ -1,5 +1,5 @@
 import React, { useRef, useEffect, useCallback } from 'react';
-import '../styles/shapegrid.css';
+import '@/styles/pages/joinus/shapegrid.css';
 
 interface ShapeGridProps {
 	gradientStartColor?: string;

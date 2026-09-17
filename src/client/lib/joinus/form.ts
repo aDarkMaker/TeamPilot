@@ -1,43 +1,6 @@
-export interface ShowWhen {
-	questionId: string;
-	value: string | string[];
-}
+import type { JoinUsFormConfig, JoinUsQuestion } from '@shared/formConfigTypes';
 
-export interface Question {
-	id: string;
-	type: 'input' | 'select' | 'textarea' | 'file' | 'boolean';
-	label: string;
-	required?: boolean;
-	placeholder?: string;
-	icon?: string;
-	inputType?: 'text' | 'tel' | 'email';
-	options?: string[];
-	rows?: number;
-	accept?: string;
-	multiple?: boolean;
-	interviewMode?: 'offline' | 'online';
-	showWhen?: ShowWhen;
-}
-
-export interface FormConfig {
-	title: string;
-	subtitle?: string;
-	welcome?: string;
-	theme?: string;
-	questions: Question[];
-	submit?: {
-		label?: string;
-		successMessage?: string;
-		url?: string;
-		successTitle?: string;
-		successSubtitle?: string;
-		successNote?: string;
-		successBackUrl?: string;
-		successBackLabel?: string;
-	};
-}
-
-const defaultQuestion: Partial<Question> = { required: false };
+const defaultQuestion: Partial<JoinUsQuestion> = { required: false };
 
 const JOINUS_MAX_FILE_BYTES = 50 * 1024 * 1024;
 const JOINUS_FILE_TOO_LARGE_MESSAGE = '附件太大了喵，要比 50MB 小哦～';
@@ -47,7 +10,7 @@ function removeFieldError(field: HTMLElement): void {
 	field.querySelector('.joinus-field-error-msg')?.remove();
 }
 
-function createField(q: Question): HTMLElement {
+function createField(q: JoinUsQuestion): HTMLElement {
 	const field = document.createElement('div');
 	field.className = 'joinus-field' + (q.showWhen ? ' joinus-field-logic' : '');
 	field.dataset.questionId = q.id;
@@ -90,7 +53,6 @@ function createField(q: Question): HTMLElement {
 			if (q.interviewMode) {
 				wrap.className = 'joinus-input-wrap joinus-slot-wrap';
 				wrap.dataset.interviewMode = q.interviewMode;
-				wrap.dataset.placeholder = ph || '请选择面试时间';
 				const board = document.createElement('div');
 				board.className = 'joinus-slot-board';
 				wrap.appendChild(hidden);
@@ -110,10 +72,9 @@ function createField(q: Question): HTMLElement {
 				const dropdown = document.createElement('div');
 				dropdown.className = 'joinus-select-dropdown';
 				dropdown.setAttribute('role', 'listbox');
-				const opts = (q.options ?? []).map((o, i) => {
+				const opts = (q.options ?? []).map((o) => {
 					const div = document.createElement('div');
 					div.className = 'joinus-select-option';
-					div.setAttribute('data-value', String(i));
 					div.setAttribute('data-submit', o);
 					div.setAttribute('role', 'option');
 					div.textContent = o;
@@ -147,10 +108,9 @@ function createField(q: Question): HTMLElement {
 			const dropdown = document.createElement('div');
 			dropdown.className = 'joinus-select-dropdown';
 			dropdown.setAttribute('role', 'listbox');
-			opts.forEach((o, i) => {
+			opts.forEach((o) => {
 				const div = document.createElement('div');
 				div.className = 'joinus-select-option';
-				div.setAttribute('data-value', String(i));
 				div.setAttribute('data-submit', o);
 				div.setAttribute('role', 'option');
 				div.textContent = o;
@@ -184,8 +144,7 @@ function createField(q: Question): HTMLElement {
 			if (!input.id) input.id = `joinus-file-${q.id}`;
 			const trigger = document.createElement('label');
 			trigger.className = 'joinus-file-trigger';
-			trigger.innerHTML = `<i class="${icon} joinus-file-icon"></i>
-				<span class="joinus-file-text">${ph}</span>`;
+			trigger.innerHTML = `<i class="${icon} joinus-file-icon"></i>${ph}`;
 			trigger.htmlFor = input.id;
 			const list = document.createElement('div');
 			list.className = 'joinus-file-list';
@@ -207,7 +166,6 @@ function createField(q: Question): HTMLElement {
 }
 
 function bindSelectOption(opt: HTMLElement, wrap: HTMLElement, hidden: HTMLInputElement, valueEl: Element): void {
-	if (opt.classList.contains('joinus-select-option-taken')) return;
 	opt.addEventListener('click', () => {
 		const submit = opt.getAttribute('data-submit') ?? opt.textContent ?? '';
 		const text = opt.textContent ?? '';
@@ -424,7 +382,7 @@ function setFieldRequired(field: HTMLElement, questionId: string, required: bool
 	if (fileWrap) fileWrap.dataset.required = required ? 'true' : '';
 }
 
-function clearField(field: HTMLElement, q: Question): void {
+function clearField(field: HTMLElement, q: JoinUsQuestion): void {
 	const name = q.id;
 	const input = field.querySelector<HTMLInputElement>(`input[name="${name}"]:not([type="hidden"]):not([type="file"])`);
 	if (input) input.value = '';
@@ -457,7 +415,7 @@ function clearField(field: HTMLElement, q: Question): void {
 	field.classList.remove('has-value');
 }
 
-function initLogicConditions(form: HTMLFormElement, config: FormConfig, onRevealField?: (field: HTMLElement) => void): void {
+function initLogicConditions(form: HTMLFormElement, config: JoinUsFormConfig, onRevealField?: (field: HTMLElement) => void): void {
 	const fields = form.querySelectorAll<HTMLElement>('.joinus-field');
 	config.questions.forEach((q, i) => {
 		if (!q.showWhen) return;
@@ -549,7 +507,7 @@ const SUBMIT_ERROR_FIELD: Record<string, string> = {
 	ONLINE_SLOT_NOT_FOUND: 'interview_time_online',
 };
 
-export function renderForm(container: HTMLElement, config: FormConfig): void {
+export function renderForm(container: HTMLElement, config: JoinUsFormConfig): void {
 	const form = document.createElement('form');
 	form.action = config.submit?.url ?? '#';
 	form.method = 'POST';
@@ -558,7 +516,7 @@ export function renderForm(container: HTMLElement, config: FormConfig): void {
 	form.onsubmit = (e) => e.preventDefault();
 
 	for (const q of config.questions) {
-		const field = createField({ ...defaultQuestion, ...q } as Question);
+		const field = createField({ ...defaultQuestion, ...q } as JoinUsQuestion);
 		form.appendChild(field);
 
 		const selectWrap = field.querySelector<HTMLElement>('[data-select]');

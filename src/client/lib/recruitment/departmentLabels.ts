@@ -1,4 +1,4 @@
-import type { RecruitmentDepartmentSlug } from '../../types/recruitmentUi';
+import type { RecruitmentDepartmentSlug } from './types';
 
 export const DEPARTMENT_ORDER: RecruitmentDepartmentSlug[] = ['tech', 'video', 'live', 'clip', 'art', 'copywriting', 'vup'];
 

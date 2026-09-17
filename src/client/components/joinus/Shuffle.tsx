@@ -77,7 +77,8 @@ const Shuffle: React.FC<ShuffleProps> = ({
 
 	const scrollTriggerStart = useMemo(() => {
 		const startPct = (1 - threshold) * 100;
-		const mm = /^(-?\d+(?:\.\d+)?)(px|em|rem|%)?$/.exec(rootMargin || '');
+		// GSAP start offset (px/% only — same constraint as IntersectionObserver.rootMargin)
+		const mm = /^(-?\d+(?:\.\d+)?)(px|%)?$/.exec(rootMargin || '');
 		const mv = mm ? parseFloat(mm[1]!) : 0;
 		const mu = mm ? mm[2] || 'px' : 'px';
 		const sign = mv === 0 ? '' : mv < 0 ? `-=${Math.abs(mv)}${mu}` : `+=${mv}${mu}`;
@@ -345,13 +346,6 @@ const Shuffle: React.FC<ShuffleProps> = ({
 				}
 
 				tlRef.current = tl;
-			};
-
-			const run = () => {
-				if (playingRef.current) return;
-				build();
-				if (scrambleCharset) randomizeScrambles();
-				play();
 			};
 
 			const armReplay = () => {

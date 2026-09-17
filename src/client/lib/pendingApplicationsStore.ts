@@ -1,3 +1,6 @@
+import { createPersistedStore } from './createPersistedStore';
+import { broadcastApplicationsUpdated } from './events';
+
 export type PendingApplication = {
 	id: string;
 	username: string;
@@ -11,80 +14,33 @@ type State = {
 	updatedAt: number;
 };
 
-const STORAGE_KEY = 'hxk_pending_applications_v1';
-
-function safeParseState(raw: string | null): State | null {
-	if (!raw) return null;
-	try {
-		const v = JSON.parse(raw) as unknown;
-		if (!v || typeof v !== 'object') return null;
-		const o = v as any;
+const store = createPersistedStore<State>({
+	storageKey: 'hxk_pending_applications_v1',
+	initial: { items: [], updatedAt: 0 },
+	parse: (raw) => {
+		if (!raw || typeof raw !== 'object') return null;
+		const o = raw as { items?: unknown; updatedAt?: unknown };
 		if (!Array.isArray(o.items) || typeof o.updatedAt !== 'number') return null;
 		return { items: o.items as PendingApplication[], updatedAt: o.updatedAt };
-	} catch {
-		return null;
-	}
-}
-
-function readPersisted(): State {
-	if (typeof window === 'undefined') return { items: [], updatedAt: 0 };
-	return safeParseState(window.localStorage.getItem(STORAGE_KEY)) ?? { items: [], updatedAt: 0 };
-}
-
-function persist(next: State) {
-	if (typeof window === 'undefined') return;
-	try {
-		window.localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
-	} catch {
-		// ignore quota or privacy mode
-	}
-}
-
-let state: State = readPersisted();
-const listeners = new Set<() => void>();
-
-function emit() {
-	for (const l of listeners) l();
-}
-
-function setState(next: State) {
-	state = next;
-	persist(next);
-	emit();
-}
+	},
+});
 
 export const pendingApplicationsStore = {
-	getSnapshot(): State {
-		return state;
-	},
-
-	subscribe(listener: () => void) {
-		listeners.add(listener);
-		return () => listeners.delete(listener);
-	},
-
-	hydrateFromStorage() {
-		setState(readPersisted());
-	},
+	getSnapshot: store.getSnapshot,
+	subscribe: store.subscribe,
+	hydrateFromStorage: store.hydrateFromStorage,
 
 	setItems(items: PendingApplication[]) {
-		setState({ items, updatedAt: Date.now() });
+		store.set({ items, updatedAt: Date.now() });
 	},
 
 	removeById(id: string) {
-		const next = state.items.filter((x) => x.id !== id);
-		if (next.length === state.items.length) return;
-		setState({ items: next, updatedAt: Date.now() });
+		store.update((prev) => {
+			const items = prev.items.filter((x) => x.id !== id);
+			if (items.length === prev.items.length) return prev;
+			return { items, updatedAt: Date.now() };
+		});
 	},
 };
 
-declare global {
-	interface WindowEventMap {
-		'hxk:applications-updated': CustomEvent<{ updatedAt: number }>;
-	}
-}
-
-export function broadcastApplicationsUpdated() {
-	if (typeof window === 'undefined') return;
-	window.dispatchEvent(new CustomEvent('hxk:applications-updated', { detail: { updatedAt: Date.now() } }));
-}
+export { broadcastApplicationsUpdated };

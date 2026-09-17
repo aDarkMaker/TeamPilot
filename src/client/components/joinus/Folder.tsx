@@ -1,19 +1,14 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
-import { assetUrl } from '../../lib/assetUrl';
-import joinusLeft from '../../assets/img/image/section_hero/joinus_left.webp';
-import joinusMiddle from '../../assets/img/image/section_hero/joinus_middle.webp';
-import joinusRight from '../../assets/img/image/section_hero/joinus_right.webp';
-
-interface Props {
-	items?: React.ReactNode[];
-	className?: string;
-}
+import { assetUrl } from '@/lib/assetUrl';
+import joinusLeft from '@/assets/img/image/section_hero/joinus_left.webp';
+import joinusMiddle from '@/assets/img/image/section_hero/joinus_middle.webp';
+import joinusRight from '@/assets/img/image/section_hero/joinus_right.webp';
 
 const IMAGES_BY_PAPER = [joinusLeft, joinusRight, joinusMiddle] as const;
 
-const INITIAL_TILT = 'perspective(500px) rotateY(-6deg) rotateX(2deg)';
+const INITIAL_TILT = 'perspective(31.25rem) rotateY(-6deg) rotateX(2deg)';
 
-export default function Folder({ items = [], className = '' }: Props) {
+export default function Folder() {
 	const [open, setOpen] = useState(false);
 	const [tilt, setTilt] = useState(INITIAL_TILT);
 	const containerRef = useRef<HTMLDivElement>(null);
@@ -34,12 +29,6 @@ export default function Folder({ items = [], className = '' }: Props) {
 		return () => document.removeEventListener('click', handleClickOutside);
 	}, [open]);
 
-	const maxItems = 3;
-	const papers = items.slice(0, maxItems);
-	while (papers.length < maxItems) {
-		papers.push(null);
-	}
-
 	const handleMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
 		if (!hasTilt.current) return;
 		const rect = containerRef.current?.getBoundingClientRect();
@@ -48,7 +37,7 @@ export default function Folder({ items = [], className = '' }: Props) {
 		const y = ((e.clientY - rect.top) / rect.height - 0.5) * 2;
 		const rx = clamp(y * 8, -8, 8);
 		const ry = clamp(x * 8, -8, 8);
-		setTilt(`perspective(500px) rotateX(${-rx.toFixed(2)}deg) rotateY(${ry.toFixed(2)}deg)`);
+		setTilt(`perspective(31.25rem) rotateX(${-rx.toFixed(2)}deg) rotateY(${ry.toFixed(2)}deg)`);
 	}, []);
 
 	const handleMouseLeave = useCallback(() => {
@@ -58,7 +47,7 @@ export default function Folder({ items = [], className = '' }: Props) {
 	return (
 		<div
 			ref={containerRef}
-			className={`folder ${open ? 'open' : ''} ${className}`.trim()}
+			className={`folder ${open ? 'open' : ''}`.trim()}
 			onClick={() => {
 				if (!open) setOpen(true);
 			}}
@@ -67,9 +56,9 @@ export default function Folder({ items = [], className = '' }: Props) {
 		>
 			<div className="folder__tilt" style={{ transform: tilt }}>
 				<div className="folder__back">
-					{papers.map((item, i) => (
+					{IMAGES_BY_PAPER.map((img, i) => (
 						<div key={i} className={`paper paper-${i + 1}`}>
-							{item ?? <img src={assetUrl(IMAGES_BY_PAPER[i])} alt="" />}
+							<img src={assetUrl(img)} alt="" />
 						</div>
 					))}
 					<div className="folder__front" />

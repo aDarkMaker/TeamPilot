@@ -1,38 +1,33 @@
 import { useEffect, useState, useCallback, useRef } from 'react';
-import '../../styles/joinus.css';
+import '@/styles/pages/joinus/joinus.css';
 import ShuffleTitle from './ShuffleTitle';
 import Folder from './Folder';
-import { assetUrl } from '../../lib/assetUrl';
-import IconAu from '../../assets/img/icon/joinus/vup/Icon_Au.webp';
-import IconBili from '../../assets/img/icon/joinus/vup/Icon_Bili.webp';
-import IconObs from '../../assets/img/icon/joinus/vup/Icon_Obs.webp';
-import IconAe from '../../assets/img/icon/joinus/video/Icon_Ae.webp';
-import IconLr from '../../assets/img/icon/joinus/video/Icon_Lr.webp';
-import IconPr from '../../assets/img/icon/joinus/video/Icon_Pr.webp';
-import IconAi from '../../assets/img/icon/joinus/art/Icon_Ai.webp';
-import IconProcreate from '../../assets/img/icon/joinus/art/Icon_Procreate.webp';
-import IconPs from '../../assets/img/icon/joinus/art/Icon_Ps.webp';
-import IconDs from '../../assets/img/icon/joinus/word/Icon_Ds.webp';
-import IconTxt from '../../assets/img/icon/joinus/word/Icon_Txt.webp';
-import IconWord from '../../assets/img/icon/joinus/word/Icon_Word.webp';
-import IconGo from '../../assets/img/icon/joinus/tech/Icon_Go.webp';
-import IconJs from '../../assets/img/icon/joinus/tech/Icon_Js.webp';
-import IconTs from '../../assets/img/icon/joinus/tech/Icon_Ts.webp';
-import IconExcel from '../../assets/img/icon/joinus/designer/Icon_Excel.webp';
-import IconFeishu from '../../assets/img/icon/joinus/designer/Icon_Feishu.webp';
-import IconNotion from '../../assets/img/icon/joinus/designer/Icon_Notion.webp';
-import heroImage from '../../assets/img/image/joinus_hero.webp';
+import { assetUrl } from '@/lib/assetUrl';
+import IconAu from '@/assets/img/icon/joinus/vup/Icon_Au.webp';
+import IconBili from '@/assets/img/icon/joinus/vup/Icon_Bili.webp';
+import IconObs from '@/assets/img/icon/joinus/vup/Icon_Obs.webp';
+import IconAe from '@/assets/img/icon/joinus/video/Icon_Ae.webp';
+import IconLr from '@/assets/img/icon/joinus/video/Icon_Lr.webp';
+import IconPr from '@/assets/img/icon/joinus/video/Icon_Pr.webp';
+import IconAi from '@/assets/img/icon/joinus/art/Icon_Ai.webp';
+import IconProcreate from '@/assets/img/icon/joinus/art/Icon_Procreate.webp';
+import IconPs from '@/assets/img/icon/joinus/art/Icon_Ps.webp';
+import IconDs from '@/assets/img/icon/joinus/word/Icon_Ds.webp';
+import IconTxt from '@/assets/img/icon/joinus/word/Icon_Txt.webp';
+import IconWord from '@/assets/img/icon/joinus/word/Icon_Word.webp';
+import IconGo from '@/assets/img/icon/joinus/tech/Icon_Go.webp';
+import IconJs from '@/assets/img/icon/joinus/tech/Icon_Js.webp';
+import IconTs from '@/assets/img/icon/joinus/tech/Icon_Ts.webp';
+import IconExcel from '@/assets/img/icon/joinus/designer/Icon_Excel.webp';
+import IconFeishu from '@/assets/img/icon/joinus/designer/Icon_Feishu.webp';
+import IconNotion from '@/assets/img/icon/joinus/designer/Icon_Notion.webp';
+import heroImage from '@/assets/img/image/joinus_hero.webp';
 import type { CSSProperties } from 'react';
 
 interface IconPlacement {
 	tx: number;
 	ty: number;
 	delay: number;
-}
-
-interface DeptIcon {
-	src: string;
-	alt: string;
 }
 
 const ICONS_SOURCE: Record<string, { src: string; alt: string }[]> = {
@@ -221,7 +216,7 @@ export default function JoinUsPage() {
 						{DEPTS.map((d, idx) => {
 							const icons = ICONS_SOURCE[d.tag]!;
 							const placements = DEPT_ICON_PLACEMENTS;
-							const isActive = activeCard === idx || (!isTouchDevice.current && false);
+							const isActive = activeCard === idx;
 							return (
 								<article
 									key={d.title}

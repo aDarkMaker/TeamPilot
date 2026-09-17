@@ -1,12 +1,12 @@
-import { useLayoutEffect, useEffect, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 
-import { MarkdownBlock } from './MarkdownBlock';
+import { MarkdownBlock } from '@/components/common/MarkdownBlock';
 
-import type { MeBrief, RecruitmentCommentDto } from '../../../lib/recruitment/recruitmentClient';
-import { canShowDeleteRecruitmentComment } from '../../../lib/recruitment/recruitmentClient';
-import { formatCstMonthDayTime } from '../../../lib/timeCst';
-
-const useIsoLayoutEffect = typeof document !== 'undefined' ? useLayoutEffect : useEffect;
+import type { MeBrief, RecruitmentCommentDto } from '@/lib/recruitment/recruitmentClient';
+import { canShowDeleteRecruitmentComment } from '@/lib/recruitment/recruitmentClient';
+import { roleShortLabel } from '@/lib/roles';
+import { formatCstMonthDayTime } from '@/lib/timeCst';
+import { useIsoLayoutEffect } from '@/lib/useIsoLayoutEffect';
 
 type Props = {
 	me: MeBrief | null;
@@ -76,10 +76,10 @@ export function CommentsPanel({ me, comments, busy, error, onAdd, onEdit, onDele
 						<div className="nc-comment-top">
 							<span className="nc-comment-author">{c.authorUsername}</span>
 							<span className={`nc-comment-role ${c.authorRole}`}>
-								{c.authorRole === 'super_admin' ? '超管' : c.authorRole === 'admin' ? '管理员' : '成员'}
+								{roleShortLabel(c.authorRole)}
 							</span>
 							<time className="nc-comment-time" dateTime={c.createdAt}>
-								{formatShort(c.createdAt)}
+								{formatCstMonthDayTime(c.createdAt)}
 							</time>
 						</div>
 						{editingId === c.id ? (
@@ -164,10 +164,3 @@ export function CommentsPanel({ me, comments, busy, error, onAdd, onEdit, onDele
 	);
 }
 
-function formatShort(iso: string): string {
-	try {
-		return formatCstMonthDayTime(iso);
-	} catch {
-		return iso;
-	}
-}

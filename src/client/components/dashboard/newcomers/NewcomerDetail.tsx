@@ -1,16 +1,16 @@
 import { AttachmentPanel } from './AttachmentPanel';
-import { MarkdownBlock } from './MarkdownBlock';
+import { MarkdownBlock } from '@/components/common/MarkdownBlock';
 import { TagsSection } from './TagsSection';
 import { RatingSection } from './RatingSection';
 
-import { DEPARTMENT_LABELS } from '../../../lib/recruitment/departmentLabels';
-import type { MeBrief } from '../../../lib/recruitment/recruitmentClient';
-import type { NewcomerApplicationView } from '../../../types/recruitmentUi';
-import { formatCstDateTime } from '../../../lib/timeCst';
-import { useSearchHighlight } from '../../../lib/useSearchHighlight';
-import { copyText } from '../../../lib/copyToClipboard';
-import { getQqAvatarUrl } from '../../../lib/recruitment/qqAvatar';
-import { parseInterviewFromIntro } from '../../../../joinus/interviewIntro';
+import { DEPARTMENT_LABELS } from '@/lib/recruitment/departmentLabels';
+import type { MeBrief } from '@/lib/recruitment/recruitmentClient';
+import type { NewcomerApplicationView } from '@/lib/recruitment/types';
+import { formatCstDateTime } from '@/lib/timeCst';
+import { useSearchHighlight } from '@/lib/useSearchHighlight';
+import { copyText } from '@/lib/copyToClipboard';
+import { getQqAvatarUrl } from '@/lib/recruitment/qqAvatar';
+import { parseInterviewFromIntro } from '@shared/interviewIntro';
 
 type Props = {
 	application: NewcomerApplicationView;

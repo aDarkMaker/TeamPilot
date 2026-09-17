@@ -1,24 +1,28 @@
 ---
 import { ClientRouter, fade } from 'astro:transitions';
-import '../styles/dashboard.css';
-import '../styles/dashboard-toast.css';
-import '../styles/users-admin.css';
-import '../styles/joinus-form-admin.css';
-import '../styles/calendar.css';
-import '../styles/global.css';
-import '../styles/search-panel.css';
-import '../styles/tangerine-fonts.css';
-import '../styles/tangerine.css';
-import { assetUrl } from '../lib/assetUrl';
-import favicon from '../assets/img/icon/icon-hxk.webp';
-import fontBody from '../assets/fonts/tangerine/inter-var.woff2';
-import fontDisplay from '../assets/fonts/tangerine/bricolage-grotesque-700.woff2';
-import fontCjk from '../assets/fonts/tangerine/misans-sc-var.woff2';
-import DashboardSidebar from '../components/dashboard/DashboardSidebar';
-import DashboardTopBar from '../components/dashboard/DashboardTopBar';
-import DashboardBackground from '../components/dashboard/DashboardBackground';
-import DashboardAuthGuard from '../components/dashboard/DashboardAuthGuard';
-import UserNameWatermark from '../components/dashboard/UserNameWatermark';
+import '@/styles/layouts/dashboard.css';
+import '@/styles/components/dashboard-toast.css';
+import '@/styles/base/global.css';
+import '@/styles/base/animations.css';
+import '@/styles/components/search-panel.css';
+import '@/styles/base/tangerine-fonts.css';
+import '@/styles/base/tangerine/tokens.css';
+import '@/styles/base/tangerine/utilities.css';
+import '@/styles/base/tangerine/controls.css';
+import '@/styles/base/tangerine/choices.css';
+import '@/styles/base/tangerine/surfaces.css';
+import '@/styles/base/tangerine/feedback.css';
+import '@/styles/base/tangerine/scaffold.css';
+import { assetUrl } from '@/lib/assetUrl';
+import favicon from '@/assets/img/icon/icon-hxk.webp';
+import fontBody from '@/assets/fonts/tangerine/inter-var.woff2';
+import fontDisplay from '@/assets/fonts/tangerine/bricolage-grotesque-700.woff2';
+import fontCjk from '@/assets/fonts/tangerine/misans-sc-var.woff2';
+import DashboardSidebar from '@/components/dashboard/shell/DashboardSidebar';
+import DashboardTopBar from '@/components/dashboard/shell/DashboardTopBar';
+import DashboardBackground from '@/components/dashboard/shell/DashboardBackground';
+import DashboardAuthGuard from '@/components/dashboard/shell/DashboardAuthGuard';
+import UserNameWatermark from '@/components/dashboard/shell/UserNameWatermark';
 
 interface Props {
     title?: string;
