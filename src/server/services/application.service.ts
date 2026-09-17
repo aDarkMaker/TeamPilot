@@ -3,6 +3,7 @@ import type { DB } from '../db';
 import { AppError } from '../types/api';
 import { hashPassword } from '../auth/password';
 import { passwordPlainSchema } from '../auth/passwordPolicy';
+import { ensureScheduleTasksForUser } from './scheduleTaskSync.service';
 
 const submitSchema = z.object({
 	username: z.string().min(2).max(4),
@@ -12,27 +13,6 @@ const submitSchema = z.object({
 
 export class ApplicationService {
 	constructor(private db: DB) {}
-
-	private getShanghaiYmd() {
-		const parts = new Intl.DateTimeFormat('zh-CN', {
-			timeZone: 'Asia/Shanghai',
-			hour12: false,
-			year: 'numeric',
-			month: '2-digit',
-			day: '2-digit',
-		}).formatToParts(new Date());
-		const get = (type: Intl.DateTimeFormatPartTypes) => String(parts.find((p) => p.type === type)?.value ?? '');
-		const y = get('year');
-		const m = get('month');
-		const d = get('day');
-		return `${y}-${m}-${d}`;
-	}
-
-	private toTaskStartIso(input: { year: number; month: number; day: number; startAt: string }) {
-		const mm = String(input.month).padStart(2, '0');
-		const dd = String(input.day).padStart(2, '0');
-		return `${input.year}-${mm}-${dd}T${input.startAt}:00`;
-	}
 
 	async submit(input: unknown) {
 		const parsed = submitSchema.parse(input);
@@ -69,28 +49,7 @@ export class ApplicationService {
 			status: 'active',
 		});
 
-		const startDate = this.getShanghaiYmd();
-		const allSchedules = await this.db.listAllSchedulesFromDate({ startDate });
-		await Promise.all(
-			allSchedules.map((s) =>
-				this.db.createOrReplaceTaskCard({
-					targetUserId: user.id,
-					actorUserId: s.createdBy ?? null,
-					sourceType: 'schedule_at',
-					sourceId: s.id,
-					title: `日程提醒：${s.title}`,
-					content: s.description ?? null,
-					payloadJson: JSON.stringify({
-						startAtIso: this.toTaskStartIso(s),
-						year: s.year,
-						month: s.month,
-						day: s.day,
-						startAt: s.startAt,
-						endAt: s.endAt,
-					}),
-				})
-			)
-		);
+		await ensureScheduleTasksForUser(this.db, user.id);
 
 		await this.db.setApplicationReview({
 			id: app.id,

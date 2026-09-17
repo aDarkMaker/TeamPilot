@@ -6,6 +6,7 @@ import { AppError } from '../types/api';
 import type { UserProfilePublic } from '../types/user';
 import { verifyPassword, hashPassword } from '../auth/password';
 import { passwordPlainSchema } from '../auth/passwordPolicy';
+import { loadUserOrThrow, toPublicProfile } from '../lib/userDto';
 import sharp from 'sharp';
 
 const patchSchema = z.object({
@@ -34,43 +35,16 @@ const ALLOWED_MIME = new Map<string, string>([
 const MAX_BYTES = 5 * 1024 * 1024;
 const UPLOAD_ROOT = join(process.cwd(), 'data', 'uploads');
 
-function toPublicUrl(storedPath: string | null): string | null {
-	if (!storedPath) return null;
-	const normalized = storedPath.replace(/^\/+/, '');
-	const dot = normalized.lastIndexOf('.');
-	const base = dot >= 0 ? normalized.slice(0, dot) : normalized;
-	return `/uploads/${base}.webp`;
-}
-
 function isValidMonthDay(month: number, day: number): boolean {
 	const maxDay = new Date(2024, month, 0).getDate();
 	return day >= 1 && day <= maxDay;
-}
-
-function toPublicProfile(user: import('../types/user').User): UserProfilePublic {
-	return {
-		id: user.id,
-		username: user.username,
-		nickname: user.nickname,
-		signature: user.signature,
-		qq: user.qq,
-		avatarUrl: toPublicUrl(user.avatarPath),
-		profileBackgroundUrl: toPublicUrl(user.profileBgPath),
-		role: user.role,
-		createdAt: user.createdAt,
-		updatedAt: user.updatedAt,
-		birthdayMonth: user.birthdayMonth,
-		birthdayDay: user.birthdayDay,
-	};
 }
 
 export class ProfileService {
 	constructor(private db: DB) {}
 
 	async getMe(userId: string): Promise<UserProfilePublic> {
-		const user = await this.db.findUserById(userId);
-		if (!user) throw new AppError(404, 'USER_NOT_FOUND', '查无此人啦');
-		return toPublicProfile(user);
+		return toPublicProfile(await loadUserOrThrow(this.db, userId));
 	}
 
 	async updateProfile(userId: string, body: unknown): Promise<UserProfilePublic> {
@@ -102,9 +76,7 @@ export class ProfileService {
 		}
 
 		await this.db.updateUserProfile(userId, patch);
-		const user = await this.db.findUserById(userId);
-		if (!user) throw new AppError(404, 'USER_NOT_FOUND', '查无此人啦');
-		return toPublicProfile(user);
+		return toPublicProfile(await loadUserOrThrow(this.db, userId));
 	}
 
 	async changePassword(userId: string, body: unknown): Promise<void> {
@@ -112,8 +84,7 @@ export class ProfileService {
 		if (oldPassword === newPassword) {
 			throw new AppError(400, 'INVALID_PASSWORD', '新密码换个花样嘛');
 		}
-		const user = await this.db.findUserById(userId);
-		if (!user) throw new AppError(404, 'USER_NOT_FOUND', '查无此人啦');
+		const user = await loadUserOrThrow(this.db, userId);
 		const ok = await verifyPassword(oldPassword, user.passwordHash);
 		if (!ok) throw new AppError(401, 'INVALID_CREDENTIALS', '当务之急是找回而非修改');
 		const newPasswordHash = await hashPassword(newPassword);
@@ -134,9 +105,7 @@ export class ProfileService {
 		writeFileSync(abs, compressed);
 
 		await this.db.updateUserProfile(userId, { avatarPath: relative });
-		const user = await this.db.findUserById(userId);
-		if (!user) throw new AppError(404, 'USER_NOT_FOUND', '查无此人啦');
-		return toPublicProfile(user);
+		return toPublicProfile(await loadUserOrThrow(this.db, userId));
 	}
 
 	async saveProfileBackground(userId: string, buffer: Buffer, mime: string): Promise<UserProfilePublic> {
@@ -153,22 +122,16 @@ export class ProfileService {
 		writeFileSync(abs, compressed);
 
 		await this.db.updateUserProfile(userId, { profileBgPath: relative });
-		const user = await this.db.findUserById(userId);
-		if (!user) throw new AppError(404, 'USER_NOT_FOUND', '查无此人啦');
-		return toPublicProfile(user);
+		return toPublicProfile(await loadUserOrThrow(this.db, userId));
 	}
 
 	async clearAvatar(userId: string): Promise<UserProfilePublic> {
 		await this.db.updateUserProfile(userId, { avatarPath: null });
-		const user = await this.db.findUserById(userId);
-		if (!user) throw new AppError(404, 'USER_NOT_FOUND', '查无此人啦');
-		return toPublicProfile(user);
+		return toPublicProfile(await loadUserOrThrow(this.db, userId));
 	}
 
 	async clearProfileBackground(userId: string): Promise<UserProfilePublic> {
 		await this.db.updateUserProfile(userId, { profileBgPath: null });
-		const user = await this.db.findUserById(userId);
-		if (!user) throw new AppError(404, 'USER_NOT_FOUND', '查无此人啦');
-		return toPublicProfile(user);
+		return toPublicProfile(await loadUserOrThrow(this.db, userId));
 	}
 }

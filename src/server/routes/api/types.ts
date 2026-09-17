@@ -1,31 +1,4 @@
-import type { ApplicationController } from '../../controller/application.controller';
-import type { AdminController } from '../../controller/admin.controller';
-import type { AuthController } from '../../controller/auth.controller';
-import type { ProfileController } from '../../controller/profile.controller';
-import type { ScheduleController } from '../../controller/schedule.controller';
-import type { RecruitmentController } from '../../controller/recruitment.controller';
-import type { JoinusSubmitController } from '../../controller/joinusSubmit.controller';
-import type { JoinusFormController } from '../../controller/joinusForm.controller';
-import type { JoinusInterviewSlotsController } from '../../controller/joinusInterviewSlots.controller';
-import type { HomeController } from '../../controller/home.controller';
-import type { TaskController } from '../../controller/task.controller';
-import type { SearchController } from '../../controller/search.controller';
-import type { BilibiliController } from '../../controller/bilibili.controller';
-import type { HealthController } from '../../controller/health.controller';
+import type { createControllers } from '../../container';
 
-export interface ApiRouteDeps {
-	authController: AuthController;
-	applicationController: ApplicationController;
-	adminController: AdminController;
-	profileController: ProfileController;
-	scheduleController: ScheduleController;
-	recruitmentController: RecruitmentController;
-	joinusSubmitController: JoinusSubmitController;
-	joinusFormController: JoinusFormController;
-	joinusInterviewSlotsController: JoinusInterviewSlotsController;
-	homeController: HomeController;
-	taskController: TaskController;
-	searchController: SearchController;
-	bilibiliController: BilibiliController;
-	healthController: HealthController;
-}
+/** Derived from the composition root so this list can never drift from it */
+export type ApiRouteDeps = ReturnType<typeof createControllers>;

@@ -31,3 +31,28 @@ export interface UserProfilePublic {
 	birthdayMonth: number | null;
 	birthdayDay: number | null;
 }
+
+/** Admin listing projection; deliberately excludes passwordHash and contact fields */
+export interface UserAdminListItem {
+	id: string;
+	username: string;
+	role: Role;
+	status: UserStatus;
+	createdAt: string;
+	updatedAt: string;
+}
+
+/** Minimal user projection for birthday listings */
+export interface UserBirthdayBrief {
+	id: string;
+	username: string;
+	nickname: string | null;
+	avatarPath: string | null;
+}
+
+/** Minimal user projection for @-mention autocomplete */
+export interface UserSearchBrief {
+	id: string;
+	username: string;
+	avatarPath: string | null;
+}

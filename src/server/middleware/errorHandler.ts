@@ -2,7 +2,7 @@ import type { Middleware } from 'koa';
 import { ZodError } from 'zod';
 import { AppError } from '../types/api';
 
-function isBenignNetworkError(err: unknown): boolean {
+export function isBenignNetworkError(err: unknown): boolean {
 	if (!err || typeof err !== 'object') return false;
 	const anyErr = err as any;
 	const code = typeof anyErr.code === 'string' ? anyErr.code : '';

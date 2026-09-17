@@ -77,6 +77,6 @@ async function readUploadedBuffer(file: KoaUploaded): Promise<Buffer> {
 		return buf;
 	} catch (e) {
 		const msg = e instanceof Error ? e.message : 'UNKNOWN_READ_FILE_ERROR';
-		throw new Error(`READ_FILE_FAILED: ${msg}`);
+		throw new Error(`READ_FILE_FAILED: ${msg}`, { cause: e });
 	}
 }

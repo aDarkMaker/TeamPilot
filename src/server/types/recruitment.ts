@@ -65,6 +65,11 @@ export type RecruitmentApplicationRatingState = RecruitmentApplicationRatingSumm
 	myRating: number | null;
 };
 
+/** Rating totals plus the viewer's own (required) rating, as returned after casting a vote */
+export type RecruitmentApplicationRatingAggregate = RecruitmentApplicationRatingSummary & {
+	myRating: number;
+};
+
 export type RecruitmentComment = {
 	id: string;
 	applicationId: string;
@@ -76,4 +81,44 @@ export type RecruitmentComment = {
 	updatedAt: string;
 	likeCount: number;
 	likedByMe: boolean;
+};
+
+/**
+ * Write payload shared by create / upsert / update of a recruitment application.
+ * Slot columns are stored as the chosen mode's slot reference.
+ */
+export type RecruitmentApplicationWriteInput = {
+	submitterUserId: string;
+	fullName: string;
+	contact: string;
+	qq: string;
+	department: RecruitmentDepartment;
+	departmentSortOrder: number;
+	isStudent: boolean;
+	schoolCollege: string | null;
+	grade: string | null;
+	wantsOfflineInterview: boolean;
+	offlineInterviewSlot: RecruitmentInterviewSlot | null;
+	wantsOnlineInterview: boolean;
+	onlineInterviewSlot: RecruitmentInterviewSlot | null;
+	introMarkdown: string;
+	worksMarkdown: string;
+	attachmentPath: string | null;
+};
+
+/** The booking flow resolves slot ids separately, so it omits the slot references */
+export type RecruitmentBookingWriteInput = Omit<RecruitmentApplicationWriteInput, 'offlineInterviewSlot' | 'onlineInterviewSlot'>;
+
+/** Comment ownership lookup used for permission checks */
+export type RecruitmentCommentMeta = {
+	id: string;
+	applicationId: string;
+	authorId: string;
+	authorRole: Role;
+};
+
+/** Rating totals for one application, without the viewer's own rating */
+export type RecruitmentRatingTotals = {
+	ratingAverage: number;
+	ratingCount: number;
 };

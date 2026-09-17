@@ -1,7 +1,8 @@
 import { z } from 'zod';
 import type { DB } from '../db';
 import { AppError } from '../types/api';
-import { getShanghaiNow } from '../../joinus/interviewSchedule';
+import { INTERVIEW_SLOT_MINUTES, getShanghaiNow } from '../../joinus/interviewSchedule';
+import { rethrowMapped } from '../lib/errorMap';
 
 const windowBodySchema = z
 	.object({
@@ -10,7 +11,7 @@ const windowBodySchema = z
 		endMin: z.number().int().min(1).max(1440),
 	})
 	.refine((v) => v.startMin < v.endMin, { message: '结束时间需晚于开始时间' })
-	.refine((v) => (v.endMin - v.startMin) % 15 === 0, { message: '时长必须是 15 分钟的整数倍' });
+	.refine((v) => (v.endMin - v.startMin) % INTERVIEW_SLOT_MINUTES === 0, { message: '时长必须是 15 分钟的整数倍' });
 
 export type InterviewWindowWithCounts = {
 	id: string;
@@ -69,10 +70,9 @@ export class JoinusInterviewSlotsService {
 			const window = await this.db.createInterviewWindowWithSlots(parsed.data);
 			return window;
 		} catch (e) {
-			if (e instanceof Error && e.message === 'WINDOW_CONFLICT') {
-				throw new AppError(409, 'WINDOW_CONFLICT', '该时间段与已有排期重叠，请调整后重试');
-			}
-			throw e;
+			rethrowMapped(e, {
+				WINDOW_CONFLICT: { status: 409, code: 'WINDOW_CONFLICT', message: '该时间段与已有排期重叠，请调整后重试' },
+			});
 		}
 	}
 
@@ -82,13 +82,10 @@ export class JoinusInterviewSlotsService {
 		try {
 			await this.db.deleteInterviewWindow(windowId);
 		} catch (e) {
-			if (e instanceof Error && e.message === 'WINDOW_HAS_BOOKINGS') {
-				throw new AppError(409, 'WINDOW_HAS_BOOKINGS', '已有报名预约了该时间段，暂时无法删除');
-			}
-			if (e instanceof Error && e.message === 'WINDOW_NOT_FOUND') {
-				throw new AppError(404, 'WINDOW_NOT_FOUND', '找不到该时间段');
-			}
-			throw e;
+			rethrowMapped(e, {
+				WINDOW_HAS_BOOKINGS: { status: 409, code: 'WINDOW_HAS_BOOKINGS', message: '已有报名预约了该时间段，暂时无法删除' },
+				WINDOW_NOT_FOUND: { status: 404, code: 'WINDOW_NOT_FOUND', message: '找不到该时间段' },
+			});
 		}
 		return { id: windowId };
 	}

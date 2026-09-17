@@ -1,5 +1,5 @@
-import type { Database } from 'bun:sqlite';
 import type { AppConfig } from '../config';
+import type { DB } from '../db';
 import { AppError } from '../types/api';
 import { toBiliProxyImagePath } from '../lib/biliCdnImage';
 import QRCode from 'qrcode';
@@ -18,14 +18,9 @@ interface QrcodeStatus {
 
 export class BilibiliService {
 	constructor(
-		private sqlite: Database,
+		private db: DB,
 		private cfg: AppConfig
 	) {}
-
-	private getUserCookie(userId: string): string | null {
-		const row = this.sqlite.query(`SELECT bili_cookie FROM users WHERE id = ?`).all(Number(userId)) as any[];
-		return row?.[0]?.bili_cookie ?? null;
-	}
 
 	async generateQrcode(): Promise<QrcodeResult> {
 		const res = await fetch('https://passport.bilibili.com/x/passport-login/web/qrcode/generate', {
@@ -103,7 +98,7 @@ export class BilibiliService {
 	}
 
 	async fetchBiliUserInfo(userId: string): Promise<{ avatar: string; nickname: string }> {
-		const cookie = this.getUserCookie(userId);
+		const cookie = await this.db.findBiliCookieByUserId(userId);
 		if (!cookie?.trim()) throw new AppError(400, 'BILI_NOT_BOUND', '尚未绑定B站账号');
 
 		const res = await fetch('https://api.bilibili.com/x/space/myinfo', {
@@ -128,27 +123,18 @@ export class BilibiliService {
 		};
 	}
 
-	saveBind(userId: string, refreshToken: string, biliUid: string, cookies: string): void {
-		this.sqlite.run(`UPDATE users SET bilibili_refresh_token = ?, bili_uid = ?, bili_cookie = ? WHERE id = ?`, [
-			refreshToken,
-			biliUid,
-			cookies,
-			Number(userId),
-		]);
+	async saveBind(userId: string, refreshToken: string, biliUid: string, cookies: string): Promise<void> {
+		await this.db.saveBiliBind({ userId, refreshToken, biliUid, cookies });
 	}
 
 	async getDynamicCookie(): Promise<string | null> {
 		const targetUsername = this.cfg.bili.loginTargetUsername;
 		if (!targetUsername) return null;
-
-		const rows = this.sqlite
-			.query(`SELECT bili_cookie FROM users WHERE username = ? AND bili_cookie IS NOT NULL AND bili_cookie != '' LIMIT 1`)
-			.all(targetUsername) as any[];
-		return rows[0]?.bili_cookie ?? null;
+		return this.db.findBiliCookieByUsername(targetUsername);
 	}
 
-	getBindStatus(userId: string): { bound: boolean; avatar: string | null; nickname: string | null } {
-		const cookie = this.getUserCookie(userId);
-		return { bound: !!cookie?.trim(), avatar: null, nickname: null };
+	async isBound(userId: string): Promise<boolean> {
+		const cookie = await this.db.findBiliCookieByUserId(userId);
+		return Boolean(cookie?.trim());
 	}
 }

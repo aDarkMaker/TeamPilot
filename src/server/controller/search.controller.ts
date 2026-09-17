@@ -5,7 +5,7 @@ export class SearchController {
 	constructor(private service: SearchService) {}
 
 	search = async (ctx: Context) => {
-		const result = await this.service.search(ctx.query, ctx.state.user!.id);
+		const result = await this.service.search(ctx.query);
 		ctx.body = { ok: true, data: result };
 	};
 }

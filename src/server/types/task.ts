@@ -11,8 +11,8 @@ export interface TaskCard {
 	sourceId: string;
 
 	title: string;
-	content: string;
-	payloadJson: string;
+	content: string | null;
+	payloadJson: string | null;
 
 	status: TaskStatus;
 	decidedAt: string | null;

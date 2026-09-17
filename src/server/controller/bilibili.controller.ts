@@ -46,7 +46,7 @@ export class BilibiliController {
 			return;
 		}
 		const userId = ctx.state.user!.id;
-		this.service.saveBind(userId, refresh_token, bili_uid ?? '', cookies ?? '');
+		await this.service.saveBind(userId, refresh_token, bili_uid ?? '', cookies ?? '');
 		ctx.body = { ok: true, data: { bound: true } };
 	};
 
@@ -61,8 +61,8 @@ export class BilibiliController {
 			const info = await this.service.fetchBiliUserInfo(userId);
 			ctx.body = { ok: true, data: { bound: true, allowed: true, avatar: info.avatar, nickname: info.nickname } };
 		} catch {
-			const status = this.service.getBindStatus(userId);
-			ctx.body = { ok: true, data: { bound: status.bound, allowed: true, avatar: null, nickname: null } };
+			const bound = await this.service.isBound(userId);
+			ctx.body = { ok: true, data: { bound, allowed: true, avatar: null, nickname: null } };
 		}
 	};
 

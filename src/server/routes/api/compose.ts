@@ -32,7 +32,7 @@ export function composeApiRouter(deps: ApiRouteDeps): Router {
 	mountChildRouter(api, buildProfileRoutes(deps.profileController));
 	mountChildRouter(api, buildScheduleRoutes(deps.scheduleController));
 	mountChildRouter(api, buildRecruitmentRoutes(deps.recruitmentController));
-	mountChildRouter(api, buildRecruitmentEventsRoutes());
+	mountChildRouter(api, buildRecruitmentEventsRoutes(deps.recruitmentEventsController));
 	mountChildRouter(api, buildJoinUsSubmitRoutes(deps.joinusSubmitController));
 	mountChildRouter(api, buildJoinUsFormRoutes(deps.joinusFormController));
 	mountChildRouter(api, buildJoinUsInterviewSlotsRoutes(deps.joinusInterviewSlotsController));

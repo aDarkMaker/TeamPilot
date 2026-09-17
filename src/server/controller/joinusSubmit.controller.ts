@@ -34,7 +34,7 @@ async function readUploadedBufferAndUnlink(file: UploadedTempFile): Promise<Uplo
 		buffer = await readFile(filePath);
 	} catch (e) {
 		const msg = e instanceof Error ? e.message : 'READ_FILE_FAILED';
-		throw new Error(`READ_FILE_FAILED: ${msg}`);
+		throw new Error(`READ_FILE_FAILED: ${msg}`, { cause: e });
 	}
 
 	await unlink(filePath).catch(() => undefined);

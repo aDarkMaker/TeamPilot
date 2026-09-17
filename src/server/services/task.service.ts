@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import type { DB } from '../db';
-import { AppError } from '../types/api';
+import { rethrowMapped } from '../lib/errorMap';
+import { ensureScheduleTasksForUser } from './scheduleTaskSync.service';
 
 const listQuerySchema = z.object({
 	status: z.enum(['pending', 'accepted', 'leave']).optional(),
@@ -15,50 +16,8 @@ const decideBodySchema = z.object({
 export class TaskService {
 	constructor(private db: DB) {}
 
-	private getShanghaiYmd() {
-		const parts = new Intl.DateTimeFormat('zh-CN', {
-			timeZone: 'Asia/Shanghai',
-			hour12: false,
-			year: 'numeric',
-			month: '2-digit',
-			day: '2-digit',
-		}).formatToParts(new Date());
-		const get = (type: Intl.DateTimeFormatPartTypes) => String(parts.find((p) => p.type === type)?.value ?? '');
-		return `${get('year')}-${get('month')}-${get('day')}`;
-	}
-
-	private toTaskStartIso(input: { year: number; month: number; day: number; startAt: string }) {
-		const mm = String(input.month).padStart(2, '0');
-		const dd = String(input.day).padStart(2, '0');
-		return `${input.year}-${mm}-${dd}T${input.startAt}:00`;
-	}
-
-	private async ensureAllScheduleTasksForUser(userId: string) {
-		const allSchedules = await this.db.listAllSchedulesFromDate({ startDate: this.getShanghaiYmd() });
-		await Promise.all(
-			allSchedules.map((s) =>
-				this.db.createOrReplaceTaskCard({
-					targetUserId: userId,
-					actorUserId: s.createdBy ?? null,
-					sourceType: 'schedule_at',
-					sourceId: s.id,
-					title: `日程提醒：${s.title}`,
-					content: s.description ?? null,
-					payloadJson: JSON.stringify({
-						startAtIso: this.toTaskStartIso(s),
-						year: s.year,
-						month: s.month,
-						day: s.day,
-						startAt: s.startAt,
-						endAt: s.endAt,
-					}),
-				})
-			)
-		);
-	}
-
 	async listMyTasks(actor: { id: string }, query: unknown) {
-		await this.ensureAllScheduleTasksForUser(actor.id);
+		await ensureScheduleTasksForUser(this.db, actor.id);
 		const q = listQuerySchema.parse(query);
 		const rows = await this.db.listTaskCardsByUser({
 			targetUserId: actor.id,
@@ -73,7 +32,7 @@ export class TaskService {
 				await this.db.deleteTaskCardsBySource({ sourceType: 'schedule_at', sourceId: t.sourceId });
 			}
 		}
-		// 再查一次，确保返回给前端的是干净的
+		// Re-query so the client only ever sees a clean list
 		return await this.db.listTaskCardsByUser({
 			targetUserId: actor.id,
 			status: q.status,
@@ -83,7 +42,7 @@ export class TaskService {
 	}
 
 	async countMyPending(actor: { id: string }) {
-		await this.ensureAllScheduleTasksForUser(actor.id);
+		await ensureScheduleTasksForUser(this.db, actor.id);
 		return await this.db.countPendingTaskCardsByUser(actor.id);
 	}
 
@@ -96,10 +55,10 @@ export class TaskService {
 				status: parsed.status,
 			});
 		} catch (e) {
-			const msg = e instanceof Error ? e.message : 'DECIDE_FAILED';
-			if (msg === 'TASK_NOT_FOUND') throw new AppError(404, 'TASK_NOT_FOUND', '任务不见啦');
-			if (msg === 'FORBIDDEN') throw new AppError(403, 'FORBIDDEN', '这里没有你的权限哦');
-			throw e;
+			rethrowMapped(e, {
+				TASK_NOT_FOUND: { status: 404, code: 'TASK_NOT_FOUND', message: '任务不见啦' },
+				FORBIDDEN: { status: 403, code: 'FORBIDDEN', message: '这里没有你的权限哦' },
+			});
 		}
 	}
 }

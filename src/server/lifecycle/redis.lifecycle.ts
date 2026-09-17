@@ -66,7 +66,7 @@ export async function startRedis(): Promise<Redis> {
 		redisProcess = startRedisServer();
 		startedByApp = true;
 	} catch (error) {
-		throw new Error(`Failed to start redis-server: ${(error as Error).message}`);
+		throw new Error(`Failed to start redis-server: ${(error as Error).message}`, { cause: error });
 	}
 
 	const client = await waitForRedis();

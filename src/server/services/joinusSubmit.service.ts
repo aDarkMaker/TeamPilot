@@ -107,15 +107,20 @@ function extFromOriginalName(raw: string): string {
 	return /^[a-z0-9]{1,10}$/.test(ext) ? ext : 'bin';
 }
 
+// eslint-disable-next-line no-control-regex -- stripping control characters is the point
+const CONTROL_CHARS = /[\u0000-\u001f\u007f]/g;
+// eslint-disable-next-line no-control-regex -- stripping control characters is the point
+const UNSAFE_FILENAME_CHARS = /[<>:"|?*\u0000-\u001f]/g;
+
 function sanitizeFileName(raw: string): string {
 	const name = (raw ?? '').trim();
 	if (!name) return 'attachment';
 	const cleaned = name
-		.replace(/[\\\/]+/g, '_')
-		.replace(/[\u0000-\u001f\u007f]/g, '')
+		.replace(/[\\/]+/g, '_')
+		.replace(CONTROL_CHARS, '')
 		.replace(/\s+/g, ' ')
 		.trim();
-	const safe = cleaned.replace(/[<>:"|?*\u0000-\u001f]/g, '_');
+	const safe = cleaned.replace(UNSAFE_FILENAME_CHARS, '_');
 	return safe.slice(0, 120) || 'attachment';
 }
 
