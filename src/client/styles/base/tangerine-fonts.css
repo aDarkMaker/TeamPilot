@@ -3,7 +3,7 @@
 
 @font-face {
 	font-family: 'Bricolage Grotesque';
-	src: url('../assets/fonts/tangerine/bricolage-grotesque-400.woff2') format('woff2');
+	src: url('../../assets/fonts/tangerine/bricolage-grotesque-400.woff2') format('woff2');
 	font-weight: 400;
 	font-style: normal;
 	font-display: swap;
@@ -11,7 +11,7 @@
 
 @font-face {
 	font-family: 'Bricolage Grotesque';
-	src: url('../assets/fonts/tangerine/bricolage-grotesque-700.woff2') format('woff2');
+	src: url('../../assets/fonts/tangerine/bricolage-grotesque-700.woff2') format('woff2');
 	font-weight: 700;
 	font-style: normal;
 	font-display: swap;
@@ -19,7 +19,7 @@
 
 @font-face {
 	font-family: 'Bricolage Grotesque';
-	src: url('../assets/fonts/tangerine/bricolage-grotesque-800.woff2') format('woff2');
+	src: url('../../assets/fonts/tangerine/bricolage-grotesque-800.woff2') format('woff2');
 	font-weight: 800;
 	font-style: normal;
 	font-display: swap;
@@ -27,7 +27,7 @@
 
 @font-face {
 	font-family: 'Inter';
-	src: url('../assets/fonts/tangerine/inter-var.woff2') format('woff2');
+	src: url('../../assets/fonts/tangerine/inter-var.woff2') format('woff2');
 	font-weight: 100 900;
 	font-style: normal;
 	font-display: swap;
@@ -35,7 +35,7 @@
 
 @font-face {
 	font-family: 'JetBrains Mono';
-	src: url('../assets/fonts/tangerine/jetbrains-mono-var.woff2') format('woff2');
+	src: url('../../assets/fonts/tangerine/jetbrains-mono-var.woff2') format('woff2');
 	font-weight: 100 800;
 	font-style: normal;
 	font-display: swap;
@@ -45,7 +45,7 @@
    the auth masthead. Commercial licence, embedding permitted (fsType 0). */
 @font-face {
 	font-family: 'HFIntimate';
-	src: url('../assets/fonts/tangerine/hf-intimate.woff2') format('woff2');
+	src: url('../../assets/fonts/tangerine/hf-intimate.woff2') format('woff2');
 	font-weight: 400;
 	font-style: normal;
 	font-display: swap;
@@ -57,7 +57,7 @@
    MiSans-LICENSE.txt alongside the asset. */
 @font-face {
 	font-family: 'MiSans';
-	src: url('../assets/fonts/tangerine/misans-sc-var.woff2') format('woff2');
+	src: url('../../assets/fonts/tangerine/misans-sc-var.woff2') format('woff2');
 	font-weight: 150 700;
 	font-style: normal;
 	font-display: swap;

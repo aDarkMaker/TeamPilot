@@ -17,7 +17,7 @@ body {
 	--field-bg: var(--color-ivory);
 	--field-border: var(--color-espresso);
 	--auth-backdrop-veil: linear-gradient(180deg, rgba(20, 10, 4, 0.66) 0%, rgba(20, 10, 4, 0.82) 100%);
-	--auth-stripe: repeating-linear-gradient(135deg, rgba(244, 236, 216, 0.07) 0 1px, transparent 1px 16px);
+	--auth-stripe: repeating-linear-gradient(135deg, rgba(244, 236, 216, 0.07) 0 1px, transparent 1px 1rem);
 }
 
 * {
@@ -35,7 +35,7 @@ body.auth-page {
 	font-family: var(--font-body);
 	color: var(--text-color);
 	background-color: var(--color-ink);
-	background-image: var(--auth-stripe), var(--auth-backdrop-veil), url('../assets/img/image/background.webp');
+	background-image: var(--auth-stripe), var(--auth-backdrop-veil), url('../../assets/img/image/background.webp');
 	background-size: auto, auto, cover;
 	background-position: center;
 	background-repeat: repeat, no-repeat, no-repeat;
@@ -56,25 +56,25 @@ body.auth-page::before {
 	min-height: 100vh;
 	display: grid;
 	place-items: center;
-	padding: 24px;
+	padding: 1.5rem;
 	position: relative;
 	z-index: 1;
 }
 
 /* Editorial split: brand masthead on the left, form card on the right. */
 .auth-shell {
-	width: min(1040px, 100%);
+	width: min(65rem, 100%);
 	display: grid;
-	grid-template-columns: minmax(0, 1fr) minmax(0, 460px);
+	grid-template-columns: minmax(0, 1fr) minmax(0, 28.75rem);
 	align-items: center;
-	gap: 48px;
+	gap: 3rem;
 }
 
 .auth-brand {
 	display: grid;
-	gap: 16px;
+	gap: 1rem;
 	align-content: center;
-	max-width: 460px;
+	max-width: 28.75rem;
 	color: var(--color-ivory);
 }
 
@@ -90,7 +90,7 @@ body.auth-page::before {
 	line-height: 0.95;
 	letter-spacing: -0.03em;
 	color: var(--color-parchment);
-	text-shadow: 0 2px 18px rgba(20, 10, 4, 0.55);
+	text-shadow: 0 0.125rem 1.125rem rgba(20, 10, 4, 0.55);
 }
 
 .auth-brand-note {
@@ -115,7 +115,7 @@ body.auth-page::before {
 	content: '';
 	position: absolute;
 	right: 0;
-	bottom: -2px;
+	bottom: -0.125rem;
 	left: 0;
 	height: 1px;
 	background: currentColor;
@@ -138,8 +138,8 @@ body.auth-page::before {
 
 .auth-brand-link:focus-visible {
 	outline: none;
-	box-shadow: 0 0 0 2px var(--color-saffron);
-	border-radius: 2px;
+	box-shadow: 0 0 0 0.125rem var(--color-saffron);
+	border-radius: 0.125rem;
 }
 
 /* =========================
@@ -147,8 +147,8 @@ body.auth-page::before {
    ========================= */
 .glass-card {
 	width: 100%;
-	max-width: 460px;
-	padding: 32px;
+	max-width: 28.75rem;
+	padding: 2rem;
 	border-radius: var(--radius-ticket);
 	background: var(--glass-bg);
 	border: 1px solid var(--glass-border);
@@ -161,7 +161,7 @@ body.auth-page::before {
 }
 
 .glass-card:hover {
-	transform: translateY(-2px);
+	transform: translateY(-0.125rem);
 	box-shadow: var(--shadow-panel);
 	border-color: var(--color-ink);
 }
@@ -177,9 +177,9 @@ body.auth-page::before {
 }
 
 .auth-header h1 {
-	margin: 10px 0 8px;
+	margin: 0.625rem 0 0.5rem;
 	font-family: var(--font-display);
-	font-size: 28px;
+	font-size: 1.75rem;
 	font-weight: 800;
 	line-height: 1.2;
 	letter-spacing: -0.02em;
@@ -187,8 +187,8 @@ body.auth-page::before {
 }
 
 .auth-header p {
-	margin: 0 0 20px;
-	font-size: 14px;
+	margin: 0 0 1.25rem;
+	font-size: 0.875rem;
 	color: var(--color-espresso);
 }
 
@@ -200,8 +200,8 @@ body.auth-page::before {
 	display: grid;
 	grid-template-columns: 1fr 1fr;
 	gap: 0;
-	margin-bottom: 18px;
-	padding: 4px;
+	margin-bottom: 1.125rem;
+	padding: 0.25rem;
 	border-radius: var(--radius-pill);
 	background: var(--color-parchment);
 	border: 1px solid var(--color-hairline);
@@ -211,10 +211,10 @@ body.auth-page::before {
 
 .tab-indicator {
 	position: absolute;
-	top: 4px;
-	left: 4px;
-	width: calc(50% - 4px);
-	height: calc(100% - 8px);
+	top: 0.25rem;
+	left: 0.25rem;
+	width: calc(50% - 0.25rem);
+	height: calc(100% - 0.5rem);
 	border-radius: var(--radius-pill);
 	background: var(--button-color);
 	transition: transform 260ms var(--ease-editorial);
@@ -229,10 +229,10 @@ body.auth-page::before {
 	border: 0;
 	background: transparent;
 	color: var(--color-espresso);
-	padding: 10px 12px;
+	padding: 0.625rem 0.75rem;
 	border-radius: var(--radius-pill);
 	font-family: inherit;
-	font-size: 14px;
+	font-size: 0.875rem;
 	font-weight: 600;
 	cursor: pointer;
 	transition:
@@ -250,7 +250,7 @@ body.auth-page::before {
 
 .tab-btn:focus-visible {
 	outline: none;
-	box-shadow: 0 0 0 2px var(--color-saffron);
+	box-shadow: 0 0 0 0.125rem var(--color-saffron);
 }
 
 /* =========================
@@ -258,11 +258,11 @@ body.auth-page::before {
    ========================= */
 .card-content-wrap {
 	position: relative;
-	margin-top: 12px;
+	margin-top: 0.75rem;
 	overflow: clip;
 	/* Keep 4px of clip room so focus rings on fields/buttons inside the wrap
 	   are not shaved off by the height-animation clipping. */
-	overflow-clip-margin: 4px;
+	overflow-clip-margin: 0.25rem;
 	will-change: height;
 	transition: height 640ms var(--ease-editorial) 160ms;
 }
@@ -271,7 +271,7 @@ body.auth-page::before {
 	position: absolute;
 	inset: 0;
 	opacity: 0;
-	transform: translateY(4px);
+	transform: translateY(0.25rem);
 	pointer-events: none;
 	transition:
 		opacity 280ms var(--ease-editorial),
@@ -288,13 +288,13 @@ body.auth-page::before {
 
 .auth-form {
 	display: grid;
-	gap: 16px;
+	gap: 1rem;
 }
 
 .input-group {
 	position: relative;
 	display: grid;
-	gap: 8px;
+	gap: 0.5rem;
 }
 
 .input-group label {
@@ -307,7 +307,7 @@ body.auth-page::before {
 .input-group input,
 .input-group textarea {
 	width: 100%;
-	padding: 12px 16px;
+	padding: 0.75rem 1rem;
 	border: 1px solid var(--field-border);
 	border-radius: var(--radius-field);
 	background: var(--field-bg);
@@ -326,25 +326,25 @@ body.auth-page::before {
 }
 
 .input-group textarea {
-	min-height: 96px;
+	min-height: 6rem;
 	resize: vertical;
 }
 
 .input-group input:focus,
 .input-group textarea:focus {
 	border-color: var(--color-tangerine);
-	box-shadow: 0 0 0 2px var(--color-saffron);
+	box-shadow: 0 0 0 0.125rem var(--color-saffron);
 }
 
 .submit-btn {
 	position: relative;
-	margin-top: 4px;
+	margin-top: 0.25rem;
 	display: inline-flex;
 	align-items: center;
 	justify-content: center;
-	height: 48px;
-	padding: 0 24px;
-	border: 1.5px solid var(--color-ink);
+	height: 3rem;
+	padding: 0 1.5rem;
+	border: 0.0938rem solid var(--color-ink);
 	border-radius: var(--radius-pill);
 	background: var(--color-ink);
 	color: var(--color-parchment);
@@ -371,7 +371,7 @@ body.auth-page::before {
 
 .submit-btn:focus-visible {
 	outline: none;
-	box-shadow: 0 0 0 2px var(--color-saffron);
+	box-shadow: 0 0 0 0.125rem var(--color-saffron);
 }
 
 .submit-btn:disabled {
@@ -383,10 +383,10 @@ body.auth-page::before {
    Feedback
    ========================= */
 .msg {
-	margin: 8px 0 10px;
-	padding: 10px 14px;
+	margin: 0.5rem 0 0.625rem;
+	padding: 0.625rem 0.875rem;
 	border-radius: var(--radius-chip);
-	font-size: 14px;
+	font-size: 0.875rem;
 	animation: msg-in 220ms var(--ease-editorial);
 }
 
@@ -403,7 +403,7 @@ body.auth-page::before {
 }
 
 .placeholder {
-	padding: 20px;
+	padding: 1.25rem;
 	border-radius: var(--radius-card);
 	background: var(--color-parchment);
 	border: 1px dashed var(--color-hairline-strong);
@@ -417,7 +417,7 @@ body.auth-page::before {
 @keyframes card-in {
 	from {
 		opacity: 0;
-		transform: translateY(8px);
+		transform: translateY(0.5rem);
 	}
 	to {
 		opacity: 1;
@@ -428,7 +428,7 @@ body.auth-page::before {
 @keyframes msg-in {
 	from {
 		opacity: 0;
-		transform: translateY(-4px);
+		transform: translateY(-0.25rem);
 	}
 	to {
 		opacity: 1;
@@ -442,8 +442,8 @@ body.auth-page::before {
 @media (max-width: 900px) {
 	.auth-shell {
 		grid-template-columns: minmax(0, 1fr);
-		max-width: 460px;
-		gap: 24px;
+		max-width: 28.75rem;
+		gap: 1.5rem;
 	}
 
 	.auth-brand {
@@ -453,40 +453,40 @@ body.auth-page::before {
 
 @media (max-width: 520px) {
 	.auth-container {
-		padding: 16px;
+		padding: 1rem;
 	}
 
 	.glass-card {
-		padding: 24px 20px;
+		padding: 1.5rem 1.25rem;
 		border-radius: var(--radius-panel);
 	}
 }
 
 @media (max-width: 400px) {
 	.auth-container {
-		padding: 12px;
+		padding: 0.75rem;
 	}
 
 	.glass-card {
-		padding: 20px 16px;
+		padding: 1.25rem 1rem;
 	}
 
 	.auth-header h1 {
-		font-size: 24px;
+		font-size: 1.5rem;
 	}
 
 	.auth-header p {
-		font-size: 13px;
+		font-size: 0.8125rem;
 	}
 
 	.tab-btn {
-		padding: 8px 10px;
-		font-size: 13px;
+		padding: 0.5rem 0.625rem;
+		font-size: 0.8125rem;
 	}
 
 	.input-group input {
-		padding: 10px 14px;
-		font-size: 14px;
+		padding: 0.625rem 0.875rem;
+		font-size: 0.875rem;
 	}
 }
 

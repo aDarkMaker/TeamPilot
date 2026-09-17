@@ -2,7 +2,7 @@
 	--folder-color: #f7c14b;
 	--folder-back-color: #edb02b;
 	flex-shrink: 0;
-	perspective: 500px;
+	perspective: 31.25rem;
 	cursor: pointer;
 }
 
@@ -11,7 +11,7 @@
 }
 
 .folder:not(.open):hover .folder__back {
-	transform: translateY(-8px);
+	transform: translateY(-0.5rem);
 }
 
 .folder:not(.open):hover .paper {
@@ -27,7 +27,7 @@
 }
 
 .folder.open .folder__back {
-	transform: translateY(-8px);
+	transform: translateY(-0.5rem);
 }
 
 .folder.open .paper:nth-child(1) {
@@ -66,10 +66,10 @@
 
 .folder__back {
 	position: relative;
-	width: 100px;
-	height: 80px;
+	width: 6.25rem;
+	height: 5rem;
 	background: var(--folder-back-color);
-	border-radius: 0px 10px 10px 10px;
+	border-radius: 0 0.625rem 0.625rem 0.625rem;
 	transition: transform 0.2s ease-in;
 }
 
@@ -79,10 +79,10 @@
 	bottom: 98%;
 	left: 0;
 	content: '';
-	width: 30px;
-	height: 10px;
+	width: 1.875rem;
+	height: 0.625rem;
 	background: var(--folder-back-color);
-	border-radius: 5px 5px 0 0;
+	border-radius: 0.3125rem 0.3125rem 0 0;
 }
 
 .paper {
@@ -94,7 +94,7 @@
 	width: 70%;
 	height: 80%;
 	background: transparent;
-	border-radius: 10px;
+	border-radius: 0.625rem;
 	transition: all 0.3s ease-in-out;
 	display: flex;
 	align-items: center;
@@ -132,7 +132,7 @@
 	width: 100%;
 	height: 100%;
 	background: var(--folder-color);
-	border-radius: 5px 10px 10px 10px;
+	border-radius: 0.3125rem 0.625rem 0.625rem 0.625rem;
 	transform-origin: bottom;
 	transition: all 0.3s ease-in-out;
 }

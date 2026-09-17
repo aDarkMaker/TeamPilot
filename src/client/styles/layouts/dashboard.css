@@ -6,9 +6,13 @@
 	--dash-accent: var(--color-tangerine);
 	--dash-glass: var(--color-ivory);
 	--dash-glass-border: var(--color-hairline);
-	--dash-sidebar-w: 220px;
-	--dash-content-pad-x: 28px;
-	--dash-modal-sidebar-gap: 24px;
+	--dash-sidebar-w: 13.75rem;
+	--dash-topbar-h: 5.25rem;
+	--dash-content-pad-x: 1.75rem;
+	--dash-modal-sidebar-gap: 1.5rem;
+	/* Full-viewport dim; flex padding shifts the card into the content well so
+	   the mask never leaves a seam under the topbar. */
+	--dash-overlay-pad: calc(var(--dash-topbar-h) + 1.125rem) 1.125rem 1.125rem calc(var(--dash-sidebar-w) + 1.125rem);
 	--dash-nav-ease: var(--ease-editorial);
 	--dash-nav-spring: var(--ease-editorial);
 }
@@ -76,11 +80,11 @@ html.dashboard-shell body {
 	flex-shrink: 0;
 	display: flex;
 	flex-direction: column;
-	padding: 16px 12px;
+	padding: 1rem 0.75rem;
 	min-height: 0;
 	overflow: hidden;
 	/* Soft falloff into the parchment content instead of a hard seam. */
-	box-shadow: 8px 0 28px rgba(26, 14, 8, 0.28);
+	box-shadow: 0.5rem 0 1.75rem rgba(26, 14, 8, 0.28);
 	background: linear-gradient(165deg, var(--color-espresso) 0%, var(--color-ink) 100%);
 	color: var(--rail-fg);
 	z-index: 20;
@@ -90,8 +94,8 @@ html.dashboard-shell body {
 .dashboard-logo {
 	display: flex;
 	align-items: center;
-	gap: 10px;
-	padding: 6px 10px 18px;
+	gap: 0.625rem;
+	padding: 0.375rem 0.625rem 1.125rem;
 	text-decoration: none;
 	color: inherit;
 	transition: opacity 0.28s var(--dash-nav-ease);
@@ -102,23 +106,23 @@ html.dashboard-shell body {
 }
 
 .dashboard-logo img {
-	width: 40px;
-	height: 40px;
-	border-radius: 10px;
+	width: 2.5rem;
+	height: 2.5rem;
+	border-radius: 0.625rem;
 	object-fit: cover;
 	border: 1px solid rgba(251, 246, 234, 0.35);
 }
 
 .dashboard-logo-text {
 	display: grid;
-	gap: 2px;
+	gap: 0.125rem;
 	min-width: 0;
 }
 
 .dashboard-logo-name {
 	font-family: var(--font-display);
 	font-weight: 700;
-	font-size: 16px;
+	font-size: 1rem;
 	letter-spacing: -0.01em;
 	color: var(--rail-fg);
 	white-space: nowrap;
@@ -127,7 +131,7 @@ html.dashboard-shell body {
 .dashboard-logo-tag {
 	font-family: var(--font-mono);
 	font-weight: 600;
-	font-size: 9px;
+	font-size: 0.5625rem;
 	letter-spacing: 0.16em;
 	text-transform: uppercase;
 	color: var(--rail-fg-muted);
@@ -139,7 +143,7 @@ html.dashboard-shell body {
 	padding: 0;
 	display: flex;
 	flex-direction: column;
-	gap: 6px;
+	gap: 0.375rem;
 	flex: 1;
 	overflow-y: auto;
 	scrollbar-width: none;
@@ -147,7 +151,7 @@ html.dashboard-shell body {
 
 .dashboard-nav-eyebrow {
 	list-style: none;
-	padding: 10px 12px 4px;
+	padding: 0.625rem 0.75rem 0.25rem;
 	font-family: var(--font-mono);
 	font-size: 0.625rem;
 	font-weight: 600;
@@ -157,22 +161,22 @@ html.dashboard-shell body {
 }
 
 .dashboard-nav-eyebrow--group {
-	margin-top: 8px;
-	padding-top: 14px;
+	margin-top: 0.5rem;
+	padding-top: 0.875rem;
 	border-top: 1px solid rgba(251, 246, 234, 0.16);
 }
 
 .dashboard-nav a {
 	display: flex;
 	align-items: center;
-	gap: 10px;
-	padding: 10px 12px;
-	padding-left: 9px;
+	gap: 0.625rem;
+	padding: 0.625rem 0.75rem;
+	padding-left: 0.5625rem;
 	border-radius: var(--radius-pill);
 	text-decoration: none;
 	color: var(--rail-fg-muted);
 	font-weight: 500;
-	font-size: 14px;
+	font-size: 0.875rem;
 	transition:
 		background 0.34s var(--dash-nav-ease),
 		color 0.26s var(--dash-nav-ease),
@@ -183,8 +187,8 @@ html.dashboard-shell body {
 
 /* Navbar icons ship as flat black artwork; invert them on the rail. */
 .dashboard-nav a img {
-	width: 21px;
-	height: 21px;
+	width: 1.3125rem;
+	height: 1.3125rem;
 	object-fit: contain;
 	flex-shrink: 0;
 	filter: brightness(0) invert(1);
@@ -245,27 +249,27 @@ html.dashboard-shell body {
 
 .dashboard-user-card {
 	margin-top: auto;
-	padding: 14px;
+	padding: 0.875rem;
 	border-radius: var(--radius-card);
 	background: rgba(26, 14, 8, 0.18);
 	border: 1px solid rgba(251, 246, 234, 0.24);
 	display: flex;
 	align-items: center;
-	gap: 10px;
+	gap: 0.625rem;
 }
 
 .dashboard-user-card .avatar-img {
-	width: 40px;
-	height: 40px;
+	width: 2.5rem;
+	height: 2.5rem;
 	border-radius: 50%;
 	object-fit: cover;
 	flex-shrink: 0;
-	border: 2px solid rgba(251, 246, 234, 0.7);
+	border: 0.125rem solid rgba(251, 246, 234, 0.7);
 }
 
 .dashboard-user-card .avatar-letter {
-	width: 40px;
-	height: 40px;
+	width: 2.5rem;
+	height: 2.5rem;
 	border-radius: 50%;
 	background: var(--color-saffron);
 	color: var(--color-ink);
@@ -273,7 +277,7 @@ html.dashboard-shell body {
 	align-items: center;
 	justify-content: center;
 	font-weight: 700;
-	font-size: 16px;
+	font-size: 1rem;
 	flex-shrink: 0;
 }
 
@@ -283,7 +287,7 @@ html.dashboard-shell body {
 }
 
 .dashboard-user-card .meta .name {
-	font-size: 14px;
+	font-size: 0.875rem;
 	font-weight: 600;
 	color: var(--color-ivory);
 	white-space: nowrap;
@@ -294,15 +298,15 @@ html.dashboard-shell body {
 
 .dashboard-user-card .meta .role {
 	font-family: var(--font-mono);
-	font-size: 11px;
+	font-size: 0.6875rem;
 	letter-spacing: 0.06em;
 	text-transform: uppercase;
 	color: var(--rail-fg-muted);
 }
 
 .user-card-signature {
-	margin-top: 4px;
-	font-size: 11px;
+	margin-top: 0.25rem;
+	font-size: 0.6875rem;
 	line-height: 1.35;
 	color: var(--rail-fg-muted);
 	display: -webkit-box;
@@ -315,9 +319,9 @@ html.dashboard-shell body {
 	align-self: center;
 	background: none;
 	border: none;
-	padding: 6px;
+	padding: 0.375rem;
 	cursor: pointer;
-	border-radius: 8px;
+	border-radius: 0.5rem;
 	line-height: 0;
 	transition: background var(--duration-color) var(--ease-editorial);
 }
@@ -327,8 +331,8 @@ html.dashboard-shell body {
 }
 
 .dashboard-logout img {
-	width: 22px;
-	height: 22px;
+	width: 1.375rem;
+	height: 1.375rem;
 	filter: brightness(0) invert(1);
 	opacity: 0.82;
 }
@@ -339,7 +343,7 @@ html.dashboard-shell body {
 
 .dashboard-logout:focus-visible {
 	outline: none;
-	box-shadow: 0 0 0 2px var(--color-saffron);
+	box-shadow: 0 0 0 0.125rem var(--color-saffron);
 }
 
 .dashboard-nav-item--hidden {
@@ -366,12 +370,12 @@ html.dashboard-shell body {
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
-	gap: 16px;
-	padding: 16px 28px;
+	gap: 1rem;
+	padding: 1rem 1.75rem;
 	border-bottom: 1px solid var(--color-hairline);
 	background: rgba(251, 246, 234, 0.82);
-	backdrop-filter: blur(12px);
-	-webkit-backdrop-filter: blur(12px);
+	backdrop-filter: blur(0.75rem);
+	-webkit-backdrop-filter: blur(0.75rem);
 	position: sticky;
 	top: 0;
 	z-index: 10;
@@ -382,7 +386,7 @@ html.dashboard-shell body {
 
 .dashboard-topbar-title {
 	display: grid;
-	gap: 2px;
+	gap: 0.125rem;
 	min-width: 0;
 }
 
@@ -393,7 +397,7 @@ html.dashboard-shell body {
 .dashboard-topbar h1 {
 	margin: 0;
 	font-family: var(--font-display);
-	font-size: 22px;
+	font-size: 1.375rem;
 	font-weight: 800;
 	letter-spacing: -0.02em;
 	color: var(--color-ink);
@@ -401,9 +405,9 @@ html.dashboard-shell body {
 
 .sidebar-hamburger {
 	display: none;
-	width: 36px;
-	height: 36px;
-	padding: 8px 6px;
+	width: 2.25rem;
+	height: 2.25rem;
+	padding: 0.5rem 0.375rem;
 	border: 1px solid var(--color-hairline);
 	border-radius: var(--radius-chip);
 	background: var(--color-ivory);
@@ -411,7 +415,7 @@ html.dashboard-shell body {
 	flex-direction: column;
 	align-items: center;
 	justify-content: center;
-	gap: 4px;
+	gap: 0.25rem;
 	transition: background 0.18s ease;
 }
 
@@ -421,13 +425,13 @@ html.dashboard-shell body {
 
 .sidebar-hamburger:focus-visible {
 	outline: none;
-	box-shadow: 0 0 0 2px var(--color-saffron);
+	box-shadow: 0 0 0 0.125rem var(--color-saffron);
 }
 
 .sidebar-hamburger-line {
 	display: block;
-	width: 18px;
-	height: 2px;
+	width: 1.125rem;
+	height: 0.125rem;
 	border-radius: 1px;
 	background: var(--color-ink);
 	transition:
@@ -448,7 +452,7 @@ html.dashboard-shell body {
 .dashboard-topbar-tools {
 	display: flex;
 	align-items: center;
-	gap: 16px;
+	gap: 1rem;
 }
 
 .dashboard-search {
@@ -458,24 +462,24 @@ html.dashboard-shell body {
 
 .dashboard-search img {
 	position: absolute;
-	left: 12px;
+	left: 0.75rem;
 	top: 50%;
 	transform: translateY(-50%);
-	width: 18px;
-	height: 18px;
+	width: 1.125rem;
+	height: 1.125rem;
 	opacity: 0.55;
 	pointer-events: none;
 }
 
 .dashboard-search input {
-	width: 260px;
+	width: 16.25rem;
 	max-width: 40vw;
-	padding: 10px 14px 10px 40px;
+	padding: 0.625rem 0.875rem 0.625rem 2.5rem;
 	border-radius: var(--radius-pill);
 	border: 1px solid var(--color-espresso);
 	background: var(--color-ivory);
 	font-family: var(--font-body);
-	font-size: 14px;
+	font-size: 0.875rem;
 	color: var(--color-ink);
 	transition:
 		border-color var(--duration-color) var(--ease-editorial),
@@ -485,7 +489,7 @@ html.dashboard-shell body {
 .dashboard-search input:focus {
 	outline: none;
 	border-color: var(--color-tangerine);
-	box-shadow: 0 0 0 2px var(--color-saffron);
+	box-shadow: 0 0 0 0.125rem var(--color-saffron);
 }
 
 .dashboard-search input::placeholder {
@@ -493,13 +497,30 @@ html.dashboard-shell body {
 }
 
 .dashboard-notify-btn {
+	position: relative;
 	background: var(--color-ivory);
 	border: 1px solid var(--color-hairline);
 	border-radius: var(--radius-pill);
-	padding: 8px 10px;
+	padding: 0.5rem 0.625rem;
 	cursor: pointer;
 	line-height: 0;
 	transition: background var(--duration-color) var(--ease-editorial);
+}
+
+.dashboard-notify-badge {
+	position: absolute;
+	top: -0.25rem;
+	right: -0.25rem;
+	min-width: 1rem;
+	padding: 0 0.25rem;
+	border-radius: var(--radius-pill);
+	background: var(--color-clay);
+	color: var(--color-parchment);
+	font-family: var(--font-mono);
+	font-size: 0.625rem;
+	font-weight: 700;
+	line-height: 1rem;
+	text-align: center;
 }
 
 .dashboard-notify-btn:hover {
@@ -508,19 +529,19 @@ html.dashboard-shell body {
 
 .dashboard-notify-btn:focus-visible {
 	outline: none;
-	box-shadow: 0 0 0 2px var(--color-saffron);
+	box-shadow: 0 0 0 0.125rem var(--color-saffron);
 }
 
 .dashboard-notify-btn img {
-	width: 24px;
-	height: 24px;
+	width: 1.5rem;
+	height: 1.5rem;
 	display: block;
 }
 
 .content-wrapper {
 	flex: 1;
 	min-height: 0;
-	padding: 24px var(--dash-content-pad-x) 40px;
+	padding: 1.5rem var(--dash-content-pad-x) 2.5rem;
 	width: 100%;
 	max-width: none;
 	box-sizing: border-box;
@@ -553,6 +574,11 @@ html.dashboard-shell body {
 }
 
 @media (max-width: 768px) {
+	:root {
+		/* Drawer sidebar is off-flow; only keep a modest pad for the card. */
+		--dash-overlay-pad: 1.125rem;
+	}
+
 	.dashboard-sidebar {
 		position: fixed;
 		top: 0;
@@ -568,14 +594,14 @@ html.dashboard-shell body {
 	.dashboard-sidebar.is-open {
 		transform: translateX(0);
 		box-shadow: var(--shadow-panel);
-		border-radius: 0 16px 16px 0;
+		border-radius: 0 1rem 1rem 0;
 	}
 
 	.dashboard-sidebar-overlay {
 		position: fixed;
 		inset: 0;
 		background: rgba(26, 14, 8, 0.42);
-		backdrop-filter: blur(4px);
+		backdrop-filter: blur(0.25rem);
 		z-index: 29;
 		opacity: 0;
 		pointer-events: none;
@@ -604,12 +630,12 @@ html.dashboard-shell body {
 
 	.dashboard-sidebar {
 		width: var(--dash-sidebar-w);
-		padding: 14px 12px;
+		padding: 0.875rem 0.75rem;
 	}
 
 	.dashboard-sidebar.is-open {
 		width: var(--dash-sidebar-w);
-		padding: 16px 12px;
+		padding: 1rem 0.75rem;
 	}
 
 	.dashboard-sidebar.is-open .dashboard-logo-text,
@@ -620,8 +646,8 @@ html.dashboard-shell body {
 
 	.dashboard-sidebar.is-open .dashboard-nav a {
 		justify-content: flex-start;
-		padding: 10px 12px;
-		padding-left: 9px;
+		padding: 0.625rem 0.75rem;
+		padding-left: 0.5625rem;
 	}
 
 	.dashboard-sidebar.is-open .dashboard-logo {
@@ -630,7 +656,7 @@ html.dashboard-shell body {
 
 	.dashboard-sidebar.is-open .dashboard-user-card {
 		justify-content: flex-start;
-		padding: 14px;
+		padding: 0.875rem;
 		border-radius: var(--radius-card);
 		background: rgba(26, 14, 8, 0.18);
 		border: 1px solid rgba(251, 246, 234, 0.24);
@@ -642,15 +668,15 @@ html.dashboard-shell body {
 
 	.sidebar-hamburger {
 		display: flex;
-		width: 32px;
-		height: 32px;
-		padding: 6px 5px;
-		border-radius: 9px;
-		gap: 3px;
+		width: 2rem;
+		height: 2rem;
+		padding: 0.375rem 0.3125rem;
+		border-radius: 0.5625rem;
+		gap: 0.1875rem;
 	}
 
 	.sidebar-hamburger-line {
-		width: 16px;
+		width: 1rem;
 	}
 
 	.dashboard-search {
@@ -666,7 +692,7 @@ html.dashboard-shell body {
 
 	.dashboard-nav a {
 		justify-content: center;
-		padding: 12px;
+		padding: 0.75rem;
 	}
 
 	.dashboard-topbar h1 {
@@ -685,7 +711,7 @@ html.dashboard-shell body {
 	}
 
 	.home-ann-meta {
-		font-size: 10px !important;
+		font-size: 0.625rem !important;
 	}
 
 	.dashboard-topbar-toast-slot {
@@ -696,20 +722,20 @@ html.dashboard-shell body {
 @media (max-width: 480px) {
 	.dashboard-sidebar {
 		width: var(--dash-sidebar-w);
-		padding: 10px 8px;
+		padding: 0.625rem 0.5rem;
 	}
 
 	.dashboard-nav a {
-		padding: 10px;
+		padding: 0.625rem;
 	}
 
 	.dashboard-logo img {
-		width: 34px;
-		height: 34px;
+		width: 2.125rem;
+		height: 2.125rem;
 	}
 
 	.dashboard-nav a img {
-		width: 19px;
-		height: 19px;
+		width: 1.1875rem;
+		height: 1.1875rem;
 	}
 }

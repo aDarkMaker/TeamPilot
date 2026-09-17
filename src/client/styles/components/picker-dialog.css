@@ -1,0 +1,128 @@
+/* PickerDialog: scrollable option-list overlay.
+   Card tokens match .calendar-modal-card so birthday month/day and schedule
+   time pickers read as the same surface. Overlay keyframes: base/animations.css.
+   Mask is full-viewport; --dash-overlay-pad centers the card in the content well. */
+
+.time-picker {
+	position: fixed;
+	inset: 0;
+	background: rgba(26, 14, 8, 0.45);
+	backdrop-filter: blur(0.25rem);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding: var(--dash-overlay-pad, 1.125rem);
+	box-sizing: border-box;
+	/* Must clear .calendar-modal (z-index 3000): the picker is a nested overlay. */
+	z-index: 3100;
+}
+
+.time-picker.open {
+	animation: modal-fade-in 180ms ease both;
+}
+
+.time-picker.closing {
+	animation: modal-fade-out 180ms ease both;
+}
+
+.time-picker.open .time-picker-card {
+	animation: modal-pop-in 180ms var(--dash-nav-spring, ease) both;
+}
+
+.time-picker.closing .time-picker-card {
+	animation: modal-pop-out 180ms ease both;
+}
+
+.time-picker-card {
+	width: min(22.5rem, 100%);
+	max-height: min(32rem, calc(100dvh - var(--dash-topbar-h, 5.25rem) - 2.25rem));
+	box-sizing: border-box;
+	display: flex;
+	flex-direction: column;
+	overflow: hidden;
+	padding: 1rem;
+	border-radius: var(--radius-panel);
+	border: 1px solid var(--color-hairline);
+	background: var(--color-ivory);
+	box-shadow: var(--shadow-panel);
+	color: var(--color-ink);
+	font-family: var(--font-body);
+	backdrop-filter: blur(1.125rem);
+}
+
+.time-picker-head {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 0.75rem;
+	flex-shrink: 0;
+	border-bottom: 1px solid var(--color-hairline-soft);
+	padding-bottom: 0.75rem;
+	margin-bottom: 0.875rem;
+}
+
+.time-picker-title {
+	font-family: var(--font-display);
+	font-weight: 700;
+	font-size: 0.875rem;
+	letter-spacing: -0.01em;
+	color: var(--color-ink);
+}
+
+.time-picker-list {
+	flex: 1 1 auto;
+	min-height: 0;
+	overflow: auto;
+	display: grid;
+	gap: 0.5rem;
+	padding: 0.125rem;
+	scrollbar-width: none;
+	overscroll-behavior: contain;
+}
+
+.time-picker-list::-webkit-scrollbar {
+	width: 0;
+	height: 0;
+}
+
+.time-picker-item {
+	border: 1px solid var(--color-hairline);
+	background: var(--color-parchment);
+	color: var(--color-espresso);
+	border-radius: var(--radius-chip);
+	padding: 0.625rem 0.75rem;
+	font-family: var(--font-body);
+	font-size: 0.8125rem;
+	font-weight: 600;
+	cursor: pointer;
+	text-align: left;
+}
+
+.time-picker-item:hover {
+	border-color: var(--color-ink);
+	color: var(--color-ink);
+}
+
+.time-picker-item.active {
+	background: var(--color-ink);
+	border-color: var(--color-ink);
+	color: var(--color-parchment);
+}
+
+@media (max-width: 768px) {
+	.time-picker {
+		align-items: flex-end;
+		justify-content: stretch;
+		padding: 0;
+		padding-bottom: env(safe-area-inset-bottom);
+		/* Bottom sheet covers the full viewport like .calendar-modal on mobile. */
+		inset: 0;
+	}
+
+	.time-picker-card {
+		width: 100%;
+		max-width: none;
+		max-height: min(72dvh, 32rem);
+		border-radius: 1.125rem 1.125rem 0 0;
+	}
+}

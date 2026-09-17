@@ -1,14 +1,14 @@
 @font-face {
 	font-family: 'JoinUsTitle';
 	src:
-		url('../assets/fonts/joinusTitle.woff2') format('woff2'),
-		url('../assets/fonts/joinusTitle.ttf') format('truetype');
+		url('../../../assets/fonts/joinusTitle.woff2') format('woff2'),
+		url('../../../assets/fonts/joinusTitle.ttf') format('truetype');
 	font-display: swap;
 }
 
 html.joinus-page {
 	scroll-behavior: smooth;
-	scroll-padding-top: var(--joinus-header-h, 0px);
+	scroll-padding-top: var(--joinus-header-h, 0);
 	scrollbar-width: none;
 	-ms-overflow-style: none;
 	overflow-y: auto;
@@ -53,7 +53,7 @@ html.joinus-page::-webkit-scrollbar {
 	font-size: 1rem;
 	line-height: 1.55;
 	color: var(--joinus-fg);
-	padding-top: var(--joinus-header-h, 64px);
+	padding-top: var(--joinus-header-h, 4rem);
 }
 
 .joinus-skip {
@@ -90,10 +90,10 @@ html.joinus-page::-webkit-scrollbar {
 	left: 0;
 	right: 0;
 	z-index: 50;
-	backdrop-filter: blur(14px);
+	backdrop-filter: blur(0.875rem);
 	background: transparent;
 	border-bottom: 1px solid var(--joinus-line);
-	box-shadow: 0 1px 2px rgba(15, 23, 42, 0.06);
+	box-shadow: 0 1px 0.125rem rgba(15, 23, 42, 0.06);
 }
 
 .joinus-header-actions {
@@ -139,7 +139,7 @@ html.joinus-page::-webkit-scrollbar {
 .joinus-brand-icon {
 	width: 2rem;
 	height: 2rem;
-	border-radius: 6px;
+	border-radius: 0.375rem;
 	object-fit: contain;
 	flex-shrink: 0;
 }
@@ -155,9 +155,9 @@ html.joinus-page::-webkit-scrollbar {
 	display: inline-flex;
 	align-items: center;
 	justify-content: center;
-	height: 34px;
-	padding: 0 16px;
-	border-radius: 9999px;
+	height: 2.125rem;
+	padding: 0 1rem;
+	border-radius: 624.9375rem;
 	background: #fff;
 	border: 1px solid var(--joinus-line);
 	text-decoration: none;
@@ -185,8 +185,8 @@ html.joinus-page::-webkit-scrollbar {
 		position: absolute;
 		left: 50%;
 		bottom: -1.2%;
-		width: 200px;
-		height: 200px;
+		width: 12.5rem;
+		height: 12.5rem;
 		border-radius: 50%;
 		background: #1a1d24;
 		transform: translateX(-50%) scale(0);
@@ -213,7 +213,7 @@ html.joinus-page::-webkit-scrollbar {
 		z-index: 2;
 		color: #fff;
 		white-space: nowrap;
-		transform: translate(-50%, calc(-50% + 42px));
+		transform: translate(-50%, calc(-50% + 2.625rem));
 		opacity: 0;
 		transition:
 			transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1),
@@ -222,7 +222,7 @@ html.joinus-page::-webkit-scrollbar {
 	}
 
 	.joinus-nav a:hover .pill-label {
-		transform: translateY(-42px);
+		transform: translateY(-2.625rem);
 		opacity: 0;
 	}
 
@@ -237,10 +237,10 @@ html.joinus-page::-webkit-scrollbar {
 	display: inline-flex;
 	align-items: center;
 	justify-content: center;
-	height: 34px;
-	padding: 0 18px;
+	height: 2.125rem;
+	padding: 0 1.125rem;
 	border: 1px solid var(--joinus-line);
-	border-radius: 999px;
+	border-radius: 62.4375rem;
 	background: var(--joinus-accent);
 	font-weight: 700;
 	font-size: 0.85rem;
@@ -267,8 +267,8 @@ html.joinus-page::-webkit-scrollbar {
 		position: absolute;
 		left: 50%;
 		bottom: -10%;
-		width: 200px;
-		height: 200px;
+		width: 12.5rem;
+		height: 12.5rem;
 		border-radius: 50%;
 		background: #fff;
 		transform: translateX(-50%) scale(0);
@@ -295,7 +295,7 @@ html.joinus-page::-webkit-scrollbar {
 		z-index: 2;
 		color: var(--joinus-accent);
 		white-space: nowrap;
-		transform: translate(-50%, calc(-50% + 42px));
+		transform: translate(-50%, calc(-50% + 2.625rem));
 		opacity: 0;
 		transition:
 			transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1),
@@ -304,7 +304,7 @@ html.joinus-page::-webkit-scrollbar {
 	}
 
 	.joinus-header__cta:hover .pill-label {
-		transform: translateY(-42px);
+		transform: translateY(-2.625rem);
 		opacity: 0;
 	}
 
@@ -349,12 +349,12 @@ html.joinus-page::-webkit-scrollbar {
 }
 
 .joinus-hero > div:first-child {
-	flex: 1 1 280px;
+	flex: 1 1 17.5rem;
 	min-width: 0;
 }
 
 .joinus-hero__img {
-	max-width: 282px;
+	max-width: 17.625rem;
 	width: 100%;
 	height: auto;
 	object-fit: contain;
@@ -425,7 +425,7 @@ html.joinus-page::-webkit-scrollbar {
 	align-items: center;
 	justify-content: center;
 	padding: 0.65rem 1.35rem;
-	border-radius: 999px;
+	border-radius: 62.4375rem;
 	font-weight: 600;
 	font-size: 0.9rem;
 	text-decoration: none;
@@ -458,7 +458,7 @@ html.joinus-page::-webkit-scrollbar {
 }
 
 .joinus-section {
-	scroll-margin-top: -2px;
+	scroll-margin-top: -0.125rem;
 	padding: var(--joinus-section-y) 0;
 	border-top: 1px solid #fff;
 }
@@ -496,11 +496,11 @@ html.joinus-page::-webkit-scrollbar {
 .joinus-card {
 	position: relative;
 	overflow: hidden;
-	border-radius: 12px;
+	border-radius: 0.75rem;
 	border: 1px solid var(--joinus-line);
 	padding: 1rem 1.1rem;
 	background: #fff;
-	box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+	box-shadow: 0 1px 0.125rem rgba(15, 23, 42, 0.04);
 }
 
 .joinus-card h3 {
@@ -512,7 +512,7 @@ html.joinus-page::-webkit-scrollbar {
 
 .joinus-card p {
 	margin: 0;
-	font-size: 14px;
+	font-size: 0.875rem;
 	font-weight: 500;
 	color: var(--joinus-muted);
 }
@@ -541,22 +541,22 @@ html.joinus-page::-webkit-scrollbar {
 	position: absolute;
 	right: 0;
 	bottom: 0;
-	width: 44px;
-	height: 44px;
+	width: 2.75rem;
+	height: 2.75rem;
 	object-fit: contain;
-	border-radius: 4px;
+	border-radius: 0.25rem;
 	opacity: 0;
 	transform: scale(0.4);
 	transition:
 		opacity 0.42s cubic-bezier(0.34, 1.56, 0.64, 1),
 		transform 0.42s cubic-bezier(0.34, 1.56, 0.64, 1);
 	transition-delay: var(--icon-delay, 0s);
-	filter: drop-shadow(0 2px 8px rgba(15, 23, 42, 0.12));
+	filter: drop-shadow(0 0.125rem 0.5rem rgba(15, 23, 42, 0.12));
 }
 
 .joinus-card--active .joinus-card__icon {
 	opacity: 0.88;
-	transform: translate(var(--icon-tx, 0px), var(--icon-ty, 0px)) scale(1);
+	transform: translate(var(--icon-tx, 0), var(--icon-ty, 0)) scale(1);
 	transition-delay: var(--icon-delay, 0s);
 }
 
@@ -570,8 +570,8 @@ html.joinus-page::-webkit-scrollbar {
 	z-index: 2;
 	opacity: 0;
 	background: rgba(255, 255, 255, 0.38);
-	backdrop-filter: blur(14px);
-	-webkit-backdrop-filter: blur(14px);
+	backdrop-filter: blur(0.875rem);
+	-webkit-backdrop-filter: blur(0.875rem);
 	mask-image: radial-gradient(ellipse at 100% 100%, #000 0%, transparent 68%);
 	-webkit-mask-image: radial-gradient(ellipse at 100% 100%, #000 0%, transparent 68%);
 	transition: opacity 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
@@ -609,7 +609,7 @@ html.joinus-page::-webkit-scrollbar {
 			rgba(255, 220, 130, 0) 68%,
 			transparent 100%
 		);
-		filter: blur(2px);
+		filter: blur(0.125rem);
 		transform: skewX(-20deg);
 	}
 
@@ -637,8 +637,8 @@ html.joinus-page::-webkit-scrollbar {
 
 @media (max-width: 767px) {
 	.joinus-card__icon {
-		width: 38px;
-		height: 38px;
+		width: 2.375rem;
+		height: 2.375rem;
 	}
 
 	.joinus-card__corner-blur {
@@ -823,7 +823,7 @@ html.joinus-page::-webkit-scrollbar {
 	font-weight: 600;
 	gap: 0.35rem;
 	text-decoration: none;
-	border-radius: 9999px;
+	border-radius: 624.9375rem;
 }
 
 .joinus-apply-back.joinus-btn i {
@@ -848,8 +848,8 @@ html.joinus-page::-webkit-scrollbar {
 		position: absolute;
 		left: 50%;
 		bottom: -10%;
-		width: 200px;
-		height: 200px;
+		width: 12.5rem;
+		height: 12.5rem;
 		border-radius: 50%;
 		background: #1a1d24;
 		transform: translateX(-50%) scale(0);
@@ -879,7 +879,7 @@ html.joinus-page::-webkit-scrollbar {
 		z-index: 2;
 		color: #fff;
 		white-space: nowrap;
-		transform: translate(-50%, calc(-50% + 42px));
+		transform: translate(-50%, calc(-50% + 2.625rem));
 		opacity: 0;
 		transition:
 			transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1),
@@ -888,7 +888,7 @@ html.joinus-page::-webkit-scrollbar {
 	}
 
 	.joinus-apply-back.joinus-btn:hover .pill-label {
-		transform: translateY(-42px);
+		transform: translateY(-2.625rem);
 		opacity: 0;
 	}
 
@@ -896,25 +896,6 @@ html.joinus-page::-webkit-scrollbar {
 		transform: translate(-50%, -50%);
 		opacity: 1;
 	}
-}
-
-.joinus-apply-sheet {
-	padding: 1.5rem 0 3rem;
-	border-top: none;
-}
-
-.joinus-apply-sheet .joinus-section__title {
-	margin-top: 0;
-}
-
-.joinus-apply-placeholder {
-	margin: 1.25rem 0 0;
-	padding: 1.25rem 1rem;
-	border-radius: 0.75rem;
-	border: 1px dashed var(--joinus-line);
-	color: var(--joinus-muted);
-	font-size: 0.95rem;
-	line-height: 1.55;
 }
 
 @media (prefers-reduced-motion: reduce) {

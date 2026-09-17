@@ -1,0 +1,210 @@
+/* Choice controls: checkbox, radio option card, tabs. */
+
+.tc-check {
+	position: relative;
+	display: inline-flex;
+	align-items: center;
+	gap: 0.875rem;
+	padding: 0.75rem 1rem;
+	background: var(--color-ivory);
+	border: 1px solid var(--color-hairline);
+	border-radius: var(--radius-card);
+	font-family: var(--font-body);
+	font-size: 0.9375rem;
+	color: var(--color-ink);
+	cursor: pointer;
+	user-select: none;
+	transition: border-color var(--duration-color) var(--ease-editorial);
+}
+
+.tc-check:hover {
+	border-color: var(--color-ink);
+}
+
+.tc-check__input {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	margin: -1px;
+	padding: 0;
+	overflow: hidden;
+	clip: rect(0, 0, 0, 0);
+	border: 0;
+}
+
+.tc-check__box {
+	flex-shrink: 0;
+	display: inline-grid;
+	place-content: center;
+	width: 1.375rem;
+	height: 1.375rem;
+	background: var(--color-ivory);
+	border: 0.0938rem solid var(--color-ink);
+	border-radius: var(--radius-box);
+	transition:
+		background var(--duration-color) var(--ease-editorial),
+		border-color var(--duration-color) var(--ease-editorial);
+}
+
+.tc-check__box::before {
+	content: '';
+	width: 0.8125rem;
+	height: 0.8125rem;
+	background: var(--color-saffron);
+	clip-path: polygon(14% 44%, 0 65%, 50% 100%, 100% 16%, 80% 0, 43% 62%);
+	transform: scale(0);
+	transition: transform var(--duration-color) var(--ease-editorial);
+}
+
+.tc-check__input:checked + .tc-check__box {
+	background: var(--color-ink);
+	border-color: var(--color-ink);
+}
+
+.tc-check__input:checked + .tc-check__box::before {
+	transform: scale(1);
+}
+
+.tc-check__input:focus-visible + .tc-check__box {
+	box-shadow: 0 0 0 0.125rem var(--color-saffron);
+}
+
+.tc-check__label {
+	font-weight: 500;
+}
+
+.tc-check__meta {
+	margin-left: auto;
+	font-family: var(--font-mono);
+	font-weight: 600;
+	font-size: 0.8125rem;
+	color: var(--color-espresso);
+	letter-spacing: -0.01em;
+}
+
+/* Radio option card */
+
+.tc-radio-card {
+	position: relative;
+	display: grid;
+	grid-template-columns: 1.375rem 1fr auto;
+	align-items: center;
+	gap: 0.875rem;
+	padding: 0.875rem 1.125rem;
+	background: var(--color-ivory);
+	border: 1px solid var(--color-hairline);
+	border-radius: var(--radius-card);
+	cursor: pointer;
+	transition:
+		border-color var(--duration-color) var(--ease-editorial),
+		box-shadow var(--duration-color) var(--ease-editorial);
+}
+
+.tc-radio-card:hover {
+	border-color: var(--color-ink);
+}
+
+.tc-radio-card:has(.tc-radio-card__input:checked) {
+	border-color: var(--color-ink);
+	box-shadow: 0 1px 0 rgba(58, 36, 24, 0.08);
+}
+
+.tc-radio-card__input {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	margin: -1px;
+	overflow: hidden;
+	clip: rect(0, 0, 0, 0);
+	border: 0;
+}
+
+.tc-radio-card__dot {
+	width: 1.375rem;
+	height: 1.375rem;
+	border-radius: 50%;
+	border: 0.0938rem solid var(--color-ink);
+	display: inline-grid;
+	place-content: center;
+}
+
+.tc-radio-card__dot::before {
+	content: '';
+	width: 0.625rem;
+	height: 0.625rem;
+	border-radius: 50%;
+	background: var(--color-tangerine);
+	transform: scale(0);
+	transition: transform var(--duration-color) var(--ease-editorial);
+}
+
+.tc-radio-card__input:checked ~ .tc-radio-card__dot::before {
+	transform: scale(1);
+}
+
+.tc-radio-card__input:focus-visible ~ .tc-radio-card__dot {
+	box-shadow: 0 0 0 0.125rem var(--color-saffron);
+}
+
+.tc-radio-card__title {
+	font-family: var(--font-display);
+	font-weight: 700;
+	font-size: 1.0625rem;
+	letter-spacing: -0.01em;
+	color: var(--color-ink);
+}
+
+.tc-radio-card__meta {
+	font-family: var(--font-mono);
+	font-weight: 500;
+	font-size: 0.8125rem;
+	color: var(--color-espresso);
+	letter-spacing: -0.01em;
+}
+
+/* Tabs */
+
+.tc-tabs {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.25rem;
+	background: var(--color-ivory);
+	border: 1px solid var(--color-hairline);
+	border-radius: var(--radius-pill);
+	padding: 0.375rem;
+	font-family: var(--font-body);
+}
+
+.tc-tabs__tab {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.5rem;
+	height: 2.5rem;
+	padding: 0 1.125rem;
+	border: 0;
+	background: transparent;
+	border-radius: var(--radius-pill);
+	font-family: inherit;
+	font-size: 0.875rem;
+	font-weight: 600;
+	color: var(--color-espresso);
+	cursor: pointer;
+	transition:
+		background var(--duration-color) var(--ease-editorial),
+		color var(--duration-color) var(--ease-editorial);
+}
+
+.tc-tabs__tab:hover {
+	color: var(--color-ink);
+}
+
+.tc-tabs__tab.is-active,
+.tc-tabs__tab[aria-selected='true'] {
+	background: var(--color-ink);
+	color: var(--color-parchment);
+}
+
+.tc-tabs__tab:focus-visible {
+	outline: none;
+	box-shadow: 0 0 0 0.125rem var(--color-saffron);
+}

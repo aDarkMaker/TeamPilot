@@ -1,0 +1,178 @@
+/* ConfirmModal: shared confirm/cancel dialog.
+   Owned by the component; previously these rules were named users-admin-* in
+   users-admin.css even though the dialog is mounted from the users page and the
+   newcomers page alike. */
+
+.confirm-modal {
+	position: fixed;
+	inset: 0;
+	z-index: 3000;
+	display: grid;
+	place-items: center;
+	padding: var(--dash-overlay-pad, 1.25rem);
+	box-sizing: border-box;
+	background: rgba(26, 14, 8, 0.45);
+	backdrop-filter: blur(0.25rem);
+}
+
+.confirm-modal-card {
+	width: min(27.5rem, 100%);
+	padding: 1.375rem 1.5rem;
+	border: 1px solid var(--color-hairline);
+	border-radius: var(--radius-panel);
+	background: var(--color-ivory);
+	box-shadow: var(--shadow-panel);
+	color: var(--color-ink);
+	font-family: var(--font-body);
+}
+
+.confirm-modal-head {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 0.75rem;
+	margin-bottom: 0.75rem;
+}
+
+.confirm-modal-title {
+	font-family: var(--font-display);
+	font-size: 1.125rem;
+	font-weight: 700;
+	letter-spacing: -0.01em;
+	color: var(--color-ink);
+}
+
+.confirm-modal-close {
+	padding: 0.25rem 0.5rem;
+	border: none;
+	background: transparent;
+	font-weight: 900;
+	font-size: 1.125rem;
+	line-height: 1;
+	border-radius: var(--radius-chip);
+	color: var(--color-clay);
+	cursor: pointer;
+	transition:
+		transform 0.18s var(--dash-nav-spring),
+		background 0.22s ease;
+}
+
+.confirm-modal-close:hover:not(:disabled) {
+	background: var(--color-clay-tint);
+}
+
+.confirm-modal-close:active:not(:disabled) {
+	transform: scale(0.98);
+}
+
+.confirm-modal-close:disabled {
+	opacity: 0.6;
+	cursor: not-allowed;
+	transform: none;
+}
+
+.confirm-modal-message {
+	padding: 0.85rem 1rem;
+	margin: 0 0 0.75rem;
+	border-radius: var(--radius-card);
+	border: 1px solid var(--color-hairline);
+	background: var(--color-ivory);
+	font-family: var(--font-body);
+	font-size: 0.9rem;
+	font-weight: 600;
+	animation: hxk-toast-in 360ms cubic-bezier(0.25, 0.8, 0.25, 1) both;
+}
+
+.confirm-modal-message.err {
+	color: var(--color-clay);
+}
+
+.confirm-modal-actions {
+	display: flex;
+	align-items: center;
+	gap: 0.625rem;
+	justify-content: flex-end;
+}
+
+/* The confirm/cancel pair sits 20px apart, matching the previous inline margin. */
+.confirm-modal-actions .confirm-modal-btn + .confirm-modal-btn {
+	margin-left: 0.625rem;
+}
+
+.confirm-modal-btn {
+	padding: 0.4375rem 0.6875rem;
+	border: 0.0938rem solid var(--color-espresso);
+	background: transparent;
+	border-color: var(--color-espresso);
+	border-radius: var(--radius-pill);
+	font-family: var(--font-body);
+	font-size: 0.75rem;
+	font-weight: 600;
+	cursor: pointer;
+	transition:
+		background var(--duration-color) var(--ease-editorial),
+		border-color var(--duration-color) var(--ease-editorial),
+		color var(--duration-color) var(--ease-editorial);
+}
+
+.confirm-modal-btn:hover:not(:disabled) {
+	background: var(--color-hairline-soft);
+	border-color: var(--color-espresso);
+	color: var(--color-espresso);
+}
+
+.confirm-modal-btn:focus-visible,
+.confirm-modal-close:focus-visible {
+	outline: none;
+	box-shadow: 0 0 0 0.125rem var(--color-saffron);
+}
+
+.confirm-modal-btn.primary {
+	background: var(--color-ink);
+	border-color: var(--color-ink);
+	color: var(--color-parchment);
+}
+
+.confirm-modal-btn.primary:hover:not(:disabled) {
+	background: var(--color-clay);
+	border-color: var(--color-clay);
+}
+
+.confirm-modal-btn.danger {
+	background: transparent;
+	border-color: var(--color-clay);
+	color: var(--color-clay);
+}
+
+.confirm-modal-btn.danger:hover:not(:disabled) {
+	background: var(--color-clay-tint);
+	border-color: var(--color-clay);
+}
+
+.confirm-modal-btn:disabled,
+.confirm-modal-btn:disabled:hover {
+	background: transparent;
+	border-color: var(--color-hairline);
+	color: var(--color-espresso);
+	cursor: not-allowed;
+}
+
+.confirm-modal-btn.primary:disabled,
+.confirm-modal-btn.primary:disabled:hover {
+	background: var(--color-ink);
+	border-color: var(--color-ink);
+	color: var(--color-parchment);
+}
+
+.confirm-modal-btn.danger:disabled,
+.confirm-modal-btn.danger:disabled:hover {
+	background: transparent;
+	border-color: var(--color-clay);
+	color: var(--color-clay);
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.confirm-modal-message {
+		animation: none;
+	}
+}

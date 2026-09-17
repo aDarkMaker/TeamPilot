@@ -1,0 +1,27 @@
+/* Utilities */
+
+.tc-eyebrow {
+	font-family: var(--font-body);
+	font-size: 0.75rem;
+	font-weight: 600;
+	letter-spacing: 0.14em;
+	text-transform: uppercase;
+	color: var(--color-espresso);
+}
+
+.tc-figure {
+	font-family: var(--font-mono);
+	font-weight: 700;
+	font-size: 2.75rem;
+	line-height: 0.95;
+	letter-spacing: -0.04em;
+	color: var(--color-ink);
+}
+
+.tc-meta {
+	font-family: var(--font-mono);
+	font-weight: 500;
+	font-size: 0.8125rem;
+	letter-spacing: -0.01em;
+	color: var(--color-espresso);
+}
