@@ -39,6 +39,11 @@ if [ -z "${COMPOSE_BIN:-}" ]; then
 	fi
 fi
 
+# docker-compose 1.x chokes on BuildKit attestation manifests ("ContainerConfig").
+# Prefer the classic builder unless the operator explicitly opts into BuildKit.
+export DOCKER_BUILDKIT="${DOCKER_BUILDKIT:-0}"
+export COMPOSE_DOCKER_CLI_BUILD="${COMPOSE_DOCKER_CLI_BUILD:-0}"
+
 cd "$PROJECT_DIR"
 export SHARED_NETWORK_NAME
 
@@ -94,10 +99,45 @@ stop_project() {
 	$COMPOSE_BIN -p "$project" -f "$COMPOSE_FILE" down --remove-orphans || warn "failed to stop $project"
 }
 
-# The legacy single-stack release runs under its own project name and holds a
-# host port, so it has to be recognised before a colour tries to bind it.
+# Compose names containers `{project}_{service}_{n}` (underscore). Legacy
+# single-stack releases may also hold a host port under a different project.
 port_owner() {
 	docker ps --format '{{.Names}}|{{.Ports}}' | grep -F "127.0.0.1:$1->" | cut -d'|' -f1 | head -n1 || true
+}
+
+owner_belongs_to_project() {
+	local owner="$1" project="$2"
+	[ -n "$owner" ] && [ -n "$project" ] || return 1
+	case "$owner" in
+	"$project"_*|"$project"-*) return 0 ;;
+	esac
+	return 1
+}
+
+# Idle colour is disposable: last release left it up for rollback, next release
+# rebuilds that colour. Tear it down so the port is free — never require a
+# manual docker stop between releases.
+clear_idle_colour() {
+	local color="$1" project="$2" port owner previous_project
+	port="$(port_of "$color")"
+
+	stop_project "$project"
+
+	previous_project="$(state_get previous_project)"
+	if [ -n "$previous_project" ] && [ "$previous_project" != "$project" ]; then
+		owner="$(port_owner "$port")"
+		if owner_belongs_to_project "$owner" "$previous_project"; then
+			log "stopping leftover previous project $previous_project on port $port"
+			stop_project "$previous_project"
+		fi
+	fi
+
+	owner="$(port_owner "$port")"
+	[ -z "$owner" ] && return 0
+	if owner_belongs_to_project "$owner" "$project"; then
+		die "port $port still held by $owner after stopping $project"
+	fi
+	die "port $port is held by $owner; refuse to release over an unknown stack"
 }
 
 ensure_port_available() {
@@ -105,9 +145,9 @@ ensure_port_available() {
 	port="$(port_of "$color")"
 	owner="$(port_owner "$port")"
 	[ -n "$owner" ] || return 0
-	case "$owner" in
-	"$project"-*) return 0 ;;
-	esac
+	if owner_belongs_to_project "$owner" "$project"; then
+		return 0
+	fi
 	die "port $port is held by $owner; stop that stack or release the colour before releasing"
 }
 
@@ -252,6 +292,8 @@ release_stack() {
 	local color="$1" tag="$2" project
 	project="$(color_project "$color")"
 
+	log "clearing idle $color before release"
+	clear_idle_colour "$color" "$project"
 	ensure_port_available "$color" "$project"
 
 	if [ "$SKIP_BUILD" != "1" ]; then

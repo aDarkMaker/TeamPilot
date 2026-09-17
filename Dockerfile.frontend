@@ -10,7 +10,7 @@ RUN bun install
 COPY . .
 RUN bun run build
 
-# serve by nginx
-FROM nginx:latest
+# serve by nginx (alpine keeps the pull small enough for mirror-based hosts)
+FROM nginx:alpine
 COPY deploy/nginx.conf /etc/nginx/conf.d/default.conf
 COPY --from=builder /app/dist /usr/share/nginx/html

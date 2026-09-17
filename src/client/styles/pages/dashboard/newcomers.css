@@ -1713,12 +1713,19 @@
 	stroke-dasharray: 400;
 	stroke-dashoffset: 400;
 	opacity: 0;
-	transition: stroke-dashoffset 0.42s cubic-bezier(0.33, 1, 0.68, 1);
+	/* Uncheck: reverse the stroke first, then fade so the undo is visible. */
+	transition:
+		stroke-dashoffset 0.36s cubic-bezier(0.33, 1, 0.68, 1),
+		opacity 0.12s ease 0.22s;
 }
 
 .nc-attach-check-input:checked + .nc-attach-check-label .nc-attach-check-path {
 	stroke-dashoffset: 0;
 	opacity: 1;
+	/* Check: show ink immediately, then draw. */
+	transition:
+		stroke-dashoffset 0.42s cubic-bezier(0.33, 1, 0.68, 1),
+		opacity 0.05s ease;
 }
 
 .nc-attach-check-input:checked + .nc-attach-check-label .nc-attach-check-box {
