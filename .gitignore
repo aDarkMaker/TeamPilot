@@ -53,3 +53,6 @@ script/build.js
 
 # Deploy state
 .deploy-state
+
+# One-off roster aligner — holds applicant PII; keep off GitHub
+script/align-interview-slots.mjs
