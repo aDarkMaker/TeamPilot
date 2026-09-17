@@ -4,19 +4,27 @@ import type { AuthService } from '../services/auth.service';
 const COOKIE_NAME = 'access_token';
 const MAX_AGE_SEC = 60 * 60 * 24 * 7;
 
+function setAccessTokenCookie(ctx: Context, value: string, maxAge: number) {
+	// TLS terminates at the host edge; the app hop is plain HTTP. Force the
+	// Secure attribute in production so cookies() does not require ctx.secure.
+	const secure = process.env.NODE_ENV === 'production';
+	if (secure) ctx.cookies.secure = true;
+	ctx.cookies.set(COOKIE_NAME, value, {
+		httpOnly: true,
+		sameSite: 'lax',
+		secure,
+		maxAge,
+		path: '/',
+	});
+}
+
 export class AuthController {
 	constructor(private service: AuthService) {}
 
 	login = async (ctx: Context) => {
 		const result = await this.service.login(ctx.request.body);
 
-		ctx.cookies.set(COOKIE_NAME, result.token, {
-			httpOnly: true,
-			sameSite: 'lax',
-			secure: process.env.NODE_ENV === 'production',
-			maxAge: MAX_AGE_SEC * 1000,
-			path: '/',
-		});
+		setAccessTokenCookie(ctx, result.token, MAX_AGE_SEC * 1000);
 
 		ctx.body = {
 			ok: true,
@@ -28,13 +36,7 @@ export class AuthController {
 	};
 
 	logout = async (ctx: Context) => {
-		ctx.cookies.set(COOKIE_NAME, '', {
-			httpOnly: true,
-			sameSite: 'lax',
-			secure: process.env.NODE_ENV === 'production',
-			maxAge: 0,
-			path: '/',
-		});
+		setAccessTokenCookie(ctx, '', 0);
 		ctx.body = { ok: true, data: { status: 'ok' } };
 	};
 }

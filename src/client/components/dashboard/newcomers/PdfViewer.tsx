@@ -19,14 +19,31 @@ export function PdfViewer({ url }: Props) {
 		let task: import('pdfjs-dist').PDFDocumentLoadingTask | null = null;
 		let ro: ResizeObserver | null = null;
 		let raf = 0;
+		let gen = 0;
+		let lastWidth = 0;
+		const renders = new Set<import('pdfjs-dist').RenderTask>();
+
+		const cancelPending = () => {
+			for (const pending of renders) {
+				try {
+					pending.cancel();
+				} catch {
+					// 已结束的任务取消会抛错，忽略
+				}
+			}
+			renders.clear();
+		};
 
 		const renderPages = async (width: number) => {
+			const myGen = ++gen;
+			cancelPending();
+
 			const doc = task?.promise ? await task.promise : null;
-			if (!doc || disposed) return;
+			if (!doc || disposed || myGen !== gen) return;
 			const dpr = window.devicePixelRatio || 1;
-			host.replaceChildren();
+			const fragment = document.createDocumentFragment();
 			for (let n = 1; n <= doc.numPages; n++) {
-				if (disposed) return;
+				if (disposed || myGen !== gen) return;
 				let page: PDFPageProxy;
 				try {
 					page = await doc.getPage(n);
@@ -44,25 +61,33 @@ export function PdfViewer({ url }: Props) {
 				const wrap = document.createElement('div');
 				wrap.className = 'nc-pdf-page';
 				wrap.appendChild(canvas);
-				host.appendChild(wrap);
-				if (disposed) return;
+				fragment.appendChild(wrap);
+				const renderTask = page.render({
+					canvas,
+					viewport,
+					transform: dpr !== 1 ? [dpr, 0, 0, dpr, 0, 0] : undefined,
+				});
+				renders.add(renderTask);
 				try {
-					await page.render({
-						canvas,
-						viewport,
-						transform: dpr !== 1 ? [dpr, 0, 0, dpr, 0, 0] : undefined,
-					}).promise;
+					await renderTask.promise;
 				} catch {
-					// 单页渲染失败不影响后续页
+					// 单页渲染失败或被取消都不影响后续页
+				} finally {
+					renders.delete(renderTask);
 				}
 			}
+			if (disposed || myGen !== gen) return;
+			host.replaceChildren(fragment);
 		};
 
+		// 只按宽度重绘：追加页面只改变高度，观察增高中的 host 会让 Firefox 反复重绘。
 		const schedule = () => {
 			cancelAnimationFrame(raf);
 			raf = requestAnimationFrame(() => {
-				const w = host.clientWidth;
-				if (w > 0) void renderPages(w);
+				const w = Math.floor(host.clientWidth);
+				if (w <= 0 || w === lastWidth) return;
+				lastWidth = w;
+				void renderPages(w);
 			});
 		};
 
@@ -76,7 +101,7 @@ export function PdfViewer({ url }: Props) {
 				setStatus('ready');
 				schedule();
 				ro = new ResizeObserver(schedule);
-				ro.observe(host);
+				ro.observe(host.parentElement ?? host);
 			} catch {
 				if (!disposed) setStatus('error');
 			}
@@ -84,8 +109,10 @@ export function PdfViewer({ url }: Props) {
 
 		return () => {
 			disposed = true;
+			gen++;
 			cancelAnimationFrame(raf);
 			ro?.disconnect();
+			cancelPending();
 			host.replaceChildren();
 			if (task) {
 				void task.destroy().catch(() => undefined);

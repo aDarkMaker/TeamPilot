@@ -1099,6 +1099,7 @@
 	box-sizing: border-box;
 	height: min(58vh, 35rem);
 	overflow: auto;
+	scrollbar-gutter: stable;
 	overscroll-behavior: contain;
 	background: #525659;
 	scrollbar-width: thin;
