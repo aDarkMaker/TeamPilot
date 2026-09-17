@@ -38,6 +38,8 @@ const { title = '工作主页', notifyVariant = 'read' }: Props = Astro.props;
         <ClientRouter />
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests" />
+
         <link rel="icon" type="image/png" href={assetUrl(favicon)} />
         <link rel="preload" href={assetUrl(fontBody)} as="font" type="font/woff2" crossorigin />
         <link rel="preload" href={assetUrl(fontDisplay)} as="font" type="font/woff2" crossorigin />

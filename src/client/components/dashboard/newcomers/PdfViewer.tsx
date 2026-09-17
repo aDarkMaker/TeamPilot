@@ -86,6 +86,7 @@ export function PdfViewer({ url }: Props) {
 			disposed = true;
 			cancelAnimationFrame(raf);
 			ro?.disconnect();
+			host.replaceChildren();
 			if (task) {
 				void task.destroy().catch(() => undefined);
 				task = null;
@@ -93,10 +94,13 @@ export function PdfViewer({ url }: Props) {
 		};
 	}, [url]);
 
+	// Hints stay under React; canvases go in the empty host so replaceChildren
+	// cannot orphan a node React still thinks it owns.
 	return (
-		<div ref={scrollRef} className="nc-attach-pdf">
+		<div className="nc-attach-pdf">
 			{status === 'loading' ? <p className="nc-pdf-hint">正在加载 PDF…</p> : null}
 			{status === 'error' ? <p className="nc-pdf-hint is-error">PDF 加载失败，请尝试「新窗口打开」。</p> : null}
+			<div ref={scrollRef} />
 		</div>
 	);
 }
