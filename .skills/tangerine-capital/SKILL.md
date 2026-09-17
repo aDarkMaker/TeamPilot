@@ -12,19 +12,22 @@ Four rules override everything else in this document.
 
 1. **The `joinus` surface is out of scope.** `src/client/pages/joinus.astro`,
    `src/client/pages/joinus/apply.astro`, `src/client/layouts/JoinUsLayout.astro`
-   and every stylesheet they import (`joinus.css`, `joinus-form.css`,
-   `joinus-transitions.css`, `remixicon-local.css`, `shapegrid.css`, `clickspark.css`,
-   `shuffle.css`, `shuffle-reactbits.css`, `folder.css`) serve the live
-   `huaxiaoke.com` recruitment funnel. Never restyle them with this system.
-2. **`src/client/styles/global.css` is frozen.** It is imported by `JoinUsLayout`,
+   and every stylesheet they import under `src/client/styles/pages/joinus/`
+   (`joinus.css`, `joinus-form.css`, `joinus-transitions.css`, `shapegrid.css`,
+   `clickspark.css`, `shuffle.css`, `shuffle-reactbits.css`, `folder.css`) plus
+   `src/client/styles/base/remixicon-local.css` serve the live `huaxiaoke.com`
+   recruitment funnel. Never restyle them with this system.
+2. **`src/client/styles/base/global.css` is frozen.** It is imported by `JoinUsLayout`,
    so adding tokens there leaks into the joinus bundle. The token layer lives in
-   `tangerine.css`, imported only by `DashboardLayout.astro` and `auth.astro`.
+   `src/client/styles/base/tangerine/`, imported only by `DashboardLayout.astro`
+   and `auth.astro`.
 3. **Background layers are frozen.** The auth page keeps the confirmed
    `assets/img/image/background.webp` behind the shared warm wash and its
    `body.auth-page::before` vignette; the `.dashboard-root::before` user
    background and its `::after` wash, and `DashboardBackground.tsx` are all off
    limits. Restyle the content above them, never the layers themselves.
-4. **The dark left rail stays.** `dashboard.css` paints the navigation rail with
+4. **The dark left rail stays.** `src/client/styles/layouts/dashboard.css` paints
+   the navigation rail with
    `linear-gradient(165deg, var(--color-espresso), var(--color-ink))` and the
    `--rail-fg*` cream text tokens. Keep the rail dark; do not swap the console to
    a light sidebar, and do not add a hairline seam against the content - the soft

@@ -14,6 +14,13 @@
 		"allowImportingTsExtensions": true,
 		"noEmit": true,
 
+		// Path aliases: moving a file never breaks its importers
+		"baseUrl": ".",
+		"paths": {
+			"@/*": ["src/client/*"],
+			"@shared/*": ["src/joinus/*"]
+		},
+
 		// Best practices
 		"strict": true,
 		"skipLibCheck": true,

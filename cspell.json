@@ -20,6 +20,7 @@
 		"hxktoolbox",
 		"joinus",
 		"lightningcss",
+		"neighbour",
 		"nums",
 		"procs",
 		"rbits",
@@ -34,5 +35,10 @@
 		"wawoff",
 		"wght"
 	],
-	"ignorePaths": [".gitignore", ".skills/**", "commit.js", "*.sh"]
+	"ignorePaths": [
+		".gitignore",
+		".skills/**",
+		"commit.js",
+		"*.sh"
+	]
 }
