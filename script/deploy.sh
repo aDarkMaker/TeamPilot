@@ -19,7 +19,7 @@ DRAIN_SECONDS="${DRAIN_SECONDS:-30}"
 STOP_PREVIOUS="${STOP_PREVIOUS:-0}"
 NO_CUTOVER="${NO_CUTOVER:-0}"
 ROLLBACK="${ROLLBACK:-0}"
-SITE_CONF="${SITE_CONF:-/etc/nginx/sites-available/huaxiaoke.work}"
+SITE_CONF="${SITE_CONF:-}"
 UPSTREAM_CONF="${UPSTREAM_CONF:-/etc/nginx/conf.d/hxktoolbox-upstream.conf}"
 
 STATE_FILE="$PROJECT_DIR/.deploy-state"

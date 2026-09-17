@@ -48,8 +48,10 @@ temp/
 # ZipBuild
 *.zip
 
-# Build Script
+# Release tooling embeds host SSH paths — keep off the public remote
+script/build.mjs
 script/build.js
+script/release.local.mjs
 
 # Deploy state
 .deploy-state

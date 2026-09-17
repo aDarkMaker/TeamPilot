@@ -37,7 +37,7 @@ services:
       context: .
       dockerfile: Dockerfile.frontend
       args:
-        PUBLIC_SITE_URL: ${PUBLIC_SITE_URL:-https://huaxiaoke.work}
+        PUBLIC_SITE_URL: ${PUBLIC_SITE_URL}
     restart: unless-stopped
     depends_on:
       - backend
