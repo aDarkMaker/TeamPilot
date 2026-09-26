@@ -139,6 +139,9 @@ export interface DB {
 	findRecruitmentApplicationById(id: string): Promise<RecruitmentApplication | null>;
 	deleteRecruitmentApplicationById(id: string): Promise<void>;
 
+	/** Wipes every application plus its comments, likes, tags and ratings; returns the application count */
+	deleteAllRecruitmentApplications(): Promise<number>;
+
 	countRecruitmentApplicationsBySubmitter(submitterUserId: string): Promise<number>;
 
 	listRecruitmentApplicationTags(applicationId: string): Promise<string[]>;
@@ -176,6 +179,10 @@ export interface DB {
 	listInterviewWindows(): Promise<InterviewWindow[]>;
 	createInterviewWindowWithSlots(input: { date: string; startMin: number; endMin: number }): Promise<InterviewWindow>;
 	deleteInterviewWindow(windowId: string): Promise<void>;
+
+	/** Removes every interview window (and its slots); returns the window count */
+	deleteAllInterviewWindows(): Promise<number>;
+
 	listInterviewSlotsWithBooked(): Promise<InterviewSlotListItem[]>;
 	findInterviewSlotsByIds(ids: number[]): Promise<InterviewSlot[]>;
 	bookRecruitmentApplication(input: {
@@ -255,6 +262,7 @@ export type RecruitmentRepo = Pick<
 	| 'listRecruitmentApplications'
 	| 'findRecruitmentApplicationById'
 	| 'deleteRecruitmentApplicationById'
+	| 'deleteAllRecruitmentApplications'
 	| 'countRecruitmentApplicationsBySubmitter'
 	| 'listRecruitmentApplicationTags'
 	| 'addRecruitmentApplicationTag'
@@ -288,6 +296,7 @@ export type InterviewsRepo = Pick<
 	| 'listInterviewWindows'
 	| 'createInterviewWindowWithSlots'
 	| 'deleteInterviewWindow'
+	| 'deleteAllInterviewWindows'
 	| 'listInterviewSlotsWithBooked'
 	| 'findInterviewSlotsByIds'
 	| 'bookRecruitmentApplication'

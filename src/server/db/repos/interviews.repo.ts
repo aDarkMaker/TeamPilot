@@ -52,6 +52,14 @@ export function createInterviewsRepo(sqlite: Database): InterviewsRepo {
 			})(windowId);
 		},
 
+		// 未启用 PRAGMA foreign_keys，ON DELETE CASCADE 不会触发，slots 必须显式清理。
+		async deleteAllInterviewWindows() {
+			return sqlite.transaction(() => {
+				sqlite.query(`DELETE FROM joinus_interview_slots`).run();
+				return Number(sqlite.query(`DELETE FROM joinus_interview_windows`).run().changes ?? 0);
+			}).immediate();
+		},
+
 		async listInterviewSlotsWithBooked() {
 			const rows = sqlite
 				.query(

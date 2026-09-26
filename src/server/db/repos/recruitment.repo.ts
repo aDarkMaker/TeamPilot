@@ -179,6 +179,17 @@ export function createRecruitmentRepo(sqlite: Database): RecruitmentRepo {
 			sqlite.query(`DELETE FROM recruitment_applications WHERE id = ?`).run(id);
 		},
 
+		// 未启用 PRAGMA foreign_keys，ON DELETE CASCADE 不会触发，子表必须显式清理。
+		async deleteAllRecruitmentApplications() {
+			return sqlite.transaction(() => {
+				sqlite.query(`DELETE FROM recruitment_comment_likes`).run();
+				sqlite.query(`DELETE FROM recruitment_comments`).run();
+				sqlite.query(`DELETE FROM recruitment_application_tags`).run();
+				sqlite.query(`DELETE FROM recruitment_application_ratings`).run();
+				return Number(sqlite.query(`DELETE FROM recruitment_applications`).run().changes ?? 0);
+			}).immediate();
+		},
+
 		async countRecruitmentApplicationsBySubmitter(submitterUserId) {
 			const row = sqlite.query(`SELECT COUNT(*) AS c FROM recruitment_applications WHERE submitter_user_id = ?`).get(submitterUserId) as any;
 			return Number(row?.c ?? 0);
