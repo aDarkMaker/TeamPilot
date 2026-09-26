@@ -6,7 +6,8 @@ import { ApplicantListSidebar } from './ApplicantListSidebar';
 import { CommentsPanel } from './CommentsPanel';
 import { NewcomerDetail } from './NewcomerDetail';
 
-import { deleteApplication, fetchMe, postTag, deleteTag, putApplicationRating, type MeBrief } from '@/lib/recruitment/recruitmentClient';
+import { clearAllApplications, deleteApplication, fetchMe, postTag, deleteTag, putApplicationRating, type MeBrief } from '@/lib/recruitment/recruitmentClient';
+import { isStaffRole } from '@/lib/roles';
 import { useApplicationComments } from '@/lib/recruitment/commentsStore';
 import type { NewcomerApplicationView, RecruitmentDepartmentSlug } from '@/lib/recruitment/types';
 import { recruitmentApplicationsStore } from '@/lib/recruitment/recruitmentApplicationsStore';
@@ -31,6 +32,7 @@ export default function NewcomersPage() {
 	const applications: NewcomerApplicationView[] = appsState.items;
 	const listLoading = appsState.loading;
 	const listError = appsState.error;
+	const noApplications = applications.length === 0;
 
 	const [deptFilter, setDeptFilter] = useState<RecruitmentDepartmentSlug | 'all'>('all');
 	const [attachOnly, setAttachOnly] = useState(false);
@@ -41,6 +43,9 @@ export default function NewcomersPage() {
 	const [tagsError, setTagsError] = useState<string | null>(null);
 	const [deleteBusy, setDeleteBusy] = useState(false);
 	const [deleteError, setDeleteError] = useState<string | null>(null);
+	const [clearBusy, setClearBusy] = useState(false);
+	const [clearError, setClearError] = useState<string | null>(null);
+	const [confirmClearOpen, setConfirmClearOpen] = useState(false);
 	const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
 	const [confirmDeleteTarget, setConfirmDeleteTarget] = useState<{ id: string; fullName: string } | null>(null);
 	const [ratingBusy, setRatingBusy] = useState(false);
@@ -156,9 +161,38 @@ export default function NewcomersPage() {
 		}
 	};
 
+	const openClearConfirm = () => {
+		if (!isStaffRole(me?.role)) return;
+		setClearError(null);
+		setConfirmClearOpen(true);
+	};
+
+	const closeClearConfirm = () => {
+		if (clearBusy) return;
+		setConfirmClearOpen(false);
+	};
+
+	const performClearAll = async () => {
+		setClearBusy(true);
+		setClearError(null);
+		try {
+			const data = await clearAllApplications();
+			await recruitmentApplicationsStore.refresh();
+			setSelectedId('');
+			comments.reset();
+			setConfirmClearOpen(false);
+			toast.show({ text: `已清空 ${data.applications} 条报名记录`, type: 'ok' });
+		} catch (e) {
+			setClearError(e instanceof Error ? e.message : '清空失败');
+			setConfirmClearOpen(false);
+		} finally {
+			setClearBusy(false);
+		}
+	};
+
 	if (listLoading && applications.length === 0) {
 		return (
-			<div className="nc-page">
+			<div className="nc-page is-empty">
 				<div className="nc-empty">加载中…</div>
 			</div>
 		);
@@ -166,7 +200,7 @@ export default function NewcomersPage() {
 
 	if (listError) {
 		return (
-			<div className="nc-page">
+			<div className="nc-page is-empty">
 				<div className="nc-empty">{listError}</div>
 			</div>
 		);
@@ -176,14 +210,34 @@ export default function NewcomersPage() {
 	const emptyListHint = applications.length === 0 ? '暂无报名记录。' : '没有符合筛选条件的记录。';
 
 	return (
-		<div className="nc-page">
+		<div className={noApplications ? 'nc-page is-empty' : 'nc-page'}>
 			<DashboardToast toast={toast.toast} />
 			<div className="tc-page-head nc-page-head">
 				<div className="tc-page-head__text">
 					<span className="tc-eyebrow">招新</span>
 					<h1 className="tc-page-title">新人详情</h1>
 				</div>
+				{isStaffRole(me?.role) ? (
+					<button
+						type="button"
+						className="nc-btn nc-btn--danger"
+						disabled={clearBusy || applications.length === 0}
+						onClick={openClearConfirm}
+					>
+						清空全部报名
+					</button>
+				) : null}
 			</div>
+			{clearError ? <div className="nc-inline-err">{clearError}</div> : null}
+			<ConfirmModal
+				open={confirmClearOpen}
+				title="确认清空全部报名"
+				message="将删除全部报名记录、评论、标签、评分、附件与面试时段，该操作不可撤销。"
+				confirmLabel="确定清空"
+				busy={clearBusy}
+				onCancel={closeClearConfirm}
+				onConfirm={() => void performClearAll()}
+			/>
 			<ConfirmModal
 				open={confirmDeleteOpen && !!confirmDeleteTarget}
 				title="确认删除报名"

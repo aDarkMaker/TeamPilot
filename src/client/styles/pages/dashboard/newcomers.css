@@ -1582,6 +1582,29 @@
 	align-self: start;
 }
 
+/* No applications at all: collapse to one column so the hint spans the page
+   top-aligned instead of sitting in the centred middle column. */
+.nc-page.is-empty {
+	grid-template-columns: minmax(0, 1fr);
+	min-height: auto;
+}
+
+.nc-page.is-empty .nc-list,
+.nc-page.is-empty .nc-comments-aside {
+	display: none;
+}
+
+.nc-page.is-empty .nc-center {
+	padding: 0;
+	border: none;
+	background: transparent;
+}
+
+.nc-page.is-empty .nc-empty {
+	padding: 0.875rem 1rem;
+	text-align: start;
+}
+
 /* Name search plus attachment filter under the department select. */
 .nc-list-tools {
 	display: flex;

@@ -262,7 +262,7 @@ async function renderInterviewSlotBoard(wrap: HTMLElement): Promise<void> {
 		board.innerHTML = '';
 
 		if (!slots.length) {
-			setSlotNote(board, '暂无可预约的面试时间');
+			setSlotNote(board, '该时段不在招新时间内，请咨询管理员');
 			return;
 		}
 

@@ -95,6 +95,13 @@ export function deleteApplication(applicationId: string): Promise<void> {
 	});
 }
 
+export function clearAllApplications(): Promise<{ applications: number; windows: number }> {
+	return httpJson<{ applications: number; windows: number }>('/api/recruitment/applications', {
+		method: 'DELETE',
+		fallbackMessage: '清空报名数据失败了',
+	});
+}
+
 export type RecruitmentApplicationRatingDto = {
 	ratingAverage: number | null;
 	ratingCount: number;
