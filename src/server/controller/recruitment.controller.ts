@@ -70,4 +70,9 @@ export class RecruitmentController {
 		const data = await this.services.application.deleteApplication(ctx.params.id);
 		ctx.body = { ok: true, data };
 	};
+
+	deleteAllApplications = async (ctx: Context) => {
+		const data = await this.services.application.purgeAll();
+		ctx.body = { ok: true, data };
+	};
 }

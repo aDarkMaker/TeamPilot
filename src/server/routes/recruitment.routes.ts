@@ -1,11 +1,12 @@
 import Router from '@koa/router';
-import { requireLogin, requireSuperAdmin } from '../middleware/requireRole';
+import { requireLogin, requireSuperAdmin, requireAdminOrAbove } from '../middleware/requireRole';
 import type { RecruitmentController } from '../controller/recruitment.controller';
 
 export function buildRecruitmentRoutes(controller: RecruitmentController): Router {
 	const router = new Router({ prefix: '/recruitment' });
 
 	router.get('/applications', requireLogin, controller.listApplications);
+	router.delete('/applications', requireAdminOrAbove, controller.deleteAllApplications);
 	router.get('/applications/:id', requireLogin, controller.getApplication);
 	router.delete('/applications/:id', requireSuperAdmin, controller.deleteApplication);
 

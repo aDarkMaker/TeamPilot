@@ -50,6 +50,16 @@ export class RecruitmentService {
 		return { id: applicationId };
 	}
 
+	/** Destructive reset: drops every application, its dependent rows, the attachment tree and all interview windows. */
+	async purgeAll(): Promise<{ applications: number; windows: number }> {
+		const applications = await this.db.deleteAllRecruitmentApplications();
+		const windows = await this.db.deleteAllInterviewWindows();
+		await rm(join(process.cwd(), 'data', 'joinus'), { recursive: true, force: true }).catch(() => undefined);
+
+		broadcastRecruitmentApplicationsUpdated();
+		return { applications, windows };
+	}
+
 	/** Attachments live under data/joinus/<slug>/; drop that directory with the application */
 	private async removeAttachmentDir(attachmentPath: string | null | undefined): Promise<void> {
 		const first = (attachmentPath ?? '').trim().split('|')[0]?.trim() ?? '';
